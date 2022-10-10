@@ -1,0 +1,124 @@
+{
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "mcintoshj@gmail.com",
+  "limitConcurrent": true,
+  "parameterConfig": [
+    {
+      "default": "Value",
+      "description": "",
+      "hasOptions": true,
+      "label": "",
+      "name": "Test",
+      "options": [
+        {
+          "value": "Value"
+        },
+        {
+          "value": "Value2"
+        }
+      ],
+      "pinned": true,
+      "required": true
+    }
+  ],
+  "roles": [
+    "engineering-managed"
+  ],
+  "schema": "1",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "failOnFailedExpressions": true,
+      "name": "Evaluate Variables",
+      "refId": "1",
+      "requisiteStageRefIds": [],
+      "type": "evaluateVariables",
+      "variables": [
+        {
+          "key": "OutputValue",
+          "value": "The value of Test is ${parameters.Test}"
+        }
+      ]
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "cloudProvider": "kubernetes",
+      "manifests": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "metadata": {
+            "annotations": {
+              "parameters": "${OutputValue}"
+            },
+            "name": "nginx-deployment"
+          },
+          "spec": {
+            "replicas": 2,
+            "selector": {
+              "matchLabels": {
+                "app": "nginx"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "app": "nginx"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "image": "nginx:1.14.2",
+                    "name": "nginx",
+                    "ports": [
+                      {
+                        "containerPort": 80
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "example"
+      },
+      "name": "Deploy (Manifest)",
+      "namespaceOverride": "prod",
+      "refId": "2",
+      "requisiteStageRefIds": [
+        "3"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "failOnFailedExpressions": false,
+      "failPipeline": true,
+      "judgmentInputs": [],
+      "name": "Manual Judgment",
+      "notifications": [],
+      "propagateAuthenticationContext": true,
+      "refId": "3",
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "selectedStageRoles": [
+        "engineering-managed"
+      ],
+      "type": "manualJudgment"
+    }
+  ],
+  "triggers": []
+}

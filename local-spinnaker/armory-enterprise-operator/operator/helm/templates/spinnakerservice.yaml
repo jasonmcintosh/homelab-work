@@ -1,0 +1,31 @@
+{{- if .Values.spinnakerService.enabled }}
+apiVersion: "{{ .Values.spinnakerService.apiVersion }}"
+kind: SpinnakerService
+
+{{- with .Values.spinnakerService.metadata }}
+metadata:
+  {{- toYaml . | nindent 8 }}
+{{- end }}
+
+spec:
+  {{- with .Values.spinnakerService.spinnakerConfig }}
+  spinnakerConfig:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
+  {{- with .Values.spinnakerService.expose }}
+  expose:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
+  {{- with .Values.spinnakerService.validation }}
+  validation:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
+  {{- with .Values.spinnakerService.kustomize }}
+  kustomize:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
+{{- end }}

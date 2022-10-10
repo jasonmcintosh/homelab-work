@@ -1,0 +1,87 @@
+{{- if and .Values.spinnakerOperator.enabled .Values.spinnakerOperator.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "spinnaker-operator.name" . }}
+  labels:
+    app: {{ template "spinnaker-operator.name" . }}
+{{- include "spinnaker-operator.labels" . | indent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - ingresses/status
+  - endpoints
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - events
+  - configmaps
+  - secrets
+  - namespaces
+  - ingresses
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+  - patch
+- apiGroups:
+  - apps
+  - extensions
+  resources:
+  - deployments
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+  - patch
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - spinnaker.armory.io
+  resources:
+  - '*'
+  - spinnakerservices
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+  - patch
+- apiGroups:
+  - spinnaker.io
+  resources:
+  - spinnakeraccounts
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+  - patch
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  verbs:
+  - '*'
+{{- end }}

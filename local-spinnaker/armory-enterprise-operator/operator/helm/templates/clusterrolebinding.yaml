@@ -1,0 +1,17 @@
+{{- if and .Values.spinnakerOperator.enabled .Values.spinnakerOperator.rbac.create }}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "spinnaker-operator.name" . }}
+  labels:
+    app: {{ template "spinnaker-operator.name" . }}
+{{- include "spinnaker-operator.labels" . | indent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "spinnaker-operator.name" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "spinnaker-operator.operator.serviceAccountName" . }}
+  namespace: {{ $.Release.Namespace }}
+{{- end }}

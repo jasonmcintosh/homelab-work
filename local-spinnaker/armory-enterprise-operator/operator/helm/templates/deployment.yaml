@@ -1,0 +1,98 @@
+{{- if .Values.spinnakerOperator.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spinnaker-operator.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "spinnaker-operator.name" . }}
+{{- include "spinnaker-operator.labels" . | indent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "spinnaker-operator.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "spinnaker-operator.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+{{- include "spinnaker-operator.labels" . | indent 8 }}
+{{- if .Values.spinnakerOperator.podLabels }}
+{{ toYaml .Values.spinnakerOperator.podLabels | indent 8 }}
+{{- end }}
+{{- if .Values.spinnakerOperator.podAnnotations }}
+      annotations:
+{{ toYaml .Values.spinnakerOperator.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+    {{- with .Values.spinnakerOperator.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ template "spinnaker-operator.operator.fullname" . }}
+          image: "{{ .Values.spinnakerOperator.operator.image.repository }}:{{ .Values.spinnakerOperator.operator.image.tag }}"
+          imagePullPolicy: "{{ .Values.spinnakerOperator.operator.image.pullPolicy }}"
+          command:
+          - spinnaker-operator
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "spinnaker-operator"
+          resources:
+            {{- toYaml .Values.spinnakerOperator.operator.resources | nindent 12 }}
+{{- if .Values.spinnakerOperator.operator.volumeMounts }}
+          volumeMounts:
+{{ toYaml .Values.spinnakerOperator.operator.volumeMounts | indent 10 }}
+{{- end }}
+        - name: {{ template "spinnaker-operator.halyard.fullname" . }}
+          image: "{{ .Values.spinnakerOperator.halyard.image.repository }}:{{ .Values.spinnakerOperator.halyard.image.tag }}"
+          imagePullPolicy: "{{ .Values.spinnakerOperator.halyard.image.pullPolicy }}"
+          ports:
+            - containerPort: 8064
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8064
+            failureThreshold: 20
+            periodSeconds: 5
+            initialDelaySeconds: 20
+          livenessProbe:
+            tcpSocket:
+              port: 8064
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.spinnakerOperator.halyard.resources | nindent 12 }}
+{{- if .Values.spinnakerOperator.halyard.volumeMounts }}
+          volumeMounts:
+{{ toYaml .Values.spinnakerOperator.halyard.volumeMounts | indent 10 }}
+{{- end }}
+{{- if .Values.spinnakerOperator.volumes }}
+      volumes:
+{{ toYaml .Values.spinnakerOperator.volumes | indent 8 }}
+{{- end }}
+{{- if .Values.spinnakerOperator.securityContext }}
+      securityContext:
+{{ toYaml .Values.spinnakerOperator.securityContext | indent 8 }}
+{{- end }}
+      serviceAccountName: {{ template "spinnaker-operator.operator.serviceAccountName" . }}
+      {{- with .Values.spinnakerOperator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.spinnakerOperator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.spinnakerOperator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- end }}
