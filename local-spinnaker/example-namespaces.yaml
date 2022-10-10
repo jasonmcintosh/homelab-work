@@ -1,0 +1,20 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: spinnaker
+  labels:
+    name: spinnaker
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: dev
+  labels:
+    name: dev
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: prod
+  labels:
+    name: prod

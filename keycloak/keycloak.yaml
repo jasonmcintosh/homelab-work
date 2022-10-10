@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: keycloak
+  labels:
+    app: keycloak
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: keycloak
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-cluster
+  namespace: keycloak
+  labels:
+    app: keycloak
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: keycloak
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:19.0.3
+        args: ["start", "--auto-build", "--db=mysql", "--spi-connections-jpa-default-migration-strategy=update", "--http-relative-path=/auth", "--http-enabled=true", "--db-url=jdbc:mysql://mysql:3306/keycloak", "--cache-stack=kubernetes", "--proxy=edge", "--hostname-strict=false", "--hostname-strict-https=false"]
+        env:
+        - name: JAVA_OPTS_APPEND
+          value: "-Djgroups.dns.query=keycloak-cluster.keycloak.svc.cluster.local -Dkeycloak.profile.feature.upload_scripts=enabled"
+        - name: KEYCLOAK_ADMIN
+          value: "admin"
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: "admin"
+        - name: KC_DB_USERNAME
+          value: "root"
+        - name: KC_DB_PASSWORD
+          value: "password"
+        - name: KC_PROXY
+          value: "edge"
+        - name: KC_HOSTNAME
+          value: "keycloak:8080"
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /auth/realms/master
+            port: 8080

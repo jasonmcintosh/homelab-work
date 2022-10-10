@@ -1,0 +1,116 @@
+{
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "mcintoshj@gmail.com",
+  "limitConcurrent": true,
+  "parameterConfig": [
+    {
+      "default": "",
+      "description": "",
+      "hasOptions": true,
+      "label": "",
+      "name": "Test",
+      "options": [
+        {
+          "value": "Value"
+        },
+        {
+          "value": "Value2"
+        }
+      ],
+      "pinned": true,
+      "required": true
+    }
+  ],
+  "regenerateCronTriggerIds": true,
+  "roles": [
+    "engineering-managed"
+  ],
+  "schema": "1",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "failOnFailedExpressions": true,
+      "name": "Evaluate Variables",
+      "refId": "1",
+      "requisiteStageRefIds": [],
+      "type": "evaluateVariables",
+      "variables": [
+        {
+          "key": "OutputValue",
+          "value": "The value of Test is ${parameters.Test}"
+        }
+      ]
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "cloudProvider": "kubernetes",
+      "manifests": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "metadata": {
+            "annotations": {
+              "parameters": "${OutputValue}"
+            },
+            "name": "nginx-deployment"
+          },
+          "spec": {
+            "replicas": 2,
+            "selector": {
+              "matchLabels": {
+                "app": "nginx"
+              }
+            },
+            "template": {
+              "metadata": {
+                "labels": {
+                  "app": "nginx"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "image": "nginx:1.14.2",
+                    "name": "nginx",
+                    "ports": [
+                      {
+                        "containerPort": 80
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "example"
+      },
+      "name": "Deploy (Manifest)",
+      "namespaceOverride": "prod",
+      "refId": "2",
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    }
+  ],
+  "triggers": [
+    {
+      "enabled": true,
+      "runAsUser": "161649b6-78da-47af-a245-3908f60761e2@managed-service-account",
+      "source": "shouldIDeployNginx",
+      "type": "webhook"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{{- if .Values.spinnakerService.enabled }}
+Thank you for installing Spinnaker.
+Get the URL's for {{ .Values.spinnakerService.metadata.name }} by running these commands:
+export API_URL=$(kubectl -n {{ .Values.spinnakerService.metadata.namespace }} get spinsvc {{ .Values.spinnakerService.metadata.name }} -o jsonpath='{.status.apiUrl}')
+export UI_URL=$(kubectl -n {{ .Values.spinnakerService.metadata.namespace }} get spinsvc {{ .Values.spinnakerService.metadata.name }} -o jsonpath='{.status.uiUrl}')
+echo API URL: $API_URL
+echo UI_URL: $API_URL
+{{- end }}

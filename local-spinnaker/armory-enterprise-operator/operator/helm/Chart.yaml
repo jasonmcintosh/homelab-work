@@ -1,0 +1,15 @@
+apiVersion: v1
+appVersion: 1.7.0
+version: 1.7.0
+description: Provides easy installation of the Armory Spinnaker Operator
+name: armory-spinnaker-operator
+icon: https://i.imgur.com/g9Cv9A9.jpg
+sources:
+maintainers:
+  - name: Armory
+    email: engineering@armory.io
+home: https://docs.armory.io/spinnaker/operator/
+keywords:
+  - operator
+  - spinnaker
+  - armory
