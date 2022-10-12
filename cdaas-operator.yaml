@@ -1,0 +1,20 @@
+---
+version: v1
+kind: kubernetes
+application: armory-spinnaker-operator
+targets:
+  local-cluster:
+    account: local-cluster
+    namespace: spinnaker-operator
+    strategy: simple
+
+manifests:
+  - path: local-spinnaker/armory-enterprise-operator/crds/
+  - path: local-spinnaker/armory-enterprise-operator/operator/cluster/
+
+strategies:
+  simple:
+    canary:
+      steps:
+        - setWeight:
+            weight: 100
