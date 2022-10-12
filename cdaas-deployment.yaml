@@ -10,5 +10,5 @@ targets:
 
 manifests:
   - path: local-spinnaker/armory-enterprise-operator/crds/
-  - path: local-spinnaker/armory-enterprise-operator/ooperator/
+  - path: local-spinnaker/armory-enterprise-operator/operator/
   - path: local-spinnaker/
