@@ -6,9 +6,17 @@ targets:
   local-cluster:
     account: local-cluster
     namespace: spinnaker
-    strategy: rolling
+    strategy: simple
 
 manifests:
   - path: local-spinnaker/armory-enterprise-operator/crds/
   - path: local-spinnaker/armory-enterprise-operator/operator/
   - path: local-spinnaker/
+
+
+strategies:
+  simple:
+    canary:
+      steps:
+        - setWeight:
+            weight: 100
