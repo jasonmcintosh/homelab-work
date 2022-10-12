@@ -1,0 +1,14 @@
+---
+version: v1
+kind: kubernetes
+application: spinnaker-local
+targets:
+  local-cluster:
+    account: local-cluster
+    namespace: spinnaker
+    strategy: rolling
+
+manifests:
+  - path: local-spinnaker/armory-enterprise-operator/crds/
+  - path: local-spinnaker/armory-enterprise-operator/ooperator/
+  - path: local-spinnaker/
