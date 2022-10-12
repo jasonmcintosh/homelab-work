@@ -10,7 +10,7 @@ targets:
 
 manifests:
   - path: local-spinnaker/armory-enterprise-operator/crds/
-  - path: local-spinnaker/armory-enterprise-operator/operator/
+  - path: local-spinnaker/armory-enterprise-operator/operator/cluster/
   - path: local-spinnaker/
 
 
