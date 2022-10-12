@@ -11,7 +11,10 @@ targets:
 manifests:
   - path: local-spinnaker/armory-enterprise-operator/crds/
   - path: local-spinnaker/armory-enterprise-operator/operator/cluster/
-  - path: local-spinnaker/
+  - path: local-spinnaker/example-namespaces.yaml
+  - path: local-spinnaker/mysql.yaml
+  - path: local-spinnaker/permissions.yaml
+  - path: local-spinnaker/spinnaker.yaml
 
 
 strategies:
