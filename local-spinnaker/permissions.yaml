@@ -15,7 +15,7 @@ rules:
       ]
     verbs: ['get', 'list']
   - apiGroups: ['']
-    resources: ['pods', 'services', 'secrets']
+    resources: ['pods', 'services', 'secrets', 'nodes','nodes/proxy', 'endpoints']
     verbs:
       [
         'create',
@@ -60,6 +60,10 @@ rules:
         'update',
         'watch',
       ]
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
+
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
