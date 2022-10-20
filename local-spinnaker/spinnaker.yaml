@@ -40,6 +40,8 @@ spec:
                 spec:
                   containers:
                     - name: front50
+                      livenessProbe:
+                        initialDelaySeconds: 160
                       readinessProbe:
                         initialDelaySeconds: 160
                       startupProbe:
@@ -54,6 +56,8 @@ spec:
                   containers:
                     - name: fiat
                       readinessProbe:
+                      livenessProbe:
+                        initialDelaySeconds: 160
                         initialDelaySeconds: 160
                       startupProbe:
                         initialDelaySeconds: 120
@@ -66,6 +70,8 @@ spec:
                 spec:
                   containers:
                     - name: clouddriver
+                      livenessProbe:
+                        initialDelaySeconds: 160
                       readinessProbe:
                         initialDelaySeconds: 160
                       startupProbe:
@@ -79,6 +85,8 @@ spec:
                 spec:
                   containers:
                     - name: echo
+                      livenessProbe:
+                        initialDelaySeconds: 160
                       readinessProbe:
                         initialDelaySeconds: 160
                       startupProbe:
@@ -92,6 +100,8 @@ spec:
                 spec:
                   containers:
                     - name: orca
+                      livenessProbe:
+                        initialDelaySeconds: 160
                       readinessProbe:
                         initialDelaySeconds: 160
                       startupProbe:
@@ -105,12 +115,60 @@ spec:
                 spec:
                   containers:
                     - name: gate
+                      livenessProbe:
+                        initialDelaySeconds: 160
+                      readinessProbe:
+                        initialDelaySeconds: 30
+                      startupProbe:
+                        initialDelaySeconds: 30
+    kayenta:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                    - name: kayenta
+                      livenessProbe:
+                        initialDelaySeconds: 160
                       readinessProbe:
                         initialDelaySeconds: 30
                       startupProbe:
                         initialDelaySeconds: 30
   spinnakerConfig:
     config:
+      deploymentEnvironment:
+        livenessProbeConfig:
+          enabled: true
+          initialDelaySeconds: 600
+      canary:
+        enabled: true
+        defaultMetricsAccount: local-prometheus
+        defaultStorageAccount: minio
+        defaultMetricsStore: prometheus
+        serviceIntegrations:
+          - name: aws
+            enabled: true
+            s3Enabled: true
+            accounts:
+            - name: minio
+              bucket: canaries
+              endpoint: http://minio:9000
+              accessKeyId: minio
+              secretAccessKey: secretKey
+              supportedTypes:
+              - OBJECT_STORE
+              - CONFIGURATION_STORE
+          - name: prometheus
+            enabled: true
+            accounts:
+            - name: local-prometheus
+              endpoint:
+                baseUrl: http://prometheus:9090
+              supportedTypes:
+              - METRICS_STORE
+
       persistentStorage:
         persistentStoreType: s3
       armory:
@@ -120,10 +178,6 @@ spec:
           logging:
             enabled: true
             endpoint: https://debug.armory.io/v1/logs
-      deploymentEnvironment:
-        livenessProbeConfig:
-          enabled: true
-          initialDelaySeconds: 600
       features:
         artifacts: true
         pipelineTemplates: true
@@ -296,7 +350,7 @@ spec:
             client:
               accessTokenUri: https://dev-200769.okta.com/oauth2/default/v1/token
               clientId: 0oa9htg5c5Kv1ZEAK4x7
-              clientSecret: encryptedFile:k8s!n:auth-credentails!k:clientSecret
+              clientSecret: encrypted:k8s!n:auth-credentails!k:clientSecret
               scope: groups email profile openid
               userAuthorizationUri: https://dev-200769.okta.com/oauth2/default/v1/authorize
             userInfoMapping:
