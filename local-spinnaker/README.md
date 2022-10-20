@@ -25,3 +25,7 @@ This should point to the microk8s cluster ingress endpoint
 * Need a kubeconfig: ```k create secret generic kubeconfig --from-file kubeconfig```
 * Need oauth2 client secrets: ```k create secret generic auth-credentails --from-literal clientSecret='REPLACEME'```
 
+5) Connect to it!  
+The spinnaker.yaml includes an ingress that exposts it using host named handling.  That's WHY you need a spinnaker-local hosts entry to point to whatever your microk8s ingress point is.  Literally from there?
+http://spinnaker-local:8080/
+in a browser :) 
