@@ -182,6 +182,20 @@ spec:
         artifacts: true
         pipelineTemplates: true
       notifications:
+      artifacts:
+        gitrepo:
+          enabled: true
+          accounts:
+          - name: github-repo-clone-ro
+            username: jasonmcintosh
+            token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
+        github:
+          enabled: true
+          accounts:
+            ## For loading a SINGLE file using github API's
+            - name: github-files-jm
+              username: jasonmcintosh
+              token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
       providers:
         kubernetes:
           enabled: true
