@@ -163,7 +163,6 @@
       "cronExpression": "0 1 0/1 1/1 * ? *",
       "enabled": true,
       "id": "22a9483a-badc-495b-9c07-506b2f893e54",
-      "runAsUser": "e8066e1f-fdac-4841-a25d-2ea8709b8032@managed-service-account",
       "type": "cron"
     },
     {
@@ -173,7 +172,6 @@
         "c2fbc6d6-1e92-4a05-9c97-e1533fa29623"
       ],
       "project": "jasonmcintosh",
-      "runAsUser": "e8066e1f-fdac-4841-a25d-2ea8709b8032@managed-service-account",
       "slug": "spinnaker-work",
       "source": "github",
       "type": "git"
