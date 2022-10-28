@@ -409,6 +409,35 @@ spec:
           pollingSafeguard:
             itemUpperThreshold: 10000
       orca:
+        webhook:
+          preconfigured:
+          - label: KNative Notification
+            type: knative
+            enabled: true
+            description: Send to KNative a CDEvents
+            method: POST
+            url: https://localhost:8090/default/events-broker
+            parameters:
+            - label: Subject for Event
+              name: subject
+              description: The CdEvent is going to get this subject
+              type: string
+            - label: 
+              name: URL of requesting pipeline
+              description: The URL to the execution id of the pipeline
+              type: string
+            - label: Context
+              name: context
+              description: The context to make this make sense
+              type: string
+            customHeaders:
+              Ce-Type: cd.artifact.packaged.v1
+            payload: |-
+              {
+                "id": "${parameterValues['subject']}",
+                "url": "${parameterValues['url']}",
+                "name": "${parameterValues['context']}"
+              }
         tasks:
           useManagedServiceAccounts: true
         executionRepository:
