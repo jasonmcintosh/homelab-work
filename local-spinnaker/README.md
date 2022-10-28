@@ -29,6 +29,8 @@ This should point to the microk8s cluster ingress endpoint
 - [Change any accounts](https://github.com/jasonmcintosh/spinnaker-work/blob/main/local-spinnaker/spinnaker.yaml#L190)
 - [Change oauth2 settings](https://github.com/jasonmcintosh/spinnaker-work/blob/main/local-spinnaker/spinnaker.yaml#L347)
 
+for a more detailed list of options: https://docs.armory.io/armory-enterprise/installation/armory-operator/op-manifest-reference/
+
 6) Connect to it!  
 The spinnaker.yaml includes an ingress that exposts it using host named handling.  That's WHY you need a spinnaker-local hosts entry to point to whatever your microk8s ingress point is.  Literally from there?
 http://spinnaker-local:8080/

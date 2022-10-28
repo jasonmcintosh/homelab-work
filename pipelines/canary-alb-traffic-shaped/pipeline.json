@@ -1,0 +1,429 @@
+{
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "jason.mcintosh@armory.io",
+  "limitConcurrent": true,
+  "parameterConfig": [
+    {
+      "default": "false",
+      "description": "",
+      "hasOptions": true,
+      "label": "Whether to fail the canary analysis or not for testing",
+      "name": "FailCanary",
+      "options": [
+        {
+          "value": "true"
+        },
+        {
+          "value": "false"
+        }
+      ],
+      "pinned": false,
+      "required": true
+    }
+  ],
+  "schema": "1",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "account": "k8s-account-dev",
+      "app": "jasonmcintosh",
+      "cloudProvider": "kubernetes",
+      "cluster": "sample-app-deployment",
+      "criteria": "newest",
+      "expectedArtifacts": [
+        {
+          "defaultArtifact": {
+            "customKind": true,
+            "id": "2b9a2849-3cb7-47fa-adab-e6e38f751bd9"
+          },
+          "displayName": "current-running-configuration",
+          "id": "1c3ca63a-5bd0-4ede-9e00-b468a7633ff2",
+          "matchArtifact": {
+            "artifactAccount": "kubernetes",
+            "id": "288ae5d2-69ba-41f8-997b-4313c26ad7b3",
+            "reference": "sample-app-config",
+            "type": "kubernetes/configMap"
+          },
+          "useDefaultArtifact": false,
+          "usePriorArtifact": false
+        }
+      ],
+      "kind": "configMap",
+      "location": "default",
+      "manifestName": "",
+      "mode": "dynamic",
+      "name": "Find existing Prod Resources for Deploy",
+      "refId": "1",
+      "requisiteStageRefIds": [
+        "3"
+      ],
+      "type": "findArtifactsFromResource"
+    },
+    {
+      "account": "k8s-account-dev",
+      "cloudProvider": "kubernetes",
+      "manifests": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "metadata": {
+            "name": "sample-app-deployment-baseline"
+          },
+          "spec": {
+            "image": "sample-app",
+            "volumes": {
+              "conf": {
+                "ref": "sample-app-config",
+                "type": "ConfigMap"
+              }
+            }
+          }
+        },
+        {
+          "apiVersion": "v1",
+          "kind": "Service",
+          "metadata": {
+            "name": "sample-app-service"
+          },
+          "spec": {
+            "target": {
+              "label": "value"
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "jasonmcintosh"
+      },
+      "name": "Deploy Baseline",
+      "refId": "2",
+      "requiredArtifactIds": [
+        "1c3ca63a-5bd0-4ede-9e00-b468a7633ff2"
+      ],
+      "requiredArtifacts": [],
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "k8s-account-dev",
+      "cloudProvider": "kubernetes",
+      "expectedArtifacts": [
+        {
+          "defaultArtifact": {
+            "customKind": true,
+            "id": "8e2e4489-4a51-4cda-82e5-8c2f09a5d697"
+          },
+          "displayName": "sample-app-config",
+          "id": "6d0d4592-721d-4a7f-9891-e8ff2f44ffbf",
+          "matchArtifact": {
+            "artifactAccount": "kubernetes",
+            "id": "c879ffc1-ce80-41a7-a24e-64af875c8bcb",
+            "reference": "sample-app-config",
+            "type": "kubernetes/configMap"
+          },
+          "useDefaultArtifact": false,
+          "usePriorArtifact": false
+        }
+      ],
+      "manifestArtifact": {
+        "artifactAccount": "github",
+        "id": "853a2f0c-1cf0-43db-b9fc-b42f2dfd5f85",
+        "type": "github/file",
+        "version": "master"
+      },
+      "manifests": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "metadata": {
+            "name": "sample-app-deployment-canary"
+          },
+          "spec": {
+            "image": "armory/sample-app",
+            "volumes": {
+              "conf": {
+                "ref": "sample-app-config",
+                "type": "ConfigMap"
+              }
+            }
+          }
+        },
+        {
+          "apiVersion": "v1",
+          "data": {
+            "app.properties": "# Used to trigger responses to have artificial latency.  \nfailCanary = ${parameters[\"FailCanary\"]}\n"
+          },
+          "kind": "ConfigMap",
+          "metadata": {
+            "name": "sample-app-config"
+          }
+        },
+        {
+          "apiVersion": "v1",
+          "kind": "Service",
+          "metadata": {
+            "name": "sample-app-service"
+          },
+          "spec": {
+            "target": {
+              "label": "value"
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "jasonmcintosh"
+      },
+      "name": "Deploy Canary and config",
+      "refId": "3",
+      "requisiteStageRefIds": [],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "k8s-account-dev",
+      "app": "jasonmcintosh",
+      "cloudProvider": "kubernetes",
+      "cluster": "sample-app",
+      "criteria": "newest",
+      "kind": "ingress",
+      "location": "default",
+      "mode": "dynamic",
+      "name": "Patch Existing Service to enable baseline and Canary",
+      "options": {
+        "mergeStrategy": "strategic",
+        "record": true
+      },
+      "patchBody": [
+        {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "annotations": {
+              "alb.ingress.kubernetes.io/actions.forward-multiple-tg": "{\n  \"type\":\"forward\",\n  \"forwardConfig\":{\n    \"targetGroups\":[\n      {\"serviceName\":\"sample-app,\"servicePort\":\"http\",\"weight\":80},\n      {\"serviceName\":\"sample-app-canary\",\"servicePort\":\"http\",\"weight\":10},\n      {\"serviceName\":\"sample-app-baseline\",\"servicePort\":\"http\",\"weight\":10}\n    ]\n  }\n  \n}\n",
+              "alb.ingress.kubernetes.io/scheme": "internet-facing"
+            },
+            "name": "ingress",
+            "namespace": "default"
+          },
+          "spec": {
+            "ingressClassName": "alb",
+            "rules": [
+              {
+                "http": {
+                  "paths": [
+                    {
+                      "backend": {
+                        "service": {
+                          "name": "forward-multiple-tg",
+                          "port": {
+                            "name": "use-annotation"
+                          }
+                        }
+                      },
+                      "path": "/",
+                      "pathType": "Exact"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "refId": "4",
+      "requisiteStageRefIds": [
+        "2",
+        "3"
+      ],
+      "source": "text",
+      "type": "patchManifest"
+    },
+    {
+      "analysisType": "realTime",
+      "canaryConfig": {
+        "canaryConfigId": "17026fa6-f0af-43f0-b3b2-5ab5498c49ee",
+        "lifetimeDuration": "PT1H0M",
+        "metricsAccountName": "prometheus-yoda",
+        "scopes": [
+          {
+            "controlLocation": "${ deployedServerGroups[0].region }",
+            "controlScope": "${ #stage('Deploy Image App as a Canary')['metadata']['annotations'].name }",
+            "experimentLocation": "${ deployedServerGroups[0].region }",
+            "experimentScope": "${ deployedServerGroups[0].serverGroup }",
+            "extendedScopeParams": {},
+            "scopeName": "default"
+          }
+        ],
+        "scoreThresholds": {},
+        "storageAccountName": "s3-canary-storage"
+      },
+      "name": "Canary Analysis",
+      "refId": "6",
+      "requisiteStageRefIds": [
+        "4"
+      ],
+      "type": "kayentaCanary"
+    },
+    {
+      "account": "k8s-account-dev",
+      "cloudProvider": "kubernetes",
+      "manifests": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "metadata": {
+            "name": "sample-app-deployment"
+          },
+          "spec": {
+            "image": "armory/sample-app",
+            "volumes": {
+              "conf": {
+                "ref": "sample-app-config",
+                "type": "ConfigMap"
+              }
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "jasonmcintosh"
+      },
+      "name": "Promote Canary to Prod",
+      "refId": "7",
+      "requiredArtifactIds": [
+        "6d0d4592-721d-4a7f-9891-e8ff2f44ffbf"
+      ],
+      "requiredArtifacts": [],
+      "requisiteStageRefIds": [
+        "6"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "k8s-account-dev",
+      "app": "jasonmcintosh",
+      "cloudProvider": "kubernetes",
+      "location": "default",
+      "manifestName": "deployment apptest-deployment-canary",
+      "mode": "static",
+      "name": "Scale Down Canary",
+      "refId": "8",
+      "replicas": "0",
+      "requisiteStageRefIds": [
+        "10"
+      ],
+      "type": "scaleManifest"
+    },
+    {
+      "account": "k8s-account-dev",
+      "app": "jasonmcintosh",
+      "cloudProvider": "kubernetes",
+      "location": "default",
+      "manifestName": "deployment apptest-deployment-baseline",
+      "mode": "static",
+      "name": "Scale down baseline",
+      "refId": "9",
+      "replicas": "0",
+      "requisiteStageRefIds": [
+        "10"
+      ],
+      "type": "scaleManifest"
+    },
+    {
+      "account": "k8s-account-dev",
+      "app": "jasonmcintosh",
+      "cloudProvider": "kubernetes",
+      "location": "default",
+      "manifestName": "ingress",
+      "mode": "static",
+      "name": "Modify Ingress to disable Canary and Baseline",
+      "options": {
+        "mergeStrategy": "strategic",
+        "record": true
+      },
+      "patchBody": [
+        {
+          "apiVersion": "networking.k8s.io/v1",
+          "kind": "Ingress",
+          "metadata": {
+            "annotations": {
+              "alb.ingress.kubernetes.io/actions.forward-multiple-tg": "{\n  \"type\":\"forward\",\n  \"forwardConfig\":{\n    \"targetGroups\":[\n      {\"serviceName\":\"sample-app,\"servicePort\":\"http\",\"weight\":100}\n    ]\n  }\n  \n}\n",
+              "alb.ingress.kubernetes.io/scheme": "internet-facing"
+            },
+            "name": "ingress",
+            "namespace": "default"
+          },
+          "spec": {
+            "ingressClassName": "alb",
+            "rules": [
+              {
+                "http": {
+                  "paths": [
+                    {
+                      "backend": {
+                        "service": {
+                          "name": "forward-multiple-tg",
+                          "port": {
+                            "name": "use-annotation"
+                          }
+                        }
+                      },
+                      "path": "/",
+                      "pathType": "Exact"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "refId": "10",
+      "requisiteStageRefIds": [
+        "7"
+      ],
+      "source": "text",
+      "type": "patchManifest"
+    }
+  ],
+  "triggers": [
+    {
+      "account": "artifactory",
+      "enabled": true,
+      "organization": "apache",
+      "registry": "company-docker-all.jfrog.io",
+      "repository": "apache/tomcat",
+      "type": "docker"
+    }
+  ]
+}
+
