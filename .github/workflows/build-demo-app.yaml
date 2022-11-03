@@ -2,12 +2,14 @@ name: Demo-Web-App - Build
 
 on:
   push: # What triggers a deployment. For example, `push`.
+    paths:
+      - 'applications/demo-web-app/**'
     branches:
       - main
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: jasonmcintosh/spinnaker-work/demo-web-app
 
 jobs:
   build-and-push-image:
@@ -15,7 +17,10 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+    defaults:
+      run:
+        shell: bash
+        working-directory: applications/demo-web-app/
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -43,6 +48,7 @@ jobs:
       - name: Gradle build and push
         uses: gradle/gradle-build-action@v2
         with:
+          build-root-directory: applications/demo-web-app/
           arguments: |
             -PimagePush=true 
             -PimageCacheFrom=type=gha
