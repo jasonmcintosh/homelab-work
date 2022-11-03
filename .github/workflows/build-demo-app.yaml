@@ -4,6 +4,7 @@ on:
   push: # What triggers a deployment. For example, `push`.
     paths:
       - 'applications/demo-web-app/**'
+      - '.github/workflows/build-demo-app.yaml'
     branches:
       - main
 

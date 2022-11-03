@@ -4,7 +4,9 @@ on:
   push: # What triggers a deployment. For example, `push`.
     branches:
       - main
-
+    paths:
+      - 'cluster/spinnaker/**'
+      - '.github/workflows/local-deploy.yaml'
 jobs:
   build:
     name: Deploy Spinnaker
