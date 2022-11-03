@@ -165,12 +165,12 @@ spec:
             accounts:
             - name: local-prometheus
               endpoint:
-                baseUrl: http://prometheus:9090
+                baseUrl: http://prometheus.monitoring:9090
               supportedTypes:
               - METRICS_STORE
             - name: local-prometheus-2
               endpoint:
-                baseUrl: http://prometheus:9090
+                baseUrl: http://prometheus.monitoring:9090
               supportedTypes:
               - METRICS_STORE
 
@@ -202,6 +202,14 @@ spec:
               username: jasonmcintosh
               token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
       providers:
+        dockerRegistry:
+          enabled: true
+          accounts:
+          - name: ghcr-jm
+            address: https://ghrc.io/
+            repositories:
+              - jasonmcintosh/spinnaker-work/demo-web-app
+
         kubernetes:
           enabled: true
           primaryAccount: k8s-namespace-dev

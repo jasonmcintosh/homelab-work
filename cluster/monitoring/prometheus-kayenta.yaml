@@ -1,8 +1,53 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-prometheus
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/metrics
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources:
+  - configmaps
+  verbs: ["get"]
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-config
-  namespace: spinnaker
+  namespace: monitoring
 data:
   prometheus.yml: |
     # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
@@ -17,12 +62,23 @@ data:
         # scheme defaults to 'http'.
         static_configs:
         - targets: ['localhost:9090']
+      - job_name: 'demo-app'
+        kubernetes_sd_configs:
+          - role: service
+        metrics_path: /actuator/prometheus
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_service_annotation_type]
+          regex: spring-boot-app
+          action: keep
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: service
+
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: spinnaker
+  namespace: monitoring
   labels:
     app: prometheus
 spec:
@@ -75,10 +131,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
-  namespace: spinnaker
+  namespace: monitoring
 spec:
   ports:
   - port: 9090
   selector:
     app: prometheus
-  clusterIP: None
+  type: NodePort

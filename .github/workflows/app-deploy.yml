@@ -1,0 +1,48 @@
+name: Demo-Web-App - Build
+
+on:
+  push: # What triggers a deployment. For example, `push`.
+    branches:
+      - main
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Set up JDK    
+        uses: actions/setup-java
+        with:        
+         java-version: 17
+         cache: gradle
+
+      - name: Gradle build and push
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: |
+            -PimagePush=true 
+            -PimageCacheFrom=type=gha
+            -PimageCacheTo=type=gha,mode=max
+            buildSimpleBootImage

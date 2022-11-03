@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  annotations:
+    app: demo-app
+    type: spring-boot-app
+  name: demo-app
+spec:
+  template:
+    spec:
+      containers:
+        - name: demo-web-app
+          image: ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app
+  selector:
+    matchLabels:
+      app: demo-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-app-service
+spec:
+  selector:
+    app: demo-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
