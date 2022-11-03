@@ -6,6 +6,7 @@
 - https://developer.okta.com/signup/
 - https://www.keycloak.org/
 
+
 2) Microk8s or kubenretes cluster to deploy to.  I use a 3 node microk8s cluster with the following addons enabled:
 
 ```
@@ -15,6 +16,7 @@
     rbac                 # Role-Based Access Control for authorisation
     traefik              # traefik Ingress controller for external access
 ```
+and then I install [several services for testing](../)
 3) Add a hosts file entry (assuming in a local submit...) for your ingress:
 ```
 192.168.19.228 spinnaker-local
@@ -26,8 +28,8 @@ This should point to the microk8s cluster ingress endpoint
 * Need oauth2 client secrets: ```k create secret generic auth-credentails --from-literal clientSecret='REPLACEME'```
 
 5) Change some config
-- [Change any accounts](https://github.com/jasonmcintosh/spinnaker-work/blob/main/local-spinnaker/spinnaker.yaml#L190)
-- [Change oauth2 settings](https://github.com/jasonmcintosh/spinnaker-work/blob/main/local-spinnaker/spinnaker.yaml#L347)
+- [Change any accounts](https://github.com/jasonmcintosh/spinnaker-work/blob/main/cluster/spinnaker/spinnaker.yaml#L190)
+- [Change oauth2 settings](https://github.com/jasonmcintosh/spinnaker-work/blob/main/cluster/spinnaker/spinnaker.yaml#L347)
 
 for a more detailed list of options: https://docs.armory.io/armory-enterprise/installation/armory-operator/op-manifest-reference/
 

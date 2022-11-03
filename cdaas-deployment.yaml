@@ -10,10 +10,10 @@ targets:
 
 manifests:
 
-  - path: local-spinnaker/example-namespaces.yaml
-  - path: local-spinnaker/mysql.yaml
-  - path: local-spinnaker/permissions.yaml
-  - path: local-spinnaker/spinnaker.yaml
+  - path: cluster/spinnaker/example-namespaces.yaml
+  - path: cluster/spinnaker/mysql.yaml
+  - path: cluster/spinnaker/permissions.yaml
+  - path: cluster/spinnaker/spinnaker.yaml
 
 
 strategies:

@@ -9,8 +9,8 @@ targets:
     strategy: simple
 
 manifests:
-  - path: local-spinnaker/armory-enterprise-operator/crds/
-  - path: local-spinnaker/armory-enterprise-operator/operator/cluster/
+  - path: cluster/armory-enterprise-operator/crds/
+  - path: cluster/armory-enterprise-operator/operator/cluster/
 
 strategies:
   simple:
