@@ -5,7 +5,7 @@ metadata:
   name: spinnaker
 spec:
   rules:
-    - host: spinnaker-local
+    - host: spinnaker.mcintosh.farm
       http:
         paths:
           - path: /
@@ -179,9 +179,9 @@ spec:
       armory:
         diagnostics:
           uuid: jason-mcintosh-local
-          enabled: true
+          enabled: false
           logging:
-            enabled: true
+            enabled: false
             endpoint: https://debug.armory.io/v1/logs
       features:
         artifacts: true
@@ -202,13 +202,6 @@ spec:
               username: jasonmcintosh
               token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
       providers:
-        dockerRegistry:
-          enabled: true
-          accounts:
-          - name: ghcr-jm
-            address: https://ghrc.io/
-            repositories:
-              - jasonmcintosh/spinnaker-work/demo-web-app
 
         kubernetes:
           enabled: true
@@ -237,7 +230,7 @@ spec:
                 - engineering-managed
       security:
         apiSecurity:
-          overrideBaseUrl: http://spinnaker-local:8080/api/v1
+          overrideBaseUrl: http://spinnaker.mcintosh.farm:8080/api/v1
           ssl:
             enabled: false
         authn:
@@ -250,7 +243,7 @@ spec:
           groupMembership:
             service: EXTERNAL
         uiSecurity:
-          overrideBaseUrl: http://spinnaker-local:8080
+          overrideBaseUrl: http://spinnaker.mcintosh.farm:8080
           ssl:
             enabled: false
       stats:
@@ -269,6 +262,14 @@ spec:
           enabled: false
     profiles:
       clouddriver:
+        ## done here... Maybe could move to providers block... hit some ODD issues with halyard validation this though :( 
+        docker-registry:
+          enabled: true
+          accounts:
+          - name: docker-ghcr-jasonmcintosh
+            address: https://ghcr.io/
+            repositories:
+            - jasonmcintosh/spinnaker-work/demo-web-app
         credentials:
           poller:
             enabled: true
