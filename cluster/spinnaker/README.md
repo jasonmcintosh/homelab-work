@@ -19,7 +19,7 @@
 and then I install [several services for testing](../)
 3) Add a hosts file entry (assuming in a local submit...) for your ingress:
 ```
-192.168.19.228 spinnaker-local
+192.168.19.228 spinnaker.mcintosh.farm - or change the dns settings & host ingress stuff... see the spinnaker.yaml file
 ```
 This should point to the microk8s cluster ingress endpoint 
 

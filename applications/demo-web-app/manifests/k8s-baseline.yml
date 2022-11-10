@@ -2,37 +2,37 @@ apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
   annotations:
-    app: demo-web-app
+    app: demo-web-app-baseline
     type: spring-boot-app
-  name: demo-web-app
+  name: demo-web-app-baseline
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: demo-web-app
+      app: demo-web-app-baseline
   template:
     metadata:
       annotations:
         type: spring-boot-app
       labels:
-        app: demo-web-app
+        app: demo-web-app-baseline
         type: spring-boot-app
     spec:
       containers:
-        - name: demo-web-app
+        - name: demo-web-app-baseline
           ## INTENTIONALLY not tagging resources so spinnaker can pick it up
           image: ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: demo-web-app-service
+  name: demo-web-app-service-baseline
   annotations:
-    app: demo-web-app
+    app: demo-web-app-baseline
     type: spring-boot-app
 spec:
   selector:
-    app: demo-web-app
+    app: demo-web-app-baseline
   ports:
     - protocol: TCP
       port: 8080
