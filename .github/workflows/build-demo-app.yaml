@@ -6,8 +6,7 @@ on:
       - 'applications/demo-web-app/**'
       - '.github/workflows/build-demo-app.yaml'
     ## Don't fire a build if a manifest changes :) 
-    paths-ignore:
-      - 'applications/demo-web-app/manifests/**'
+      - '!applications/demo-web-app/manifests/**'
     branches:
       - main
 
