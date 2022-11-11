@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/canary-weight: "10"
 spec:
   rules:
-  - host: demo-app.mcintosh.farm
+  - host: demo-webapp.mcintosh.farm
     http:
       paths:
       - backend:
@@ -25,7 +25,7 @@ metadata:
     nginx.ingress.kubernetes.io/canary-weight: "10"
 spec:
   rules:
-  - host: demo-app.mcintosh.farm
+  - host: demo-webapp.mcintosh.farm
     http:
       paths:
       - backend:
@@ -41,7 +41,7 @@ metadata:
     nginx.ingress.kubernetes.io/canary: "false"
 spec:
   rules:
-  - host: demo-app.mcintosh.farm
+  - host: demo-webapp.mcintosh.farm
     http:
       paths:
       - backend:
