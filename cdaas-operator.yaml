@@ -25,7 +25,6 @@ targets:
     constraints:
       dependsOn:
       - crd2
-
 manifests:
   - path: cluster/armory-enterprise-operator/crds/spinnaker.armory.io_spinnakerservices.yaml
     targets: ['crd1']
@@ -33,8 +32,6 @@ manifests:
     targets: ['crd2']
   - path: cluster/armory-enterprise-operator/operator/cluster/
     targets: ['operator']
-    
-
 strategies:
   simple:
     canary:
