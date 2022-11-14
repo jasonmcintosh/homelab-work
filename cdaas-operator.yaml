@@ -25,6 +25,17 @@ targets:
     constraints:
       dependsOn:
       - crd2
+      afterDeployment:
+      - pause: 
+          duration: 1
+          unit: seconds 
+  spinnaker:
+    account: local-cluster
+    namespace: spinnaker
+    strategy: simple
+    constraints:
+      dependsOn:
+      - operator
 manifests:
   - path: cluster/armory-enterprise-operator/crds/spinnaker.armory.io_spinnakerservices.yaml
     targets: ['crd1']
@@ -32,6 +43,14 @@ manifests:
     targets: ['crd2']
   - path: cluster/armory-enterprise-operator/operator/cluster/
     targets: ['operator']
+  - path: cluster/spinnaker/minio-s3-for-kayenta.yaml
+    targets: ['spinnaker']
+  - path: cluster/spinnaker/mysql.yaml
+    targets: ['spinnaker']
+  - path: cluster/spinnaker/permissions.yaml
+    targets: ['spinnaker']
+  - path: cluster/spinnaker/spinnaker.yaml
+    targets: ['spinnaker']
 strategies:
   simple:
     canary:
