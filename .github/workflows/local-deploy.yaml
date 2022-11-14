@@ -16,12 +16,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-#       - name: Deployment Operator
-#         uses: armory/cli-deploy-action@main
-#         with:
-#           clientId: "${{ secrets.CDAAS_CLIENT_ID }}" # Encrypted Client ID that you created in the CD-as-a-Service Console that has been encrypted with GitHub's encrypted secrets. Replace <CLIENTD> with the name you gave your encrypted secret.
-#           clientSecret:  "${{ secrets.CDAAS_CLIENT_SECRET }}" # Client Secret that you created in the CD-as-a-Service Console that has been encrypted with GitHub's encrypted secrets. Replace <CLIENTSECRET> with the name you gave your encrypted secret.
-#           path-to-file: "/cdaas-operator.yaml" # Path to the deployment file.
+      - name: Deployment Operator
+        uses: armory/cli-deploy-action@main
+        with:
+          clientId: "${{ secrets.CDAAS_CLIENT_ID }}" # Encrypted Client ID that you created in the CD-as-a-Service Console that has been encrypted with GitHub's encrypted secrets. Replace <CLIENTD> with the name you gave your encrypted secret.
+          clientSecret:  "${{ secrets.CDAAS_CLIENT_SECRET }}" # Client Secret that you created in the CD-as-a-Service Console that has been encrypted with GitHub's encrypted secrets. Replace <CLIENTSECRET> with the name you gave your encrypted secret.
+          path-to-file: "/cdaas-operator.yaml" # Path to the deployment file.
 
       - name: Deployment Spinnaker
         uses: armory/cli-deploy-action@main
