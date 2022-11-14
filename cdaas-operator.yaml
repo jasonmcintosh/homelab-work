@@ -10,6 +10,7 @@ targets:
 
 manifests:
   - path: cluster/armory-enterprise-operator/crds/spinnaker.armory.io_spinnakerservices.yaml
+  - path: cluster/armory-enterprise-operator/crds/spinnaker.armory.io_armoryaccounts.yaml
   - path: cluster/armory-enterprise-operator/operator/cluster/
 
 strategies:
