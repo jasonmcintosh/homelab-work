@@ -9,7 +9,7 @@ targets:
     strategy: simple
 
 manifests:
-  - path: cluster/armory-enterprise-operator/crds/
+  #- path: cluster/armory-enterprise-operator/crds/
   - path: cluster/armory-enterprise-operator/operator/cluster/
 
 strategies:
