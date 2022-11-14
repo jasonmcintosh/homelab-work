@@ -14,7 +14,6 @@ manifests:
   - path: cluster/spinnaker/permissions.yaml
   - path: cluster/spinnaker/spinnaker.yaml
 
-
 strategies:
   simple:
     canary:
