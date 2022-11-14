@@ -14,6 +14,11 @@ targets:
     constraints:
       dependsOn:
       - crd1
+      afterDeployment:
+      - pause: 
+          duration: 1
+          unit: seconds
+      
   operator:
     account: local-cluster
     namespace: spinnaker-operator
