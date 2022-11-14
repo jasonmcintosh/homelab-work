@@ -17,8 +17,7 @@ targets:
       afterDeployment:
       - pause: 
           duration: 1
-          unit: seconds
-      
+          unit: seconds      
   operator:
     account: local-cluster
     namespace: spinnaker-operator
