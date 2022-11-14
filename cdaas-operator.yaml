@@ -33,6 +33,7 @@ manifests:
     targets: ['crd2']
   - path: cluster/armory-enterprise-operator/operator/cluster/
     targets: ['operator']
+    
 
 strategies:
   simple:
