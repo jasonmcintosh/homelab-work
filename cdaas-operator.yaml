@@ -37,5 +37,4 @@ strategies:
     canary:
       steps:
         - setWeight:
-            weight: 100
-            
+            weight: 100           
