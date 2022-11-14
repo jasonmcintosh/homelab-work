@@ -10,6 +10,7 @@ targets:
 
 manifests:
 
+  - path: cluster/spinnaker/minio-s3-for-kayenta.yaml
   - path: cluster/spinnaker/mysql.yaml
   - path: cluster/spinnaker/permissions.yaml
   - path: cluster/spinnaker/spinnaker.yaml
