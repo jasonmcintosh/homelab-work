@@ -3,15 +3,32 @@ version: v1
 kind: kubernetes
 application: armory-spinnaker-operator
 targets:
-  local-cluster:
+  crd1:
     account: local-cluster
     namespace: spinnaker-operator
     strategy: simple
+  crd2:
+    account: local-cluster
+    namespace: spinnaker-operator
+    strategy: simple
+    constraints:
+      dependsOn:
+      - crd1
+  operator:
+    account: local-cluster
+    namespace: spinnaker-operator
+    strategy: simple
+    constraints:
+      dependsOn:
+      - crd2
 
 manifests:
   - path: cluster/armory-enterprise-operator/crds/spinnaker.armory.io_spinnakerservices.yaml
+    targets: ['crd1']
   - path: cluster/armory-enterprise-operator/crds/spinnaker.armory.io_armoryaccounts.yaml
+    targets: ['crd2']
   - path: cluster/armory-enterprise-operator/operator/cluster/
+    targets: ['operator']
 
 strategies:
   simple:
