@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'cdaas-deployment.yaml'
+      - 'cdaas-operator.yaml'
       - 'cluster/spinnaker/**'
       - '.github/workflows/local-deploy.yaml'
 jobs:
