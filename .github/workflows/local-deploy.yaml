@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - 'cdaas-deployment.yaml'
       - 'cluster/spinnaker/**'
       - '.github/workflows/local-deploy.yaml'
 jobs:
