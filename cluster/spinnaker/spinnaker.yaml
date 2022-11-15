@@ -177,6 +177,7 @@ spec:
       persistentStorage:
         persistentStoreType: s3
       armory:
+
         diagnostics:
           uuid: jason-mcintosh-local
           enabled: false
@@ -371,6 +372,15 @@ spec:
             password: password
             user: root
       gate:
+        armory:
+          cloud:
+            enabled: true
+            iam: 
+              tokenIssueUrl: https://auth.cloud.armory.io/oauth/token
+              clientId: gjxWvqaQsoSe1BkfVFTOlhYR5DF5QEHv
+              clientSecret:  encrypted:k8s!n:auth-credentails!k:armoryCloudSecret
+            api:
+              baseUrl: https://api.cloud.armory.io
         security:
           oauth2:
             resource:
