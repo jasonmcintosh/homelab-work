@@ -1,0 +1,54 @@
+{
+  "expectedArtifacts": [],
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "mcintoshj@gmail.com",
+  "limitConcurrent": true,
+  "roles": [
+    "engineering-managed",
+    "everyone"
+  ],
+  "schema": "1",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "account": "k8s-spinnaker-prod",
+      "cloudProvider": "kubernetes",
+      "manifestArtifact": {
+        "artifactAccount": "github-files-jm",
+        "id": "5eee1844-8feb-47f3-8e7a-d93cab792fe3",
+        "name": "cluster/spinnaker/spinnaker.yaml",
+        "reference": "https://api.github.com/repos/jasonmcintosh/spinnaker-work/contents/cluster/spinnaker/spinnaker.yaml",
+        "type": "github/file",
+        "version": "main"
+      },
+      "moniker": {
+        "app": "spin"
+      },
+      "name": "Deploy (Manifest)",
+      "namespaceOverride": "spinnaker",
+      "refId": "1",
+      "requiredArtifactIds": [],
+      "requiredArtifacts": [],
+      "requisiteStageRefIds": [],
+      "skipExpressionEvaluation": true,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false
+        }
+      },
+      "type": "deployManifest"
+    }
+  ],
+  "triggers": [
+    {
+      "cronExpression": "0 1 0/1 1/1 * ? *",
+      "enabled": true,
+      "expectedArtifactIds": [],
+      "id": "a8211d6b-a89d-4778-8380-55827f79318e",
+      "runAsUser": "5ab501c4-1829-451f-837d-999168c25f07@managed-service-account",
+      "type": "cron"
+    }
+  ]
+}
