@@ -13,5 +13,5 @@ IF YOU MATCH the naming conventions... things get easier.  Even in k8s where it 
 
 
 ## What does this look like in spinnaker?
-![Spinnaker cluster view](https://p-qKFvWn.b3.n0.cdn.getcloudapp.com/items/jkuOdXyN/a9627006-43e4-439a-aac5-df60361479c5.jpg?v=3d2b6c7a225689712cf25a9a92a59a47)
+![Spinnaker cluster view](https://p-qKFvWn.b3.n0.cdn.getcloudapp.com/items/llugjdn8/55e64c22-edb5-4bad-9984-94aec8f7d95b.jpg?v=8c429623a57fb6edf6ae2e99e9817b76)
 ![Pipeline view for spin app](https://p-qKFvWn.b3.n0.cdn.getcloudapp.com/items/OAu298B4/34631f70-8fdd-456d-917b-d3b41fcde628.jpg?v=84bc6b1523ed521792f5645f7e000b8d)
