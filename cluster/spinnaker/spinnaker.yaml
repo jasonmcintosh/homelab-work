@@ -177,10 +177,9 @@ spec:
       persistentStorage:
         persistentStoreType: s3
       armory:
-
         diagnostics:
           uuid: jason-mcintosh-local
-          enabled: false
+          enabled: true
           logging:
             enabled: false
             endpoint: https://debug.armory.io/v1/logs
@@ -208,6 +207,17 @@ spec:
           enabled: true
           primaryAccount: k8s-namespace-dev
           accounts:
+            - name: k8s-spinnaker-prod
+              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+              namespaces: 
+              - spinnaker
+              permissions:
+                READ:
+                - everyone
+                - engineering-managed
+                WRITE:
+                - everyone
+                - engineering-managed
             - name: k8s-namespace-prod
               kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
               namespaces: 
@@ -376,7 +386,7 @@ spec:
           cloud:
             enabled: true
             iam: 
-              tokenIssueUrl: https://auth.cloud.armory.io/oauth/token
+              tokenIssuerUrl: https://auth.cloud.armory.io/oauth/token
               clientId: gjxWvqaQsoSe1BkfVFTOlhYR5DF5QEHv
               clientSecret:  encrypted:k8s!n:auth-credentails!k:armoryCloudSecret
             api:
