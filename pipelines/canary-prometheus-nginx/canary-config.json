@@ -1,0 +1,42 @@
+{
+  "applications": [
+    "test-app"
+  ],
+  "classifier": {
+    "groupWeights": {
+      "Request metrics": 100
+    }
+  },
+  "configVersion": "1",
+  "createdTimestamp": 1668719406850,
+  "createdTimestampIso": "2022-11-17T21:10:06.850Z",
+  "description": "",
+  "judge": {
+    "judgeConfigurations": {},
+    "name": "NetflixACAJudge-v1.0"
+  },
+  "metrics": [
+    {
+      "analysisConfigurations": {
+        "canary": {
+          "critical": true,
+          "direction": "increase"
+        }
+      },
+      "groups": [
+        "Request metrics"
+      ],
+      "name": "HTTP Request time",
+      "query": {
+        "customInlineTemplate": "PromQL:max(http_server_requests_seconds_max) by (app)",
+        "serviceType": "prometheus",
+        "type": "prometheus"
+      },
+      "scopeName": "default"
+    }
+  ],
+  "name": "spring-web-app-base",
+  "templates": {},
+  "updatedTimestamp": 1668719485738,
+  "updatedTimestampIso": "2022-11-17T21:11:25.738Z"
+}
