@@ -67,11 +67,12 @@ data:
           - role: pod
         metrics_path: /actuator/prometheus
         relabel_configs:
-        - source_labels: [__meta_kubernetes_pod_annotation_type]
+        - source_labels: [__meta_kubernetes_pod_label_type]
           regex: spring-boot-app
           action: keep
         - action: labelmap
           regex: __meta_kubernetes_pod_label_(.+)
+          replacement: $1
         - source_labels: [__meta_kubernetes_namespace]
           action: replace
           target_label: kubernetes_namespace

@@ -28,7 +28,7 @@
       ],
       "name": "HTTP Request time",
       "query": {
-        "customInlineTemplate": "PromQL:max(http_server_requests_seconds_max{${scope}=\"${location}\"}) by (${scope})",
+        "customInlineTemplate": "PromQL:avg(http_server_requests_seconds_max{app=\"${scope}\", kubernetes_namespace=\"${location}\"}) by(uri)",
         "serviceType": "prometheus",
         "type": "prometheus"
       },
@@ -37,6 +37,6 @@
   ],
   "name": "spring-web-app-base",
   "templates": {},
-  "updatedTimestamp": 1668729533266,
-  "updatedTimestampIso": "2022-11-17T23:58:53.266Z"
+  "updatedTimestamp": 1668732992990,
+  "updatedTimestampIso": "2022-11-18T00:56:32.990Z"
 }

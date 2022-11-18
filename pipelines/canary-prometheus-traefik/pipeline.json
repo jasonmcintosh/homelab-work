@@ -1,0 +1,491 @@
+{
+  "appConfig": {},
+  "expectedArtifacts": [
+    {
+      "defaultArtifact": {
+        "artifactAccount": "docker-registry",
+        "id": "564420a6-1cda-4729-b28e-93242dc9f195",
+        "name": "ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app",
+        "reference": "ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app:0.0.1-snapshot",
+        "type": "docker/image",
+        "version": "0.0.1-snapshot"
+      },
+      "displayName": "Demo web app Docker file",
+      "id": "477764fa-62e3-4726-a33a-20035cfded90",
+      "matchArtifact": {
+        "artifactAccount": "docker-registry",
+        "id": "2703c420-0935-4a38-8840-39be0212804f",
+        "name": "ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app",
+        "type": "docker/image"
+      },
+      "useDefaultArtifact": true,
+      "usePriorArtifact": true
+    }
+  ],
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "mcintoshj@gmail.com",
+  "limitConcurrent": true,
+  "parameterConfig": [
+    {
+      "default": "false",
+      "description": "",
+      "hasOptions": true,
+      "label": "Whether to fail the canary analysis or not for testing",
+      "name": "FailCanary",
+      "options": [
+        {
+          "value": "true"
+        },
+        {
+          "value": "false"
+        }
+      ],
+      "pinned": false,
+      "required": true
+    }
+  ],
+  "roles": [
+    "engineering-managed",
+    "everyone"
+  ],
+  "schema": "1",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "account": "k8s-namespace-prod",
+      "app": "demo",
+      "cloudProvider": "kubernetes",
+      "cluster": "deployment demo-web-app",
+      "completeOtherBranchesThenFail": false,
+      "continuePipeline": true,
+      "criteria": "newest",
+      "expectedArtifacts": [
+        {
+          "defaultArtifact": {
+            "artifactAccount": "docker-registry",
+            "id": "7be07c4a-af5a-4bf0-88d5-cff6553c441f",
+            "name": "ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app",
+            "reference": "ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app:0.0.1-SNAPSHOT",
+            "type": "docker/image",
+            "version": "0.0.1-SNAPSHOT"
+          },
+          "displayName": "current-running-docker image",
+          "id": "1c3ca63a-5bd0-4ede-9e00-b468a7633ff2",
+          "matchArtifact": {
+            "artifactAccount": "docker-registry",
+            "id": "6e413ca7-1c0c-4c82-84c0-ce8873ac1bb9",
+            "name": "ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app",
+            "type": "docker/image"
+          },
+          "useDefaultArtifact": true,
+          "usePriorArtifact": true
+        }
+      ],
+      "failPipeline": false,
+      "kind": "deployment",
+      "location": "prod",
+      "mode": "dynamic",
+      "name": "Find existing docker image for baseline",
+      "refId": "1",
+      "requisiteStageRefIds": [
+        "3"
+      ],
+      "type": "findArtifactsFromResource"
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "cloudProvider": "kubernetes",
+      "manifestArtifact": {
+        "artifactAccount": "github-files-jm",
+        "id": "65e0553e-5931-48c6-8d75-81bc7ce2da2c",
+        "name": "applications/demo-web-app/manifests/k8s-baseline.yml",
+        "reference": "https://api.github.com/repos/jasonmcintosh/spinnaker-work/contents/applications/demo-web-app/manifests/k8s-baseline.yml",
+        "type": "github/file",
+        "version": "main"
+      },
+      "manifests": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "metadata": {
+            "anotations": {
+              "deploymentType": "baseline"
+            },
+            "name": "sample-app-deployment-baseline"
+          },
+          "spec": {
+            "image": "sample-app",
+            "volumes": {
+              "conf": {
+                "ref": "sample-app-config",
+                "type": "ConfigMap"
+              }
+            }
+          }
+        },
+        {
+          "apiVersion": "v1",
+          "kind": "Service",
+          "metadata": {
+            "name": "sample-app-service"
+          },
+          "spec": {
+            "target": {
+              "label": "value"
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "demo"
+      },
+      "name": "Apply Baseline",
+      "namespaceOverride": "prod",
+      "refId": "2",
+      "requiredArtifactIds": [
+        "1c3ca63a-5bd0-4ede-9e00-b468a7633ff2"
+      ],
+      "requiredArtifacts": [],
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": true,
+          "namespace": "prod",
+          "services": [
+            "service demo-web-app-service-baseline"
+          ],
+          "strategy": "redblack"
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "cloudProvider": "kubernetes",
+      "expectedArtifacts": [],
+      "manifestArtifact": {
+        "artifactAccount": "github-files-jm",
+        "id": "97bbfa22-81d1-4d9f-9abf-fde6fddbcbe2",
+        "name": "applications/demo-web-app/manifests/k8s-canary.yml",
+        "reference": "https://api.github.com/repos/jasonmcintosh/spinnaker-work/contents/applications/demo-web-app/manifests/k8s-canary.yml",
+        "type": "github/file",
+        "version": "main"
+      },
+      "manifests": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "metadata": {
+            "annotations": {
+              "app": "sample-app-deployment-canary",
+              "deploymentType": "canary"
+            },
+            "name": "sample-app-deployment-canary"
+          },
+          "spec": {
+            "image": "armory/sample-app",
+            "volumes": {
+              "conf": {
+                "ref": "sample-app-config",
+                "type": "ConfigMap"
+              }
+            }
+          }
+        },
+        {
+          "apiVersion": "v1",
+          "data": {
+            "app.properties": "# Used to trigger responses to have artificial latency.  \nfailCanary = ${parameters[\"FailCanary\"]}\n"
+          },
+          "kind": "ConfigMap",
+          "metadata": {
+            "name": "sample-app-config"
+          }
+        },
+        {
+          "apiVersion": "v1",
+          "kind": "Service",
+          "metadata": {
+            "name": "sample-app-service-canary"
+          },
+          "spec": {
+            "target": {
+              "app": "sample-app-deployment-canary"
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "demo"
+      },
+      "name": "Deploy Canary and config",
+      "namespaceOverride": "prod",
+      "refId": "3",
+      "requiredArtifactIds": [
+        "477764fa-62e3-4726-a33a-20035cfded90"
+      ],
+      "requiredArtifacts": [],
+      "requisiteStageRefIds": [],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": true,
+          "namespace": "prod",
+          "services": [
+            "service demo-web-app-service-canary"
+          ],
+          "strategy": "redblack"
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "analysisType": "realTime",
+      "canaryConfig": {
+        "baselineAnalysisOffsetInMins": "0",
+        "beginCanaryAnalysisAfterMins": "0",
+        "canaryAnalysisIntervalMins": "15",
+        "canaryConfigId": "7b612968-c805-4612-b27a-076f6ae7e7ae",
+        "lifetimeDuration": "PT0H30M",
+        "metricsAccountName": "local-prometheus",
+        "scopes": [
+          {
+            "controlLocation": "prod",
+            "controlScope": "demo-web-app-baseline",
+            "experimentLocation": "prod",
+            "experimentScope": "demo-web-app-canary",
+            "extendedScopeParams": {},
+            "scopeName": "default",
+            "step": 60
+          }
+        ],
+        "scoreThresholds": {
+          "marginal": "70",
+          "pass": "90"
+        },
+        "storageAccountName": "minio"
+      },
+      "name": "Canary Analysis",
+      "refId": "6",
+      "requisiteStageRefIds": [
+        "10"
+      ],
+      "type": "kayentaCanary"
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "cloudProvider": "kubernetes",
+      "manifestArtifact": {
+        "artifactAccount": "github-files-jm",
+        "id": "b7027749-2979-4151-b16e-2e23b0873873",
+        "name": "applications/demo-web-app/manifests/k8s.yml",
+        "reference": "https://api.github.com/repos/jasonmcintosh/spinnaker-work/contents/applications/demo-web-app/manifests/k8s.yml",
+        "type": "github/file",
+        "version": "main"
+      },
+      "manifests": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "metadata": {
+            "name": "sample-app-deployment"
+          },
+          "spec": {
+            "image": "armory/sample-app",
+            "volumes": {
+              "conf": {
+                "ref": "sample-app-config",
+                "type": "ConfigMap"
+              }
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "demo"
+      },
+      "name": "Promote Canary to Prod",
+      "namespaceOverride": "prod",
+      "refId": "7",
+      "requiredArtifactIds": [
+        "477764fa-62e3-4726-a33a-20035cfded90"
+      ],
+      "requiredArtifacts": [],
+      "requisiteStageRefIds": [
+        "11"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": true,
+          "namespace": "prod",
+          "services": [
+            "service demo-web-app-service"
+          ],
+          "strategy": "redblack"
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "app": "demo",
+      "cloudProvider": "kubernetes",
+      "cluster": "demo-web-app-canary",
+      "criteria": "newest",
+      "kind": "deployment",
+      "location": "prod",
+      "mode": "dynamic",
+      "name": "Scale Down Canary",
+      "refId": "8",
+      "replicas": "0",
+      "requisiteStageRefIds": [
+        "7"
+      ],
+      "type": "scaleManifest"
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "app": "demo",
+      "cloudProvider": "kubernetes",
+      "cluster": "demo-web-app-baseline",
+      "criteria": "newest",
+      "kind": "deployment",
+      "location": "prod",
+      "mode": "dynamic",
+      "name": "Scale down baseline",
+      "refId": "9",
+      "replicas": "0",
+      "requisiteStageRefIds": [
+        "7"
+      ],
+      "type": "scaleManifest"
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "cloudProvider": "kubernetes",
+      "manifests": [
+        {
+          "apiVersion": "traefik.containo.us/v1alpha1",
+          "kind": "TraefikService",
+          "metadata": {
+            "name": "demo-web-app"
+          },
+          "spec": {
+            "weighted": {
+              "services": [
+                {
+                  "kind": "Service",
+                  "name": "demo-web-app-service",
+                  "port": 8080,
+                  "weight": 8
+                },
+                {
+                  "kind": "Service",
+                  "name": "demo-web-app-service-canary",
+                  "port": 8080,
+                  "weight": 1
+                },
+                {
+                  "kind": "Service",
+                  "name": "demo-web-app-service-baseline",
+                  "port": 8080,
+                  "weight": 1
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "demo"
+      },
+      "name": "Adjust ingress to route to canary and baseline",
+      "namespaceOverride": "prod",
+      "refId": "10",
+      "requisiteStageRefIds": [
+        "2",
+        "3"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "cloudProvider": "kubernetes",
+      "comments": "DO THIS or... canaries when they're shut off break the app entirely due to how traefik works :(",
+      "manifests": [
+        {
+          "apiVersion": "traefik.containo.us/v1alpha1",
+          "kind": "TraefikService",
+          "metadata": {
+            "name": "demo-web-app",
+            "namespace": "prod"
+          },
+          "spec": {
+            "weighted": {
+              "services": [
+                {
+                  "kind": "Service",
+                  "name": "demo-web-app-service",
+                  "port": 8080,
+                  "weight": 8
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "moniker": {
+        "app": "demo"
+      },
+      "name": "Remove baseline and canary",
+      "namespaceOverride": "prod",
+      "refId": "11",
+      "requisiteStageRefIds": [
+        "6"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    }
+  ],
+  "triggers": [
+    {
+      "account": "docker-ghcr-jasonmcintosh",
+      "enabled": true,
+      "expectedArtifactIds": [
+        "477764fa-62e3-4726-a33a-20035cfded90"
+      ],
+      "organization": "jasonmcintosh/spinnaker-work",
+      "registry": "ghcr.io",
+      "repository": "jasonmcintosh/spinnaker-work/demo-web-app",
+      "runAsUser": "fbfc7e17-dab2-4669-9cc4-0e20cec9a0e9@managed-service-account",
+      "type": "docker"
+    }
+  ]
+}
