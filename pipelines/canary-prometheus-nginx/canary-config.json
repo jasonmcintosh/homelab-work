@@ -1,6 +1,6 @@
 {
   "applications": [
-    "test-app"
+    "demo"
   ],
   "classifier": {
     "groupWeights": {
@@ -28,7 +28,7 @@
       ],
       "name": "HTTP Request time",
       "query": {
-        "customInlineTemplate": "PromQL:max(http_server_requests_seconds_max) by (app)",
+        "customInlineTemplate": "PromQL:max(http_server_requests_seconds_max{${scope}=\"${location}\"}) by (${scope})",
         "serviceType": "prometheus",
         "type": "prometheus"
       },
@@ -37,6 +37,6 @@
   ],
   "name": "spring-web-app-base",
   "templates": {},
-  "updatedTimestamp": 1668719485738,
-  "updatedTimestampIso": "2022-11-17T21:11:25.738Z"
+  "updatedTimestamp": 1668729533266,
+  "updatedTimestampIso": "2022-11-17T23:58:53.266Z"
 }
