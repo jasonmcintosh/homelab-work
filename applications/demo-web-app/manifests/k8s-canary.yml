@@ -1,10 +1,10 @@
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
-  annotations:
+  name: demo-web-app-canary
+  labels:
     app: demo-web-app-canary
     type: spring-boot-app
-  name: demo-web-app-canary
 spec:
   replicas: 3
   selector:
@@ -12,8 +12,9 @@ spec:
       app: demo-web-app-canary
   template:
     metadata:
-      annotations:
+      labels:
         type: spring-boot-app
+        app: demo-web-app-canary
     spec:
       containers:
         - name: demo-web-app-canary
@@ -34,3 +35,4 @@ spec:
     - protocol: TCP
       port: 8080
       targetPort: 8080
+

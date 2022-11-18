@@ -1,10 +1,10 @@
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
-  annotations:
+  name: demo-web-app-baseline
+  labels:
     app: demo-web-app-baseline
     type: spring-boot-app
-  name: demo-web-app-baseline
 spec:
   replicas: 3
   selector:
@@ -12,8 +12,9 @@ spec:
       app: demo-web-app-baseline
   template:
     metadata:
-      annotations:
+      labels:
         type: spring-boot-app
+        app: demo-web-app-baseline
     spec:
       containers:
         - name: demo-web-app-baseline
