@@ -14,9 +14,6 @@ spec:
     metadata:
       annotations:
         type: spring-boot-app
-      labels:
-        app: demo-web-app
-        type: spring-boot-app
     spec:
       containers:
         - name: demo-web-app

@@ -1,0 +1,28 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: demo-web-app
+  namespace: prod
+spec:
+  weighted:
+    services:
+      - name: demo-web-app-service
+        weight: 8
+        port: 8080
+        kind: Service
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: demo-web-app
+  namespace: prod
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`demo-webapp.mcintosh.farm`)
+      kind: Rule
+      services:
+        - name: demo-web-app
+          kind: TraefikService
+  
