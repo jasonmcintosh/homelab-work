@@ -1,1 +1,11 @@
-This project JSON files is apache 2 licensed.  HOWEVER, it utilizes the Armory operator & versions which are NOT open source, but enterprise licensed.  Feel free to use any/all pipelines under the Apache 2 license, configuration examples, etc. with the licesnes for each product deferred to said product.  Key examples:  Prometheus, Keycloak, MySQL licenses belong to those respective products and are not in any way shape setup here.
+This project itself and key files are apache 2 licensed.  
+- ALL pipelines definitions
+- The demo app itself and all code (libraries in USE by this, e.g. spring, have their own licensing)
+NOTE that the demo app includes a set of quotes pulled from http://www.schlockmercenary.com/ and all quotes/references are the property of schlock, etc.
+
+NOTE that key features are dependent upon several projects which are licensed differently.  Licesnes for other resources deployed by this are deferred to said product.  Key ones of note:
+* Armory operator & references to versions of Armory which are NOT open source but enterprise licensed.  
+* Microk8s 
+* Traefik
+ 
+- Key examples:  Prometheus, Keycloak, MySQL licenses belong to those respective products and are not in any way shape implied/etc. on this repo, just because it has pipeline code to deploy to said apps.
