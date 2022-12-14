@@ -1,7 +1,4 @@
-## WORK IN PROGRESS
-
-This is a work in progress.  Working on the nginx manifests to appropriately route traffic, the promql config for the canary config setup, etc.  AKA... this is SUPER preliminary/NOT working fully yet, just want to keep revision handy 
-
+## End-to-end prometheus canary deployment pipelins
 
 ### Learnings from Kayenta
 * WATCH your promql.  Your group by should result in a result where BOTH your baseline AND control are returned in the same query.  Example of a bad query that will lead to failures:
