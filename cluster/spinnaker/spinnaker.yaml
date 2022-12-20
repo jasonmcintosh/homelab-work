@@ -91,6 +91,22 @@ spec:
                         initialDelaySeconds: 160
                       startupProbe:
                         initialDelaySeconds: 120
+    igor:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                    - name: echo
+                      livenessProbe:
+                        initialDelaySeconds: 160
+                      readinessProbe:
+                        initialDelaySeconds: 160
+                      startupProbe:
+                        initialDelaySeconds: 120
+
     orca:
       deployment:
         patchesStrategicMerge:
