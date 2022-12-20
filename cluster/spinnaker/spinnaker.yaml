@@ -99,7 +99,7 @@ spec:
               template:
                 spec:
                   containers:
-                    - name: echo
+                    - name: igor
                       livenessProbe:
                         initialDelaySeconds: 160
                       readinessProbe:
