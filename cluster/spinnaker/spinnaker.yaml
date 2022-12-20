@@ -203,7 +203,7 @@ spec:
               token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
       providers:
         ## Forces igor to be built...
-        docker:
+        dockerRegistry:
           enabled: true
 
         kubernetes:
