@@ -1,6 +1,10 @@
 package io.armory.canary.demo.demowebapp;
 
 
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -33,13 +37,22 @@ public class QuoteSchlock {
     @Value("${latencyToInject:0}")
     private long latencyTOInject = 0;
 
-    @GetMapping(produces = "text/plain", path = "/")
-    public String getAQuote() {
+    @GetMapping(produces = "application/json", path = "/")
+    public SchlockQuote getAQuote() {
         try {
             Thread.sleep(latencyTOInject);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return "https://www.schlockmercenary.com/ Quote: " + quotes.get(new Random().nextInt(quotes.size()));
+        return new SchlockQuote().setQuote(quotes.get(new Random().nextInt(quotes.size())));
+    }
+
+    @Data
+    @NoArgsConstructor
+    @Accessors(chain=true)
+    public static class SchlockQuote {
+        private String quote;
+        private String url = "https://www.schlockmercenary.com/";
+
     }
 }
