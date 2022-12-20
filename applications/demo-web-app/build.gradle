@@ -3,11 +3,10 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id 'java'
 	id "io.github.itzg.simple-boot-image" version "0.5.2"
-
 }
 
 group = 'io.armory.canary.demo'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2'
 sourceCompatibility = '17'
 
 repositories {
@@ -19,6 +18,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+
+	compileOnly 'org.projectlombok:lombok:1.18.24'
+	annotationProcessor 'org.projectlombok:lombok:1.18.24'
+	testCompileOnly 'org.projectlombok:lombok:1.18.24'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
 tasks.named('test') {
