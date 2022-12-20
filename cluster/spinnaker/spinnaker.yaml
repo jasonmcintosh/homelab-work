@@ -202,6 +202,9 @@ spec:
               username: jasonmcintosh
               token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
       providers:
+        ## Forces igor to be built...
+        docker:
+          enabled: true
 
         kubernetes:
           enabled: true
