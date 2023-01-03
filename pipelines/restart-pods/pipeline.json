@@ -15,12 +15,8 @@
       "description": "Rolling restart demo webapp",
       "location": "prod",
       "manifestName": "deployment demo-web-app",
-      "moniker": {
-        "app": "demo"
-      },
       "name": "Restart pods",
       "refId": "1",
-      "requisiteStageRefIds": [],
       "type": "rollingRestartManifest"
     }
   ],
