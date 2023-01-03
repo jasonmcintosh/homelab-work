@@ -1,0 +1,37 @@
+{
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "mcintoshj@gmail.com",
+  "limitConcurrent": true,
+  "roles": [
+    "everyone"
+  ],
+  "schema": "1",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "account": "k8s-namespace-prod",
+      "application": "demo",
+      "cloudProvider": "kubernetes",
+      "description": "Rolling restart demo webapp",
+      "location": "prod",
+      "manifestName": "deployment demo-web-app",
+      "moniker": {
+        "app": "demo"
+      },
+      "name": "Restart pods",
+      "refId": "1",
+      "requisiteStageRefIds": [],
+      "type": "rollingRestartManifest"
+    }
+  ],
+  "triggers": [
+    {
+      "enabled": true,
+      "payloadConstraints": {
+        "restartCreds": "isSomeSecuredEntry"
+      },
+      "source": "restartSomeDeploymentService",
+      "type": "webhook"
+    }
+  ]
+}
