@@ -7,7 +7,7 @@ terraform {
 }
 
 ## Generating a SUPER simple example of updating a configmap with the current timestmap for demoing TF pipelines
-resource "kubernetes_configmap" "sample" {
+resource "kubernetes_config_map" "sample" {
   metadata {
     name = "last-run-timestamp"
     namespace = "default"
