@@ -122,6 +122,21 @@ spec:
                         initialDelaySeconds: 160
                       startupProbe:
                         initialDelaySeconds: 120
+    rosco:
+      deployment:
+        patchesStrategicMerge:
+          - |
+            spec:
+              template:
+                spec:
+                  containers:
+                    - name: rosco
+                      livenessProbe:
+                        initialDelaySeconds: 160
+                      readinessProbe:
+                        initialDelaySeconds: 30
+                      startupProbe:
+                        initialDelaySeconds: 30
     gate:
       deployment:
         patchesStrategicMerge:
@@ -193,6 +208,9 @@ spec:
       persistentStorage:
         persistentStoreType: s3
       armory:
+        terraform:
+          enabled:
+            true
         diagnostics:
           uuid: jason-mcintosh-local
           enabled: true
