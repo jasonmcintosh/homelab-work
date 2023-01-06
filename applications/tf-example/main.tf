@@ -5,7 +5,6 @@ terraform {
     in_cluster_config = true
   }
 }
-}
 
 ## Generating a SUPER simple example of updating a configmap with the current timestmap for demoing TF pipelines
 resource "kubernetes_configmap" "sample" {
