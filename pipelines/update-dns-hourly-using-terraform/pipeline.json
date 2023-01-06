@@ -1,0 +1,44 @@
+{
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "mcintoshj@gmail.com",
+  "limitConcurrent": true,
+  "roles": [
+    "everyone"
+  ],
+  "schema": "1",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "action": "apply",
+      "artifacts": [
+        {
+          "account": "github-repo-clone-ro",
+          "artifact": {
+            "artifactAccount": "github-repo-clone-ro",
+            "id": "cd3316fc-3b45-4261-9db7-6d2348f7fa87",
+            "location": "applications/tf-dns-internal",
+            "reference": "https://github.com/jasonmcintosh/spinnaker-work.git",
+            "type": "git/repo",
+            "version": "main"
+          }
+        }
+      ],
+      "dir": "applications/tf-dns-internal",
+      "name": "Terraform",
+      "overrides": {},
+      "refId": "1",
+      "requisiteStageRefIds": [],
+      "terraformVersion": "1.2.7",
+      "type": "terraform"
+    }
+  ],
+  "triggers": [
+    {
+      "cronExpression": "0 1 0/1 1/1 * ? *",
+      "enabled": true,
+      "id": "8877b3ee-4360-487b-9ad2-970907204b53",
+      "runAsUser": "7729ad38-360d-4598-971e-0e52928c0d2f@managed-service-account",
+      "type": "cron"
+    }
+  ]
+}
