@@ -25,6 +25,7 @@ resource "acme_registration" "reg" {
 data "kubernetes_secret" "cloudflare-api" {
   metadata {
     name = "cloudflare-api-key"
+    namespace = "spinnaker"
   }
 }
 
@@ -43,6 +44,7 @@ resource "acme_certificate" "certificate" {
 resource "kubernetes_secret" "wildcard_cert" {
   metadata {
     name = "mcintosh-farm-certs"
+    namespace = "spinnaker"
   }
 
   binary_data = {
