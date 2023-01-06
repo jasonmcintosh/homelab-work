@@ -1,25 +1,15 @@
 terraform {
   required_providers {
-    acme = {
-      source = "vancluever/acme"
-      version = "2.12.0"
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 3.0"
     }
   }
+
   backend "kubernetes" {
     secret_suffix    = "tf-dns-encrypt"
     in_cluster_config = true
   }
-}
-provider "acme" {
-  server_url = "https://acme-staging-v02.api.letsencrypt.org/directory"
-}
-
-resource "tls_private_key" "private_key" {
-  algorithm = "RSA"
-}
-resource "acme_registration" "reg" {
-  account_key_pem = tls_private_key.private_key.private_key_pem
-  email_address   = "mcintoshj@gmail.com"
 }
 
 data "kubernetes_secret" "cloudflare-api" {
@@ -29,30 +19,36 @@ data "kubernetes_secret" "cloudflare-api" {
   }
 }
 
-resource "acme_certificate" "certificate" {
-  account_key_pem           = acme_registration.reg.account_key_pem
-  common_name               = "*.mcintosh.farm"
-  dns_challenge {
-    provider = "cloudflare"
-    config = {
-      CF_API_EMAIL=data.kubernetes_secret.cloudflare-api.data["api_email"]
-      CF_API_KEY=data.kubernetes_secret.cloudflare-api.data["api_key"]
-    }
-  }
+provider "cloudflare" {
+  api_token = data.kubernetes_secret.cloudflare-api.data["api_key"]
 }
 
-resource "kubernetes_secret" "wildcard_cert" {
-  metadata {
-    name = "mcintosh-farm-certs"
-    namespace = "spinnaker"
-  }
+data "cloudflare_zone" "farm" {
+  name = "mcintosh.farm"
+}
 
-  binary_data = {
-    private_key_pem = base64encode(acme_registration.reg.account_key_pem)
-    issuer_pem = base64encode(acme_certificate.certificate.issuer_pem)
-    certificate_pem = base64encode(acme_certificate.certificate.certificate_pem)
-    combined_pem = base64encode("${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}")
-    cert_p12 = base64encode(acme_certificate.certificate.certificate_p12)
-  }
 
+resource "cloudflare_record" "spinnaker" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "spinnaker"
+  value   = "192.168.19.228"
+  type    = "A"
+  allow_overwrite = true
+}
+
+
+resource "cloudflare_record" "demo-webapp" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "demo-webapp"
+  value   = "192.168.19.228"
+  type    = "A"
+  allow_overwrite = true
+}
+
+resource "cloudflare_record" "vcenter" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "vcenter"
+  value   = "192.168.17.137"
+  type    = "A"
+  allow_overwrite = true
 }
