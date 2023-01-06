@@ -33,33 +33,13 @@ rules:
   - apiGroups: ['apps']
     resources: ['controllerrevisions']
     verbs: ['list']
-  - apiGroups: ['extensions', 'apps']
-    resources: ['daemonsets', 'deployments', 'deployments/scale', 'ingresses', 'replicasets', 'statefulsets']
-    verbs:
-      [
-        'create',
-        'delete',
-        'deletecollection',
-        'get',
-        'list',
-        'patch',
-        'update',
-        'watch',
-      ]
+  - apiGroups: ['extensions', 'apps', 'coordination.k8s.io']
+    resources: ['daemonsets', 'deployments', 'deployments/scale', 'ingresses', 'replicasets', 'statefulsets', 'leases']
+    verbs: [ 'create', 'delete', 'deletecollection', 'get', 'list', 'patch', 'update', 'watch', ]
   # These permissions are necessary for halyard to operate. We use this role also to deploy Spinnaker itself.
   - apiGroups: ['']
     resources: ['services/proxy', 'pods/portforward']
-    verbs:
-      [
-        'create',
-        'delete',
-        'deletecollection',
-        'get',
-        'list',
-        'patch',
-        'update',
-        'watch',
-      ]
+    verbs: [ 'create', 'delete', 'deletecollection', 'get', 'list', 'patch', 'update', 'watch', ]
   - nonResourceURLs: ["/metrics"]
     verbs: ["get"]
 
