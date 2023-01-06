@@ -4,16 +4,8 @@ metadata:
   name: spinnaker-role
 rules:
   - apiGroups: ['']
-    resources:
-      [
-        'namespaces',
-        'configmaps',
-        'events',
-        'replicationcontrollers',
-        'serviceaccounts',
-        'pods/log',
-      ]
-    verbs: ['get', 'list']
+    resources: [ 'namespaces', 'configmaps', 'events', 'replicationcontrollers', 'serviceaccounts', 'pods/log', ]
+    verbs: [ 'create', 'delete', 'deletecollection', 'get', 'list', 'patch', 'update', 'watch', ]
   - apiGroups: ['']
     resources: ['pods', 'services', 'secrets', 'nodes','nodes/proxy', 'endpoints']
     verbs:
