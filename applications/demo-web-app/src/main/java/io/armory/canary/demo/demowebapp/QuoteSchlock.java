@@ -1,21 +1,20 @@
 package io.armory.canary.demo.demowebapp;
 
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @RestController
@@ -38,9 +37,9 @@ public class QuoteSchlock {
     private long latencyTOInject = 0;
 
     @GetMapping(produces = "application/json", path = "/")
-    public SchlockQuote getAQuote() {
+    public SchlockQuote getAQuote(final HttpServletRequest request) {
         try {
-            Thread.sleep(latencyTOInject);
+            Thread.sleep(latencyTOInject + Integer.parseInt(Optional.ofNullable(request.getHeader("latencyToInject")).orElse("0")));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

@@ -1,6 +1,8 @@
 *.swp
 kubeconfig
 
+credentials/*
+
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

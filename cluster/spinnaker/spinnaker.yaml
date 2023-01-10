@@ -390,6 +390,10 @@ spec:
                   newrelic:
                     apiKey: ""
       echo:
+        scheduler:
+          enabled: true
+          pipelineConfigsPoller:
+            enabled: true
         resilience4j.circuitbreaker:
           instances:
             telemetry:
