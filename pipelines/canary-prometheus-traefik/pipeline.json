@@ -87,9 +87,7 @@
       "mode": "dynamic",
       "name": "Find existing docker image for baseline",
       "refId": "1",
-      "requisiteStageRefIds": [
-        "3"
-      ],
+      "requisiteStageRefIds": [],
       "type": "findArtifactsFromResource"
     },
     {
@@ -139,7 +137,7 @@
       "moniker": {
         "app": "demo"
       },
-      "name": "Apply Baseline",
+      "name": "Deploy Baseline",
       "namespaceOverride": "prod",
       "refId": "2",
       "requiredArtifactIds": [
@@ -223,14 +221,16 @@
       "moniker": {
         "app": "demo"
       },
-      "name": "Deploy Canary and config",
+      "name": "Deploy Canary",
       "namespaceOverride": "prod",
       "refId": "3",
       "requiredArtifactIds": [
         "477764fa-62e3-4726-a33a-20035cfded90"
       ],
       "requiredArtifacts": [],
-      "requisiteStageRefIds": [],
+      "requisiteStageRefIds": [
+        "1"
+      ],
       "skipExpressionEvaluation": false,
       "source": "artifact",
       "trafficManagement": {
