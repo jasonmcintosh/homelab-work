@@ -52,3 +52,11 @@ resource "cloudflare_record" "vcenter" {
   type    = "A"
   allow_overwrite = true
 }
+
+resource "cloudflare_record" "prometheus" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "prometheus"
+  value   = "192.168.17.137"
+  type    = "A"
+  allow_overwrite = true
+}
