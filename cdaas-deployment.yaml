@@ -9,7 +9,7 @@ targets:
     strategy: simple
 
 manifests:
-  - path: cluster/spinnaker/*
+  - path: cluster/spinnaker/
 
 
 strategies:
