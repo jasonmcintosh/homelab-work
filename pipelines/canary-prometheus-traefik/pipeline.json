@@ -6,9 +6,9 @@
         "artifactAccount": "docker-registry",
         "id": "564420a6-1cda-4729-b28e-93242dc9f195",
         "name": "ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app",
-        "reference": "ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app:0.0.1-snapshot",
+        "reference": "ghcr.io/jasonmcintosh/spinnaker-work/demo-web-app:0.0.2",
         "type": "docker/image",
-        "version": "0.0.1-snapshot"
+        "version": "0.0.2"
       },
       "displayName": "Demo web app Docker file",
       "id": "477764fa-62e3-4726-a33a-20035cfded90",
@@ -250,10 +250,9 @@
       "analysisType": "realTime",
       "canaryConfig": {
         "baselineAnalysisOffsetInMins": "0",
-        "beginCanaryAnalysisAfterMins": "0",
-        "canaryAnalysisIntervalMins": "15",
+        "canaryAnalysisIntervalMins": "5",
         "canaryConfigId": "7b612968-c805-4612-b27a-076f6ae7e7ae",
-        "lifetimeDuration": "PT0H30M",
+        "lifetimeDuration": "PT0H5M",
         "metricsAccountName": "local-prometheus",
         "scopes": [
           {
@@ -272,6 +271,9 @@
         },
         "storageAccountName": "minio"
       },
+      "completeOtherBranchesThenFail": false,
+      "continuePipeline": true,
+      "failPipeline": false,
       "name": "Canary Analysis",
       "refId": "6",
       "requisiteStageRefIds": [
@@ -282,6 +284,8 @@
     {
       "account": "k8s-namespace-prod",
       "cloudProvider": "kubernetes",
+      "comments": "We will NOT run if the canary fails.",
+      "failOnFailedExpressions": false,
       "manifestArtifact": {
         "artifactAccount": "github-files-jm",
         "id": "b7027749-2979-4151-b16e-2e23b0873873",
@@ -319,7 +323,7 @@
       ],
       "requiredArtifacts": [],
       "requisiteStageRefIds": [
-        "11"
+        "12"
       ],
       "skipExpressionEvaluation": false,
       "source": "artifact",
@@ -347,7 +351,7 @@
       "refId": "8",
       "replicas": "0",
       "requisiteStageRefIds": [
-        "7"
+        "11"
       ],
       "type": "scaleManifest"
     },
@@ -362,7 +366,7 @@
       "refId": "9",
       "replicas": "0",
       "requisiteStageRefIds": [
-        "7"
+        "11"
       ],
       "type": "scaleManifest"
     },
@@ -468,6 +472,27 @@
         }
       },
       "type": "deployManifest"
+    },
+    {
+      "completeOtherBranchesThenFail": true,
+      "continuePipeline": false,
+      "failPipeline": false,
+      "name": "Verify Canary Analysis results",
+      "preconditions": [
+        {
+          "context": {
+            "stageName": "Canary Analysis",
+            "stageStatus": "SUCCEEDED"
+          },
+          "failPipeline": true,
+          "type": "stageStatus"
+        }
+      ],
+      "refId": "12",
+      "requisiteStageRefIds": [
+        "11"
+      ],
+      "type": "checkPreconditions"
     }
   ],
   "triggers": [
