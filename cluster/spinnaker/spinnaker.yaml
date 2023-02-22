@@ -415,11 +415,11 @@ spec:
           connectionPools:
             default:
               default: true
-              jdbcUrl: jdbc:mysql://mysql:3306/echo
+              jdbcUrl: jdbc:mysql://mysql:3306/front50
               password: password
               user: root
           migration:
-            jdbcUrl: jdbc:mysql://mysql:3306/echo
+            jdbcUrl: jdbc:mysql://mysql:3306/front50
             password: password
             user: root
       gate:
