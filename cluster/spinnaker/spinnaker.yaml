@@ -170,6 +170,19 @@ spec:
   spinnakerConfig:
     config:
       deploymentEnvironment:
+        ## Example init container for an APM agent (honeycomb)
+        initContainers:
+          clouddriver:
+          - command:
+            - /bin/sh
+            - -c
+            - mkdir -p /opt/honeycomb && cd /opt/honeycomb && curl -LO https://github.com/honeycombio/honeycomb-opentelemetry-java/releases/latest/download/honeycomb-opentelemetry-javaagent.jar
+            image: curlimages/curl
+            imagePullPolicy: Always
+            name: apm-initializer
+            volumeMounts:
+            - mountPath: /opt/honeycomb
+              name: shared-volume
         livenessProbeConfig:
           enabled: true
           initialDelaySeconds: 600
@@ -610,8 +623,17 @@ spec:
         kubernetes:
           useExecHealthCheck: false
       clouddriver:
+        env:
+          SERVICE_NAME: clouddriver
+          #JAVA_OPTS: -javaagent:/opt/honeycomb/honeycomb-opentelemetry-javaagent.jar 
+          #HONEYCOMB_METRICS_DATASET: mcintosh.farm
+          #HONEYCOMB_API_KEY: encrypted:k8s!n:honeycomb-api-key!k:api_key
         kubernetes:
           useExecHealthCheck: false
+          volumes:
+          - id: shared-volume
+            mountPath: /opt/honeycomb
+            type: emptyDir
       dinghy:
         kubernetes:
           useExecHealthCheck: false
