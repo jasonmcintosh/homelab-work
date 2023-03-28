@@ -45,17 +45,18 @@ resource "cloudflare_record" "demo-webapp" {
   allow_overwrite = true
 }
 
-resource "cloudflare_record" "vcenter" {
+resource "cloudflare_record" "prometheus" {
   zone_id = data.cloudflare_zone.farm.id
-  name    = "vcenter"
-  value   = "192.168.17.137"
+  name    = "prometheus"
+  value   = "192.168.19.228"
   type    = "A"
   allow_overwrite = true
 }
 
-resource "cloudflare_record" "prometheus" {
+
+resource "cloudflare_record" "grafana" {
   zone_id = data.cloudflare_zone.farm.id
-  name    = "prometheus"
+  name    = "grafana"
   value   = "192.168.19.228"
   type    = "A"
   allow_overwrite = true

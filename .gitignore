@@ -2,6 +2,7 @@
 kubeconfig
 
 credentials/*
+cluster/opencontext/values*
 
 .gradle
 build/
