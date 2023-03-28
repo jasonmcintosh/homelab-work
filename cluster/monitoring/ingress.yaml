@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   name: prometheus
   namespace: monitoring
-  resourceVersion: "16021131"
 spec:
   rules:
   - host: prometheus.mcintosh.farm
