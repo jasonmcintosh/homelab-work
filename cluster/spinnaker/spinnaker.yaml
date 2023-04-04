@@ -176,16 +176,13 @@ spec:
           - command:
             - /bin/sh
             - -c
-            - mkdir -p /opt/honeycomb && cd /opt/honeycomb && curl -LO https://github.com/honeycombio/honeycomb-opentelemetry-java/releases/latest/download/honeycomb-opentelemetry-javaagent.jar
-            image: curlimages/curl
+            - mkdir -p /opt/apmagent && cd /opt/apmagent && cp ../newrelic-java.zip . && unzip /opt/apmagent/newrelic-java.zip && chmod 775 /opt/apmagent/*
+            image: armory/internal-apm-agent:7.10.0
             imagePullPolicy: Always
             name: apm-initializer
             volumeMounts:
-            - mountPath: /opt/honeycomb
+            - mountPath: /opt/apmagent
               name: shared-volume
-        livenessProbeConfig:
-          enabled: true
-          initialDelaySeconds: 600
       canary:
         enabled: true
         defaultMetricsAccount: local-prometheus
@@ -317,7 +314,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.28.4
+      version: 2.28.5
       webhook:
         trust:
           enabled: false
@@ -553,13 +550,15 @@ spec:
         management:
           endpoints.web:
             exposure.include: health,info,aop-prometheus,refresh
+        server:
+          http2:
+            enabled: false 
+          max-http-header-size: 512KB
+          compression: 
+            mime-types: text/html, text/xml, text/plain, text/css, text/javascript, application/javascript, application/json
+            enabled: true
+            min-response-size: 4096
         default:
-          server:
-            http2:
-              enabled: false # BOB-30530
-            tomcat:
-              max-http-header-size: 512KB
-            max-http-header-size: 512KB
           cipherSuites:
             - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
             - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
@@ -624,46 +623,325 @@ spec:
           useExecHealthCheck: false
       clouddriver:
         env:
+          #NEW_RELIC_LICENSE_KEY: encrypted:k8s!n:newrelic-api-key!k:api_key
+          JAVA_OPTS:  -javaagent:/opt/apmagent/newrelic/newrelic.jar -XX:MaxRAMPercentage=50.0
           SERVICE_NAME: clouddriver
-          #JAVA_OPTS: -javaagent:/opt/honeycomb/honeycomb-opentelemetry-javaagent.jar 
-          #HONEYCOMB_METRICS_DATASET: mcintosh.farm
-          #HONEYCOMB_API_KEY: encrypted:k8s!n:honeycomb-api-key!k:api_key
+          NEW_RELIC_APP_NAME: clouddriver-mcintosh
         kubernetes:
-          useExecHealthCheck: false
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 7002
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 7002
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 7002
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           volumes:
           - id: shared-volume
-            mountPath: /opt/honeycomb
+            mountPath: /opt/apmagent
             type: emptyDir
       dinghy:
         kubernetes:
           useExecHealthCheck: false
       echo:
         kubernetes:
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8089
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 180
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8089
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8089
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           useExecHealthCheck: false
       fiat:
         kubernetes:
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 7003
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 180
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 7003
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 7003
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           useExecHealthCheck: false
       front50:
         kubernetes:
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 180
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           useExecHealthCheck: false
       gate:
-        healthEndpoint: ""
         kubernetes:
           useExecHealthCheck: false
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /api/v1/health
+              port: 8084
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 180
+            failureThreshold: 3
+            httpGet:
+              path: /api/v1/health
+              port: 8084
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /api/v1/health
+              port: 8084
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
       igor:
         kubernetes:
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8088
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 180
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8088
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8088
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           useExecHealthCheck: false
       kayenta:
         kubernetes:
           useExecHealthCheck: false
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8090
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 180
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8090
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8090
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
       orca:
         kubernetes:
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8083
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 180
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8083
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8083
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           useExecHealthCheck: false
       rosco:
         kubernetes:
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8087
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 180
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8087
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8087
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           useExecHealthCheck: false
       terraformer:
         kubernetes:
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 7088
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 180
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 7088
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           securityContext:
             fsGroup: 1000
             runAsGroup: 1000

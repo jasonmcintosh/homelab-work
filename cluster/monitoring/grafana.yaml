@@ -70,7 +70,7 @@ spec:
           mountPath: /var/lib/grafana
       containers:
         - name: grafana
-          image: grafana/grafana:9.1.0
+          image: grafana/grafana:7.5.4
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
