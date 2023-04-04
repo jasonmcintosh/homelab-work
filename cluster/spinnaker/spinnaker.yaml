@@ -31,127 +31,6 @@ metadata:
   namespace: spinnaker
 spec:
   kustomize:
-    front50:
-      deployment:
-        patchesStrategicMerge:
-          - |
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: front50
-                      livenessProbe:
-                        initialDelaySeconds: 160
-                      readinessProbe:
-                        initialDelaySeconds: 160
-                      startupProbe:
-                        initialDelaySeconds: 120
-    fiat:
-      deployment:
-        patchesStrategicMerge:
-          - |
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: fiat
-                      readinessProbe:
-                      livenessProbe:
-                        initialDelaySeconds: 160
-                        initialDelaySeconds: 160
-                      startupProbe:
-                        initialDelaySeconds: 120
-    clouddriver:
-      deployment:
-        patchesStrategicMerge:
-          - |
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: clouddriver
-                      livenessProbe:
-                        initialDelaySeconds: 160
-                      readinessProbe:
-                        initialDelaySeconds: 160
-                      startupProbe:
-                        initialDelaySeconds: 120
-    echo:
-      deployment:
-        patchesStrategicMerge:
-          - |
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: echo
-                      livenessProbe:
-                        initialDelaySeconds: 160
-                      readinessProbe:
-                        initialDelaySeconds: 160
-                      startupProbe:
-                        initialDelaySeconds: 120
-    igor:
-      deployment:
-        patchesStrategicMerge:
-          - |
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: igor
-                      livenessProbe:
-                        initialDelaySeconds: 160
-                      readinessProbe:
-                        initialDelaySeconds: 160
-                      startupProbe:
-                        initialDelaySeconds: 120
-
-    orca:
-      deployment:
-        patchesStrategicMerge:
-          - |
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: orca
-                      livenessProbe:
-                        initialDelaySeconds: 160
-                      readinessProbe:
-                        initialDelaySeconds: 160
-                      startupProbe:
-                        initialDelaySeconds: 120
-    rosco:
-      deployment:
-        patchesStrategicMerge:
-          - |
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: rosco
-                      livenessProbe:
-                        initialDelaySeconds: 160
-                      readinessProbe:
-                        initialDelaySeconds: 30
-                      startupProbe:
-                        initialDelaySeconds: 30
-    gate:
-      deployment:
-        patchesStrategicMerge:
-          - |
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: gate
-                      livenessProbe:
-                        initialDelaySeconds: 160
-                      readinessProbe:
-                        initialDelaySeconds: 30
-                      startupProbe:
-                        initialDelaySeconds: 30
     kayenta:
       deployment:
         patchesStrategicMerge:
@@ -159,14 +38,11 @@ spec:
             spec:
               template:
                 spec:
+                  ## not really needed since we set below
                   containers:
                     - name: kayenta
                       livenessProbe:
                         initialDelaySeconds: 160
-                      readinessProbe:
-                        initialDelaySeconds: 30
-                      startupProbe:
-                        initialDelaySeconds: 30
   spinnakerConfig:
     config:
       deploymentEnvironment:
