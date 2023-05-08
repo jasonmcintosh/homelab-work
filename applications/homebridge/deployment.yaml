@@ -1,0 +1,112 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: homebridge
+  labels:
+    name: homebridge
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: homebridge
+  labels:
+    type: local
+spec:
+  capacity: 
+    storage: 40Gi
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - kubenode1
+  storageClassName: local-storage
+  persistentVolumeReclaimPolicy: Delete
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/homebridge"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: homebridge
+  name: homebridge
+  namespace: homebridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homebridge
+  template:
+    metadata:
+      labels:
+        app: homebridge
+    spec:
+      hostNetwork: true
+      containers:
+      - name: homebridge
+        image: oznu/homebridge:latest
+        ports:
+        - name: config
+          containerPort: 8581
+        - name: bridge
+          containerPort: 51342
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/homebridge
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: homebridge-pv
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homebridge-pv
+  namespace: homebridge
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homebridge
+  namespace: homebridge
+spec:
+  selector:
+    app: homebridge
+  ports:
+  - targetPort: 8581
+    port: 8581
+    protocol: TCP
+    name: config-server
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homebridge
+  namespace: homebridge
+spec:
+  rules:
+  - host: homebridge.mcintosh.farm
+    http:
+      paths:
+      - backend:
+          service:
+            name: homebridge
+            port:
+              number: 8581
+        path: /
+        pathType: Prefix
