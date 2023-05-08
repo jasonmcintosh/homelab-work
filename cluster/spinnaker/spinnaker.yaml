@@ -46,7 +46,7 @@ spec:
   spinnakerConfig:
     config:
       deploymentEnvironment:
-        ## Example init container for an APM agent (honeycomb)
+        ## Example init container for an APM agent (honeycomb, newrelic, etc.)
         initContainers:
           clouddriver:
           - command:
@@ -499,10 +499,10 @@ spec:
           useExecHealthCheck: false
       clouddriver:
         env:
-          #NEW_RELIC_LICENSE_KEY: encrypted:k8s!n:newrelic-api-key!k:api_key
-          JAVA_OPTS:  -javaagent:/opt/apmagent/newrelic/newrelic.jar -XX:MaxRAMPercentage=50.0
-          SERVICE_NAME: clouddriver
+          JAVA_OPTS: -XX:MaxRAMPercentage=50.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
           NEW_RELIC_APP_NAME: clouddriver-mcintosh
+          #SERVICE_NAME: clouddriver
+          #NEW_RELIC_LICENSE_KEY: encrypted:k8s!n:newrelic-api-key!k:api_key
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -542,6 +542,8 @@ spec:
         kubernetes:
           useExecHealthCheck: false
       echo:
+        env:
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -574,6 +576,8 @@ spec:
             timeoutSeconds: 1
           useExecHealthCheck: false
       fiat:
+        env:
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -606,6 +610,8 @@ spec:
             timeoutSeconds: 1
           useExecHealthCheck: false
       front50:
+        env:
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -638,6 +644,8 @@ spec:
             timeoutSeconds: 1
           useExecHealthCheck: false
       gate:
+        env:
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
         kubernetes:
           useExecHealthCheck: false
           livenessProbe:
@@ -670,6 +678,8 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
       igor:
+        env:
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -702,6 +712,8 @@ spec:
             timeoutSeconds: 1
           useExecHealthCheck: false
       kayenta:
+        env:
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
         kubernetes:
           useExecHealthCheck: false
           livenessProbe:
@@ -734,6 +746,8 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
       orca:
+        env:
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -766,6 +780,8 @@ spec:
             timeoutSeconds: 1
           useExecHealthCheck: false
       rosco:
+        env:
+          JAVA_OPTS: -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
         kubernetes:
           livenessProbe:
             failureThreshold: 3
