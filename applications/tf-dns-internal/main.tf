@@ -8,8 +8,14 @@ terraform {
 
   backend "kubernetes" {
     secret_suffix    = "tf-dns-encrypt"
-    in_cluster_config = true
+    namespace = "default"
+    config_path = "~/.kube/config.local"
+    #in_cluster_config = true
   }
+}
+
+provider "kubernetes" {
+  config_path = "~/.kube/config.local"
 }
 
 data "kubernetes_secret" "cloudflare-api" {
@@ -28,11 +34,48 @@ data "cloudflare_zone" "farm" {
 }
 
 
+resource "cloudflare_record" "traefik" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "traefik"
+  value   = "192.168.19.228"
+  type    = "A"
+  allow_overwrite = true
+}
+
+
+resource "cloudflare_record" "traefik_2" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "traefik"
+  value   = "192.168.16.137"
+  type    = "A"
+  allow_overwrite = true
+}
+
+resource "cloudflare_record" "traefik_3" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "traefik"
+  value   = "192.168.16.243"
+  type    = "A"
+  allow_overwrite = true
+}
+
+
+
 resource "cloudflare_record" "spinnaker" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "spinnaker"
-  value   = "192.168.19.228"
-  type    = "A"
+  value   = "traefik.mcintosh.farm"
+  type    = "CNAME"
+  allow_overwrite = true
+}
+
+
+
+resource "cloudflare_record" "homebridge" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "homebridge"
+  value   = "traefik.mcintosh.farm"
+  type    = "CNAME"
   allow_overwrite = true
 }
 
@@ -40,16 +83,16 @@ resource "cloudflare_record" "spinnaker" {
 resource "cloudflare_record" "demo-webapp" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "demo-webapp"
-  value   = "192.168.19.228"
-  type    = "A"
+  value   = "traefik.mcintosh.farm"
+  type    = "CNAME"
   allow_overwrite = true
 }
 
 resource "cloudflare_record" "prometheus" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "prometheus"
-  value   = "192.168.19.228"
-  type    = "A"
+  value   = "traefik.mcintosh.farm"
+  type    = "CNAME"
   allow_overwrite = true
 }
 
@@ -57,7 +100,7 @@ resource "cloudflare_record" "prometheus" {
 resource "cloudflare_record" "grafana" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "grafana"
-  value   = "192.168.19.228"
-  type    = "A"
+  value   = "traefik.mcintosh.farm"
+  type    = "CNAME"
   allow_overwrite = true
 }
