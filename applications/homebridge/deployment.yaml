@@ -25,7 +25,7 @@ spec:
           values:
           - kubenode1
   storageClassName: local-storage
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce

@@ -40,7 +40,7 @@ resource "cloudflare_record" "dl380" {
   value   = "192.168.16.89"
   type    = "A"
 }
-resource "cloudflare_record" "dl380" {
+resource "cloudflare_record" "dl380_ilo" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "dl380-ilo"
   value   = "192.168.18.128"
@@ -52,10 +52,17 @@ resource "cloudflare_record" "dl360" {
   value   = "192.168.17.143"
   type    = "A"
 }
-resource "cloudflare_record" "dl360" {
+resource "cloudflare_record" "dl360_ilo" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "dl360-ilo"
   value   = "192.168.17.89"
+  type    = "A"
+}
+
+resource "cloudflare_record" "vcenter" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "vcenter"
+  value   = "192.168.17.104"
   type    = "A"
 }
 
