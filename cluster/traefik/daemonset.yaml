@@ -3,17 +3,10 @@ kind: DaemonSet
 metadata:
   annotations:
     deprecated.daemonset.template.generation: "6"
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"DaemonSet","metadata":{"annotations":{},"labels":{"k8s-app":"traefik-ingress-lb"},"name":"traefik-ingress-controller","namespace":"traefik"},"spec":{"selector":{"matchLabels":{"k8s-app":"traefik-ingress-lb","name":"traefik-ingress-lb"}},"template":{"metadata":{"labels":{"k8s-app":"traefik-ingress-lb","name":"traefik-ingress-lb"}},"spec":{"containers":[{"args":["--providers.kubernetesingress=true","--providers.kubernetesingress.ingressendpoint.ip=127.0.0.1","--log=true","--log.level=INFO","--accesslog=true","--accesslog.filepath=/dev/stdout","--accesslog.format=json","--entrypoints.web.address=:8080","--entrypoints.websecure.address=:8443"],"image":"traefik:2.3","name":"traefik-ingress-lb","ports":[{"containerPort":8080,"hostPort":8080,"name":"http"}],"securityContext":{"capabilities":{"add":["NET_BIND_SERVICE"],"drop":["ALL"]}}}],"hostNetwork":true,"serviceAccountName":"traefik-ingress-controller","terminationGracePeriodSeconds":60,"tolerations":[{"effect":"NoSchedule","operator":"Exists"}]}}}}
-  creationTimestamp: "2022-10-06T17:18:51Z"
-  generation: 6
   labels:
     k8s-app: traefik-ingress-lb
   name: traefik-ingress-controller
   namespace: traefik
-  resourceVersion: "10030047"
-  selfLink: /apis/apps/v1/namespaces/traefik/daemonsets/traefik-ingress-controller
-  uid: 4055f45b-d402-46a5-acf4-3954ffe9c589
 spec:
   revisionHistoryLimit: 10
   selector:
@@ -22,9 +15,6 @@ spec:
       name: traefik-ingress-lb
   template:
     metadata:
-      annotations:
-        kubectl.kubernetes.io/restartedAt: "2022-11-17T20:20:25-06:00"
-      creationTimestamp: null
       labels:
         k8s-app: traefik-ingress-lb
         name: traefik-ingress-lb
@@ -42,7 +32,7 @@ spec:
         - --entrypoints.web.address=:80
         - --api
         - --api.insecure
-        image: traefik:2.3
+        image: traefik:2.10
         imagePullPolicy: IfNotPresent
         name: traefik-ingress-lb
         ports:
@@ -75,11 +65,3 @@ spec:
       maxSurge: 0
       maxUnavailable: 1
     type: RollingUpdate
-status:
-  currentNumberScheduled: 3
-  desiredNumberScheduled: 3
-  numberAvailable: 3
-  numberMisscheduled: 0
-  numberReady: 3
-  observedGeneration: 6
-  updatedNumberScheduled: 3

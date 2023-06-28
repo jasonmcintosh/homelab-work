@@ -1,68 +1,39 @@
 apiVersion: v1
-items:
-- apiVersion: v1
-  kind: Service
-  metadata:
-    annotations:
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"traefik-web-ui","namespace":"traefik"},"spec":{"ports":[{"name":"web","port":8080,"targetPort":8080}],"selector":{"k8s-app":"traefik-ingress-lb"}}}
-    creationTimestamp: "2022-10-06T17:18:51Z"
-    name: traefik-web-ui
-    namespace: traefik
-    resourceVersion: "10027725"
-    selfLink: /api/v1/namespaces/traefik/services/traefik-web-ui
-    uid: 9abf98e1-95e1-43d4-83b5-f5fb9f7669fb
-  spec:
-    clusterIP: 10.152.183.245
-    clusterIPs:
-    - 10.152.183.245
-    ipFamilies:
-    - IPv4
-    ipFamilyPolicy: SingleStack
-    ports:
-    - name: web
-      port: 80
-      protocol: TCP
-      targetPort: 80
-    selector:
-      k8s-app: traefik-ingress-lb
-    sessionAffinity: None
-    type: ClusterIP
-  status:
-    loadBalancer: {}
-- apiVersion: v1
-  kind: Service
-  metadata:
-    annotations:
-      kubectl.kubernetes.io/last-applied-configuration: |
-        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"traefik-ingress-service","namespace":"traefik"},"spec":{"ports":[{"name":"web","port":8080,"protocol":"TCP"}],"selector":{"k8s-app":"traefik-ingress-lb"},"type":"NodePort"}}
-    creationTimestamp: "2022-10-06T17:18:51Z"
-    name: traefik-ingress-service
-    namespace: traefik
-    resourceVersion: "10027794"
-    selfLink: /api/v1/namespaces/traefik/services/traefik-ingress-service
-    uid: a2356f04-118e-4076-8247-0d07c0f0a245
-  spec:
-    clusterIP: 10.152.183.249
-    clusterIPs:
-    - 10.152.183.249
-    externalTrafficPolicy: Cluster
-    ipFamilies:
-    - IPv4
-    ipFamilyPolicy: SingleStack
-    ports:
-    - name: web
-      nodePort: 30279
-      port: 80
-      protocol: TCP
-      targetPort: 80
-    selector:
-      k8s-app: traefik-ingress-lb
-    sessionAffinity: None
-    type: NodePort
-  status:
-    loadBalancer: {}
-kind: List
+kind: Service
 metadata:
-  resourceVersion: ""
-  selfLink: ""
+  name: traefik-web-ui
+  namespace: traefik
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: web
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    k8s-app: traefik-ingress-lb
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-ingress-service
+  namespace: traefik
+spec:
+  externalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: web
+    nodePort: 30279
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    k8s-app: traefik-ingress-lb
+  sessionAffinity: None
+  type: NodePort
