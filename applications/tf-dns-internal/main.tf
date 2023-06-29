@@ -9,8 +9,8 @@ terraform {
   backend "kubernetes" {
     secret_suffix    = "tf-dns-encrypt"
     namespace = "default"
-    config_path = "~/.kube/config.local"
-    #in_cluster_config = true
+    #config_path = "~/.kube/config.local"
+    in_cluster_config = true
   }
 }
 
@@ -93,7 +93,7 @@ resource "cloudflare_record" "traefik_3" {
 }
 
 resource "cloudflare_record" "nexus" {
-  zon_id = data.cloudflare_zone.farm.id
+  zone_id = data.cloudflare_zone.farm.id
   name = "nexus"
   value = "192.168.18.160"
   type = "A"
