@@ -70,7 +70,7 @@ resource "cloudflare_record" "vcenter" {
 resource "cloudflare_record" "traefik" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "traefik"
-  value   = "192.168.19.228"
+  value   = "192.168.19.142"
   type    = "A"
   allow_overwrite = true
 }
