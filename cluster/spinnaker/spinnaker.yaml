@@ -45,8 +45,44 @@ spec:
                         initialDelaySeconds: 160
   spinnakerConfig:
     config:
+      armory:
+        terraform:
+          enabled:
+            true
+        diagnostics:
+          uuid: jason-mcintosh-local
+          enabled: true
+          logging:
+            enabled: false
+            endpoint: https://debug.armory.io/v1/logs
+      artifacts:
+        gitrepo:
+          enabled: true
+          accounts:
+          - name: github-repo-clone-ro
+            username: jasonmcintosh
+            token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
+        github:
+          enabled: true
+          accounts:
+            ## For loading a SINGLE file using github API's
+            - name: github-files-jm
+              username: jasonmcintosh
+              token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
       deploymentEnvironment:
-        ## Example init container for an APM agent (honeycomb, newrelic, etc.)
+        sidecars:
+          orca: &opa-client-config
+            - name: opal-client
+              dockerImage: permitio/opal-client:latest
+              env:
+                OPAL_SERVER_URL: http://opa-opal-server:7002
+              ## IF we switch to a more advanced sidecar config, we can open up BOTH opa and opal ports.  Opal sidecar runs both it seems
+              port: 8181
+          front50: *opa-client-config
+          clouddriver: *opa-client-config
+          gate: *opa-client-config
+
+          ## Example init container for an APM agent (honeycomb, newrelic, etc.)
         initContainers:
           clouddriver:
           - command:
@@ -93,34 +129,12 @@ spec:
 
       persistentStorage:
         persistentStoreType: s3
-      armory:
-        terraform:
-          enabled:
-            true
-        diagnostics:
-          uuid: jason-mcintosh-local
-          enabled: true
-          logging:
-            enabled: false
-            endpoint: https://debug.armory.io/v1/logs
+
       features:
         artifacts: true
         pipelineTemplates: true
       notifications:
-      artifacts:
-        gitrepo:
-          enabled: true
-          accounts:
-          - name: github-repo-clone-ro
-            username: jasonmcintosh
-            token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
-        github:
-          enabled: true
-          accounts:
-            ## For loading a SINGLE file using github API's
-            - name: github-files-jm
-              username: jasonmcintosh
-              token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
+
       providers:
         ## Forces igor to be built...
         dockerRegistry:
@@ -190,7 +204,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.28.5
+      version: 2.30.0-rc8
       webhook:
         trust:
           enabled: false
@@ -423,9 +437,17 @@ spec:
             password: password
             user: root
       spinnaker:
+        armory:
+          policyEngine:
+            ## Allows for things to pass when no policy is explicitly set
+            failOpen: true
+            opa:
+              enabled: true
+              baseUrl: http://localhost:8181/v1/data
+              timeoutSeconds: 20
         management:
           endpoints.web:
-            exposure.include: health,info,aop-prometheus,refresh
+            exposure.include: "*"
         server:
           http2:
             enabled: false 
@@ -466,11 +488,17 @@ spec:
             deck-proxy:
               enabled: true
               plugins:
+                Armory.PolicyEngine:
+                  enabled: true
+                  version: 0.3.0
                 Armory.ArmoryHeader:
                   enabled: true
                   version: 0.0.3
               plugins-path: /opt/gate/deck-plugins
             plugins:
+              Armory.PolicyEngine:
+                enabled: true
+                version: 0.3.0
               Armory.ObservabilityPlugin:
                 config.metrics:
                   prometheus:
@@ -482,6 +510,8 @@ spec:
             repositories:
               armory-observability-plugin-releases:
                 url: https://raw.githubusercontent.com/armory-plugins/armory-observability-plugin-releases/master/repositories.json
+              opa:
+                url: https://raw.githubusercontent.com/armory-plugins/policy-engine-releases/master/repositories.json
       terraformer:
         redis:
           host: spin-redis
