@@ -3,6 +3,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations:
+    app: opal-server
+    owner: mcintoshj@gmail.com
   labels:
     app: opa-opal-sever
     app.kubernetes.io/name: opa-opal-server
@@ -68,6 +71,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations:
+    app: opal-db
+    owner: mcintoshj@gmail.com
   labels:
     app: opa-opal-db
     app.kubernetes.io/name: opa-opal-db
@@ -118,6 +124,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    app: opal-server
+    owner: mcintoshj@gmail.com
   name: opa-opal-db
 spec:
   ports:
@@ -129,6 +138,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    app: opal-db
+    owner: mcintoshj@gmail.com
   name: opa-opal-server
 spec:
   ports:
