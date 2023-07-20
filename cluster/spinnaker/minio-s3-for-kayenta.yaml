@@ -12,7 +12,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - kubemaster
+          - kubenode1
   storageClassName: minio-pv
   capacity:
     storage: 10Gi

@@ -1,0 +1,135 @@
+## Most of this is extracted from https://github.com/permitio/opal/blob/master/docker/docker-compose-example.yml and quickstart guides
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: opa-opal-sever
+    app.kubernetes.io/name: opa-opal-server
+  name: opa-opal-server
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: opa-opal-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: opa-opal-server
+    spec:
+      containers:
+        - args:
+          env:
+            ## It can instead of polling receive hooks
+            - name: OPAL_POLICY_REPO_POLLING_INTERVAL
+              value: "60"
+            - name: OPAL_POLICY_REPO_URL
+              value: git@github.com:jasonmcintosh/spinnaker-work.git
+            - name: OPAL_POLICY_REPO_MAIN_BRANCH
+              value: main
+            - name: OPAL_POLICY_REPO_SSH_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: OPAL_POLICY_REPO_SSH_KEY
+                  name: opa-secrets
+            - name: OPAL_BROADCAST_URI
+              value: postgresql://opal:opal@opa-opal-db/opal
+          image: permitio/opal-server
+          imagePullPolicy: Always
+          livenessProbe: &probe-config
+            failureThreshold: 3
+            httpGet:
+              path: /healthcheck
+              port: 7002
+              scheme: HTTP
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe: *probe-config
+          startupProbe: *probe-config
+          name: armory-enterprise-agent
+          ports: 
+            - containerPort: 7002
+              protocol: TCP
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: opa-opal-db
+    app.kubernetes.io/name: opa-opal-db
+  name: opa-opal-db
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: opa-opal-db
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: opa-opal-db
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_PASSWORD
+              value: opal
+            - name: POSTGRES_USER
+              value: opal
+            - name: POSTGRES_DB
+              value: opal
+          image: library/postgres:15
+          imagePullPolicy: Always
+          livenessProbe: &probe-config
+            failureThreshold: 3
+            tcpSocket:
+              port: 5432
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe: *probe-config
+          startupProbe: *probe-config
+          name: armory-enterprise-agent
+          ports: 
+            - containerPort: 5432
+              protocol: TCP
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opa-opal-db
+spec:
+  ports:
+  - port: 5432
+  selector:
+    app: opa-opal-db
+  clusterIP: None
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opa-opal-server
+spec:
+  ports:
+  - port: 7002
+  selector:
+    app: opa-opal-server
+  clusterIP: None

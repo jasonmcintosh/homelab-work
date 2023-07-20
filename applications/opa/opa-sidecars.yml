@@ -1,0 +1,36 @@
+apiVersion: spinnaker.armory.io/v1alpha2
+kind: SpinnakerService
+metadata:
+  name: spinnaker
+spec:
+  spinnakerConfig:
+    deploymentEnvironment:
+      spin-orca: &opa-client-config
+        kubernetes:
+          sidecars:
+          - name: opal-client
+            dockerImage: permitio/opal-client:latest
+            env:
+              OPAL_SERVER_URL: http://opa-opal-server:7002
+            ## IF we switch to a more advanced sidecar config, we can open up BOTH opa and opal ports.  Opal sidecar runs both it seems
+            port: 8181
+      spin-front50: *opa-client-config
+      spin-clouddriver: *opa-client-config
+      spin-gate: *opa-client-config
+            
+    profiles:         
+      spinnaker:
+        armory:
+          policyEngine:
+            opa:
+              baseUrl: http://localhost:8181/v1/data
+        spinnaker:
+          extensibility:
+            repositories:
+              policyEngine:
+                enabled: true
+                url: https://raw.githubusercontent.com/armory-plugins/policy-engine-releases/master/repositories.json 
+            plugins:
+              Armory.PolicyEngine:
+                enabled: true
+                version: v0.3.0
