@@ -24,6 +24,9 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        app: opal-server
+        owner: mcintoshj@gmail.com
       labels:
         app: opa-opal-server
     spec:
@@ -91,6 +94,9 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        app: opal-server
+        owner: mcintoshj@gmail.com
       labels:
         app: opa-opal-db
     spec:
