@@ -27,7 +27,8 @@ spec:
       containers:
         - args:
           env:
-            ## It can instead of polling receive hooks
+            - name: POLICY_REPO_MANIFEST_PATH
+              value: applications/opa/policies/
             - name: OPAL_POLICY_REPO_POLLING_INTERVAL
               value: "60"
             - name: OPAL_POLICY_REPO_URL
