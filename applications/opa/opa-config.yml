@@ -57,7 +57,7 @@ spec:
             timeoutSeconds: 1
           readinessProbe: *probe-config
           startupProbe: *probe-config
-          name: armory-enterprise-agent
+          name: opal-server
           ports: 
             - containerPort: 7002
               protocol: TCP
@@ -107,7 +107,7 @@ spec:
             timeoutSeconds: 1
           readinessProbe: *probe-config
           startupProbe: *probe-config
-          name: armory-enterprise-agent
+          name: opal-db
           ports: 
             - containerPort: 5432
               protocol: TCP
