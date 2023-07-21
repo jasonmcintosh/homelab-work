@@ -1,0 +1,29 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US
+  keyboard:
+      layout: us
+  ssh:
+      install-server: yes
+      allow-pw: yes
+      authorized-keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEds4RECl54mOC9dDVEotLyqzVyFJ2e62xindmykeWN2 mcintoshj@gmail.com
+  storage:
+      layout:
+          name: direct
+  user-data:
+      disable_root: false
+      users:
+      - name: ubuntu
+        ssh_authorized_keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEds4RECl54mOC9dDVEotLyqzVyFJ2e62xindmykeWN2 mcintoshj@gmail.com
+        lock_passwd: false
+        shell: /bin/bash
+        groups: [adm,sudo]
+        sudo: ALL=(ALL) NOPASSWD:ALL
+  #late-commands:
+      #- echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
+      #- curtin in-target --target=/target -- chmod 440 /etc/sudoers.d/ubuntu
+      #- curtin in-target --target=/target -- apt-get update
+      #- curtin in-target --target=/target -- apt-get upgrade --yes
