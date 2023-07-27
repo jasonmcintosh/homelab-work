@@ -1,4 +1,4 @@
-package spinnaker.execution.stages.before.deleteManifest
+package  spinnaker.deployment.tasks.before.deleteManifest
 
 import future.keywords
 
