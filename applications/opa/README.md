@@ -1,4 +1,4 @@
-## OPA For spionnaker - PROPRIETARY!!!
+## OPA For spinnaker - PROPRIETARY!!!
 
 This contains an example config/setup using OPAL & OPA sidecar for spinnaker vs. the kubemanagement system.  Note that OPA itself is a proprietary plugin developed and maintaed by Armory for Spinnaker.  
 * [Installation instructions](https://docs.armory.io/plugins/policy-engine/)

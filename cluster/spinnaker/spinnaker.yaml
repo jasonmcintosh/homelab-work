@@ -76,6 +76,7 @@ spec:
               dockerImage: permitio/opal-client:latest
               env:
                 OPAL_SERVER_URL: http://opa-opal-server:7002
+                OPAL_POLICY_SUBSCRIPTION_DIRS: applications/opa/
               ## IF we switch to a more advanced sidecar config, we can open up BOTH opa and opal ports.  Opal sidecar runs both it seems
               port: 8181
           front50: *opa-client-config
