@@ -13,15 +13,12 @@ terraform {
   backend "kubernetes" {
     secret_suffix    = "tf-ssl-acme-generation"
     namespace = "default"
-    config_path = "~/.kube/config.local"
-    #in_cluster_config = true
   }
 }
 provider "acme" {
   server_url = "https://acme-v02.api.letsencrypt.org/directory"
 }  
 provider "kubernetes" {
-    config_path = "~/.kube/config.local"
 }
 data "kubernetes_secret" "cloudflare-api" {
   metadata {
