@@ -10,13 +10,11 @@ terraform {
     secret_suffix    = "tf-dns-encrypt"
     namespace = "default"
     #config_path = "~/.kube/config.local"
-    in_cluster_config = true
   }
 }
 
 provider "kubernetes" {
   #config_path = "~/.kube/config.local"
-    in_cluster_config = true
 }
 
 data "kubernetes_secret" "cloudflare-api" {
