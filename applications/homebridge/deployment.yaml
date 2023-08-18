@@ -52,7 +52,7 @@ spec:
       hostNetwork: true
       containers:
       - name: homebridge
-        image: oznu/homebridge:latest
+        image: homebridge/homebridge:latest
         ports:
         - name: config
           containerPort: 8581
@@ -60,7 +60,7 @@ spec:
           containerPort: 51342
         volumeMounts:
         - name: data
-          mountPath: /var/lib/homebridge
+          mountPath: /homebridge
       volumes:
       - name: data
         persistentVolumeClaim:
