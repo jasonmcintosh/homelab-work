@@ -211,6 +211,9 @@ spec:
           enabled: false
     profiles:
       clouddriver:
+        kubernetes:
+          loadNamespacesInAccount: false
+          verifyAccountHealth: false
         ## done here... Maybe could move to providers block... hit some ODD issues with halyard validation this though :( 
         docker-registry:
           enabled: true
