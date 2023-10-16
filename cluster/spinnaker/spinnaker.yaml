@@ -205,7 +205,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.30.0-rc8
+      version: 2.30.3
       webhook:
         trust:
           enabled: false
