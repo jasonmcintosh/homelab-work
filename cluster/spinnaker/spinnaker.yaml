@@ -208,12 +208,15 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.30.2
+      version: 2.30.3
       webhook:
         trust:
           enabled: false
     profiles:
       clouddriver:
+        kubernetes:
+          loadNamespacesInAccount: false
+          verifyAccountHealth: false
         ## done here... Maybe could move to providers block... hit some ODD issues with halyard validation this though :( 
         docker-registry:
           enabled: true

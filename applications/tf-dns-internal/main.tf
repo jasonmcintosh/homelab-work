@@ -143,3 +143,7 @@ resource "cloudflare_record" "grafana" {
   type    = "CNAME"
   allow_overwrite = true
 }
+
+output "zone_status" {
+  value = data.cloudflare_zone.farm.status
+}
