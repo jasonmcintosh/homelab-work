@@ -135,6 +135,9 @@ spec:
         artifacts: true
         pipelineTemplates: true
       notifications:
+        github-status:
+          enabled: true
+          token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
 
       providers:
         ## Forces igor to be built...
