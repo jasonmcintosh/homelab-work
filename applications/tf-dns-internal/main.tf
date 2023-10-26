@@ -94,7 +94,7 @@ resource "cloudflare_record" "traefik_3" {
 resource "cloudflare_record" "nexus" {
   zone_id = data.cloudflare_zone.farm.id
   name = "nexus"
-  value = "192.168.18.160"
+  value = "192.168.17.162"
   type = "A"
   allow_overwrite = true
 
