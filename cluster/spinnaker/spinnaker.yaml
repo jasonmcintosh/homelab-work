@@ -56,6 +56,11 @@ spec:
             enabled: false
             endpoint: https://debug.armory.io/v1/logs
       artifacts:
+        helm:
+          enabled: true
+          accounts:
+          - name: helm-hashicorp
+            repository: https://helm.releases.hashicorp.com
         gitrepo:
           enabled: true
           accounts:
@@ -851,6 +856,7 @@ spec:
             timeoutSeconds: 1
           useExecHealthCheck: false
       terraformer:
+        artifactId: armory/terraformer:2023.10.27.17.07.10.master
         kubernetes:
           livenessProbe:
             failureThreshold: 3
