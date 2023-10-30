@@ -1,7 +1,7 @@
 {
   "appConfig": {},
   "keepWaitingPipelines": true,
-  "lastModifiedBy": "mcintoshj@gmail.com",
+  "lastModifiedBy": "Jason.McIntosh@armory.io",
   "limitConcurrent": false,
   "maxConcurrentExecutions": 4,
   "parameterConfig": [
@@ -11,6 +11,20 @@
       "label": "",
       "name": "account_name",
       "pinned": true,
+      "required": true
+    },
+    {
+      "default": "vault-secrets-operator",
+      "description": "",
+      "hasOptions": false,
+      "label": "",
+      "name": "namespace",
+      "options": [
+        {
+          "value": ""
+        }
+      ],
+      "pinned": false,
       "required": true
     }
   ],
@@ -47,12 +61,11 @@
             "name": "vault-secrets-operator",
             "type": "helm/chart",
             "version": "0.1.0"
-          },
-          "id": null
+          }
         }
       ],
       "name": "Bake (Manifest)",
-      "namespace": "vault-secrets-operator",
+      "namespace": "${parameters.namespace}",
       "outputName": "vault",
       "overrides": {},
       "refId": "1",
@@ -68,7 +81,7 @@
         "app": "demo"
       },
       "name": "Deploy (Manifest)",
-      "namespaceOverride": "vault-secrets-operator",
+      "namespaceOverride": "${parameters.namespace}",
       "refId": "2",
       "requisiteStageRefIds": [
         "3"
@@ -92,9 +105,9 @@
           "kind": "Namespace",
           "metadata": {
             "labels": {
-              "name": "vault-secrets-operator"
+              "name": "${parameters.namespace}"
             },
-            "name": "vault-secrets-operator"
+            "name": "${parameters.namespace}"
           }
         }
       ],
@@ -119,5 +132,5 @@
     }
   ],
   "triggers": [],
-  "updateTs": "1698678797257"
+  "updateTs": "1698679667183"
 }
