@@ -1,0 +1,123 @@
+{
+  "appConfig": {},
+  "keepWaitingPipelines": true,
+  "lastModifiedBy": "mcintoshj@gmail.com",
+  "limitConcurrent": false,
+  "maxConcurrentExecutions": 4,
+  "parameterConfig": [
+    {
+      "description": "",
+      "hasOptions": false,
+      "label": "",
+      "name": "account_name",
+      "pinned": true,
+      "required": true
+    }
+  ],
+  "schema": "1",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "expectedArtifacts": [
+        {
+          "defaultArtifact": {
+            "customKind": true,
+            "id": "8f9c10f7-7135-4228-adc7-2d0ec93a30b3"
+          },
+          "displayName": "vault-operator",
+          "id": "d6d190d5-765f-43ed-a889-5489a77aa011",
+          "matchArtifact": {
+            "artifactAccount": "embedded-artifact",
+            "customKind": false,
+            "id": "b0fdefbf-8792-4f7c-8b42-f6832d6fff13",
+            "name": "vault",
+            "type": "embedded/base64"
+          },
+          "useDefaultArtifact": false,
+          "usePriorArtifact": false
+        }
+      ],
+      "includeCRDs": true,
+      "inputArtifacts": [
+        {
+          "account": "helm-hashicorp",
+          "artifact": {
+            "artifactAccount": "helm-hashicorp",
+            "id": "d1600610-1782-4f06-8b63-dff48ae6eed7",
+            "name": "vault-secrets-operator",
+            "type": "helm/chart",
+            "version": "0.1.0"
+          },
+          "id": null
+        }
+      ],
+      "name": "Bake (Manifest)",
+      "namespace": "vault-secrets-operator",
+      "outputName": "vault",
+      "overrides": {},
+      "refId": "1",
+      "requisiteStageRefIds": [],
+      "templateRenderer": "HELM3",
+      "type": "bakeManifest"
+    },
+    {
+      "account": "${parameters.account_name}",
+      "cloudProvider": "kubernetes",
+      "manifestArtifactId": "d6d190d5-765f-43ed-a889-5489a77aa011",
+      "moniker": {
+        "app": "demo"
+      },
+      "name": "Deploy (Manifest)",
+      "namespaceOverride": "vault-secrets-operator",
+      "refId": "2",
+      "requisiteStageRefIds": [
+        "3"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false
+        }
+      },
+      "type": "deployManifest"
+    },
+    {
+      "account": "${parameters.account_name}",
+      "cloudProvider": "kubernetes",
+      "manifests": [
+        {
+          "apiVersion": "v1",
+          "kind": "Namespace",
+          "metadata": {
+            "labels": {
+              "name": "vault-secrets-operator"
+            },
+            "name": "vault-secrets-operator"
+          }
+        }
+      ],
+      "moniker": {
+        "app": "demo"
+      },
+      "name": "Deploy Namespaces",
+      "refId": "3",
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "text",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    }
+  ],
+  "triggers": [],
+  "updateTs": "1698678797257"
+}
