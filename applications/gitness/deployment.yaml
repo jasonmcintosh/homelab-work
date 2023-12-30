@@ -176,8 +176,6 @@ spec:
         env:
           - name: GITNESS_DATABASE_DATASOURCE
             value: "host=postgresql.gitness.svc.cluster.local port=5432 sslmode=disable dbname=gitness user=gitness password=gitness"
-          - name: POSTGRESL
-            value: postgresql://opal:opal@opa-opal-db/opal
           - name: GITNESS_DATABASE_DRIVER
             value: postgres 
           - name: GITNESS_URL_BASE
