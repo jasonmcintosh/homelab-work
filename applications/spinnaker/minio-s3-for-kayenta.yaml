@@ -1,33 +1,9 @@
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: minio-pv
-  labels:
-    type: local
-spec:
-  nodeAffinity: 
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - kubenode1
-  storageClassName: minio-pv
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data/minio"
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: minio-pv-claim
   namespace: spinnaker
 spec:
-  storageClassName: minio-pv
   accessModes:
     - ReadWriteOnce
   resources:

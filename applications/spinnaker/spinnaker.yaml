@@ -51,7 +51,7 @@ spec:
             true
         diagnostics:
           uuid: jason-mcintosh-local
-          enabled: true
+          enabled: false
           logging:
             enabled: false
             endpoint: https://debug.armory.io/v1/logs
@@ -75,6 +75,42 @@ spec:
               username: jasonmcintosh
               token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
       deploymentEnvironment:
+        customSizing:
+          spin-clouddriver:
+            limits:
+              memory: 2Gi
+            replicas: 2
+          spin-gate:
+            limits:
+              memory: 2Gi
+          spin-rosco:
+            limits:
+              memory: 1Gi
+          spin-front50:
+            limits:
+              memory: 2Gi
+            replicas: 2
+          spin-orca:
+            limits:
+              memory: 2Gi
+          spin-igor:
+            limits:
+              memory: 1.5Gi
+          spin-echo:
+            limits:
+              memory: 2Gi
+            replicas: 1
+          spin-fiat:
+            limits:
+              memory: 2Gi
+            replicas: 1
+          spin-kayenta:
+            limits:
+              memory: 1.5Gi
+          spin-terraformer:
+            limits:
+              memory: .5Gi
+
         sidecars:
           orca: &opa-client-config
             - name: opal-client
@@ -90,17 +126,25 @@ spec:
 
           ## Example init container for an APM agent (honeycomb, newrelic, etc.)
         initContainers:
-          clouddriver:
+          clouddriver: &apmInitConfig
           - command:
             - /bin/sh
             - -c
-            - mkdir -p /opt/apmagent && cd /opt/apmagent && cp ../newrelic-java.zip . && unzip /opt/apmagent/newrelic-java.zip && chmod 775 /opt/apmagent/*
-            image: armory/internal-apm-agent:7.10.0
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.0.0
             imagePullPolicy: Always
             name: apm-initializer
             volumeMounts:
             - mountPath: /opt/apmagent
               name: shared-volume
+          echo: *apmInitConfig
+          fiat: *apmInitConfig
+          front50: *apmInitConfig
+          gate: *apmInitConfig
+          igor: *apmInitConfig
+          kayenta: *apmInitConfig
+          orca: *apmInitConfig
+          rosco: *apmInitConfig
       canary:
         enabled: true
         defaultMetricsAccount: local-prometheus
@@ -213,7 +257,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.30.3
+      version: 2.32.1-rc1
       webhook:
         trust:
           enabled: false
@@ -294,13 +338,6 @@ spec:
       dinghy:
         Logging:
           Level: INFO
-        spinnaker:
-          extensibility:
-            plugins:
-              Armory.ObservabilityPlugin:
-                config.metrics:
-                  newrelic:
-                    apiKey: ""
       echo:
         scheduler:
           enabled: true
@@ -337,13 +374,7 @@ spec:
       gate:
         armory:
           cloud:
-            enabled: true
-            iam: 
-              tokenIssuerUrl: https://auth.cloud.armory.io/oauth/token
-              clientId: gjxWvqaQsoSe1BkfVFTOlhYR5DF5QEHv
-              clientSecret:  encrypted:k8s!n:auth-credentails!k:armoryCloudSecret
-            api:
-              baseUrl: https://api.cloud.armory.io
+            enabled: false
         security:
           oauth2:
             resource:
@@ -351,7 +382,7 @@ spec:
             client:
               accessTokenUri: https://dev-200769.okta.com/oauth2/default/v1/token
               clientId: 0oa9htg5c5Kv1ZEAK4x7
-              clientSecret: encrypted:k8s!n:auth-credentails!k:clientSecret
+              clientSecret: encrypted:k8s!n:auth-credentials!k:clientSecret
               scope: groups email profile openid
               userAuthorizationUri: https://dev-200769.okta.com/oauth2/default/v1/authorize
             userInfoMapping:
@@ -377,6 +408,9 @@ spec:
             remoteIpHeader: X-Forwarded-For
         spinnaker:
           extensibility:
+            repositories:
+              pluginRepository:
+                url: https://raw.githubusercontent.com/armory-plugins/pluginRepository/master/repositories.json
             deck-proxy:
               enabled: true
               plugins:
@@ -387,8 +421,13 @@ spec:
                   enabled: true
                   version: 1.0.9
             plugins:
-              Armory.InstanceRegistration:
+              Armory.ObservabilityPlugin:
+                enabled: false
+              Armory.ArmoryHeader:
                 enabled: true
+                version: 0.2.2
+              Armory.InstanceRegistration:
+                enabled: false
       igor:
         locking:
           enabled: true
@@ -505,47 +544,28 @@ spec:
                   version: 0.3.0
                 Armory.ArmoryHeader:
                   enabled: true
-                  version: 0.0.3
-              plugins-path: /opt/gate/deck-plugins
+                  version: 0.2.2
             plugins:
               Armory.PolicyEngine:
                 enabled: true
                 version: 0.3.0
-              Armory.ObservabilityPlugin:
-                config.metrics:
-                  prometheus:
-                    enabled: true
-                    meterRegistryConfig:
-                      armoryRecommendedFiltersEnabled: false
-                enabled: true
-                version: 1.3.1
             repositories:
-              armory-observability-plugin-releases:
-                url: https://raw.githubusercontent.com/armory-plugins/armory-observability-plugin-releases/master/repositories.json
               opa:
                 url: https://raw.githubusercontent.com/armory-plugins/policy-engine-releases/master/repositories.json
       terraformer:
         redis:
           host: spin-redis
           port: 6379
-        spinnaker:
-          extensibility:
-            plugins:
-              Armory.ObservabilityPlugin:
-                config.metrics:
-                  newrelic:
-                    apiKey: ""
     service-settings:
       deck:
         kubernetes:
           useExecHealthCheck: false
       clouddriver:
         env:
-          JAVA_OPTS: -XX:MaxRAMPercentage=50.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
-          NEW_RELIC_APP_NAME: clouddriver-mcintosh
-          #SERVICE_NAME: clouddriver
-          #NEW_RELIC_LICENSE_KEY: encrypted:k8s!n:newrelic-api-key!k:api_key
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
+          JAVA_OPTS: -XX:MaxRAMPercentage=50.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
+          useExecHealthCheck: false
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -585,8 +605,10 @@ spec:
           useExecHealthCheck: false
       echo:
         env:
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=echo-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
+          useExecHealthCheck: false
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -616,11 +638,16 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
-          useExecHealthCheck: false
+          volumes:
+          - id: shared-volume
+            mountPath: /opt/apmagent
+            type: emptyDir
       fiat:
         env:
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=fiat-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
+          useExecHealthCheck: false
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -650,10 +677,14 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
-          useExecHealthCheck: false
+          volumes:
+          - id: shared-volume
+            mountPath: /opt/apmagent
+            type: emptyDir
       front50:
         env:
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=front50-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -685,9 +716,14 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           useExecHealthCheck: false
+          volumes:
+          - id: shared-volume
+            mountPath: /opt/apmagent
+            type: emptyDir
       gate:
         env:
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=gate-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           useExecHealthCheck: false
           livenessProbe:
@@ -719,11 +755,18 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
+          volumes:
+          - id: shared-volume
+            mountPath: /opt/apmagent
+            type: emptyDir
       igor:
         env:
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
+          #JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC 
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=igor-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
+            initialDelaySeconds: 60
             failureThreshold: 3
             httpGet:
               path: /health
@@ -733,7 +776,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 180
+            initialDelaySeconds: 80
             failureThreshold: 3
             httpGet:
               path: /health
@@ -752,10 +795,15 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
+          volumes:
+          - id: shared-volume
+            mountPath: /opt/apmagent
+            type: emptyDir
           useExecHealthCheck: false
       kayenta:
         env:
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           useExecHealthCheck: false
           livenessProbe:
@@ -787,9 +835,14 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
+          volumes:
+          - id: shared-volume
+            mountPath: /opt/apmagent
+            type: emptyDir
       orca:
         env:
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
+          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=orca-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -821,9 +874,14 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           useExecHealthCheck: false
+          volumes:
+          - id: shared-volume
+            mountPath: /opt/apmagent
+            type: emptyDir
       rosco:
         env:
-          JAVA_OPTS: -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
+          JAVA_OPTS: -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=rosco-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -855,6 +913,10 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           useExecHealthCheck: false
+          volumes:
+          - id: shared-volume
+            mountPath: /opt/apmagent
+            type: emptyDir
       terraformer:
         artifactId: armory/terraformer:2023.10.27.17.07.10.master
         kubernetes:

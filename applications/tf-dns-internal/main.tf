@@ -9,12 +9,12 @@ terraform {
   backend "kubernetes" {
     secret_suffix    = "tf-dns-encrypt"
     namespace = "default"
-    #config_path = "~/.kube/config.local"
+    config_path = "~/.kube/config.local"
   }
 }
 
 provider "kubernetes" {
-  #config_path = "~/.kube/config.local"
+  config_path = "~/.kube/config.local"
 }
 
 data "kubernetes_secret" "cloudflare-api" {
@@ -69,7 +69,7 @@ resource "cloudflare_record" "vcenter" {
 resource "cloudflare_record" "traefik" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "traefik"
-  value   = "192.168.19.142"
+  value   = "192.168.19.45"
   type    = "A"
   allow_overwrite = true
 }
@@ -78,7 +78,7 @@ resource "cloudflare_record" "traefik" {
 resource "cloudflare_record" "traefik_2" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "traefik"
-  value   = "192.168.16.137"
+  value   = "192.168.16.190"
   type    = "A"
   allow_overwrite = true
 }
@@ -86,7 +86,7 @@ resource "cloudflare_record" "traefik_2" {
 resource "cloudflare_record" "traefik_3" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "traefik"
-  value   = "192.168.16.243"
+  value   = "192.168.16.98"
   type    = "A"
   allow_overwrite = true
 }

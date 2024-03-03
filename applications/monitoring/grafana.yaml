@@ -1,41 +1,15 @@
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: grafana
-  namespace: monitoring
-  labels:
-    type: local
-spec:
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - kubemaster
-  storageClassName: grafana
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data/grafana"
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: grafana-pvc
   namespace: monitoring
 spec:
-  storageClassName: grafana
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi
   volumeMode: Filesystem
-  volumeName: grafana
 ---
 apiVersion: apps/v1
 kind: Deployment

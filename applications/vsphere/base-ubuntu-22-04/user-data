@@ -1,29 +1,60 @@
 #cloud-config
 autoinstall:
   version: 1
+  early-commands:
+      - sudo systemctl stop ssh
   locale: en_US
   keyboard:
       layout: us
   ssh:
       install-server: yes
-      allow-pw: yes
+      allow-pw: no
       authorized-keys:
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEds4RECl54mOC9dDVEotLyqzVyFJ2e62xindmykeWN2 mcintoshj@gmail.com
   storage:
       layout:
           name: direct
+      swap:
+        size: 0
+  packages:
+  - lvm2
+  - cloud-init
+  - net-tools 
+  - perl 
+  - open-iscsi 
+  - ntp 
+  - curl 
+  - dnsutils 
+  - traceroute 
+  - vim 
+  - ifupdown 
+  - dos2unix 
+  - zip 
+  - unzip 
+  - gnupg2 
+  - software-properties-common 
+  - apt-transport-https 
+  - ca-certificates 
+  - lsb-release 
+  - python3-pip 
+  - jq 
+  - open-vm-tools
+  - iptables-persistent
+  - docker.io
+    
   user-data:
-      disable_root: false
-      users:
-      - name: ubuntu
-        ssh_authorized_keys:
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEds4RECl54mOC9dDVEotLyqzVyFJ2e62xindmykeWN2 mcintoshj@gmail.com
-        lock_passwd: false
-        shell: /bin/bash
-        groups: [adm,sudo]
-        sudo: ALL=(ALL) NOPASSWD:ALL
-  #late-commands:
-      #- echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
-      #- curtin in-target --target=/target -- chmod 440 /etc/sudoers.d/ubuntu
-      #- curtin in-target --target=/target -- apt-get update
-      #- curtin in-target --target=/target -- apt-get upgrade --yes
+    package_upgrade: true
+    disable_root: false
+    users:
+    - name: jasonmcintosh
+      ssh_authorized_keys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEds4RECl54mOC9dDVEotLyqzVyFJ2e62xindmykeWN2 mcintoshj@gmail.com
+      lock_passwd: false
+      shell: /bin/bash
+      groups: [adm,sudo]
+      sudo: ALL=(ALL) NOPASSWD:ALL
+#late-commands:
+    #- echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
+    #- curtin in-target --target=/target -- chmod 440 /etc/sudoers.d/ubuntu
+    #- curtin in-target --target=/target -- apt-get update
+    #- curtin in-target --target=/target -- apt-get upgrade --yes
