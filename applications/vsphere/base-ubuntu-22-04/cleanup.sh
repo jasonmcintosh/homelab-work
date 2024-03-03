@@ -7,25 +7,8 @@ fi
 
 set -v
 
-
-apt update -y
-apt dist-upgrade -y
-
-apt install openssh-server net-tools perl open-iscsi ntp curl dnsutils traceroute vim ifupdown dos2unix zip unzip gnupg2 software-properties-common apt-transport-https ca-certificates lsb-release python3-pip jq -y
-apt install -y open-vm-tools
-apt install -y iptables-persistent
-apt install -y docker.io
-
 apt autoremove -y
 apt clean
-
-
-## Disabling ipv6
-echo net.ipv6.conf.all.disable_ipv6=1 | tee -a /etc/sysctl.conf
-echo net.ipv6.conf.default.disable_ipv6=1 | tee -a /etc/sysctl.conf
-echo net.ipv6.conf.l0.disable_ipv6=1 | tee -a /etc/sysctl.conf
-sysctl -p
-
 
 
 echo '> Cleaning all audit logs ...'
@@ -88,12 +71,6 @@ echo '> Setting hostname to localhost ...'
 sed -i 's/preserve_hostname: false/preserve_hostname: true/g' /etc/cloud/cloud.cfg
 truncate -s0 /etc/hostname
 hostnamectl set-hostname localhost
-
-
-# disable swap
-swapoff --all
-sed -ri '/\sswap\s/s/^#?/#/' /etc/fstab
-
 
 # make machine-id unique and symlink it - ubuntu 20.04 uses machine id in the dhcp identifier and not mac addresses
 truncate -s 0 /etc/machine-id

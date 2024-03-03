@@ -7,38 +7,11 @@ metadata:
     name: gitness
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: postgresql-gitness
-  labels:
-    type: local
-  namespace: gitness
-spec:
-  capacity: 
-    storage: 40Gi
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - kubenode1
-  storageClassName: local-storage
-  persistentVolumeReclaimPolicy: Retain
-  volumeMode: Filesystem
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data/postgresql-gitness"
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgresql-gitness
   namespace: gitness
 spec:
-  storageClassName: local-storage
   accessModes:
     - ReadWriteOnce
   resources:
@@ -122,32 +95,6 @@ spec:
     app: postgresql
   clusterIP: None
 ---
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: git
-  labels:
-    type: local
-  namespace: gitness
-spec:
-  capacity: 
-    storage: 40Gi
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - kubenode1
-  storageClassName: local-storage
-  persistentVolumeReclaimPolicy: Retain
-  volumeMode: Filesystem
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data/gitness"
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -211,7 +158,6 @@ metadata:
   name: gitness-pv
   namespace: gitness
 spec:
-  storageClassName: local-storage
   accessModes:
     - ReadWriteOnce
   resources:

@@ -1,38 +1,14 @@
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mysql-pv-spinnaker
-  labels:
-    type: local
-spec:
-  nodeAffinity: 
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - kubenode2
-  storageClassName: spinnaker
-  capacity:
-    storage: 40Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data/spinnaker"
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pv-spinnaker
   namespace: spinnaker
 spec:
-  storageClassName: spinnaker
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 40Gi
+      storage: 20Gi
 ---
 apiVersion: v1
 kind: Service

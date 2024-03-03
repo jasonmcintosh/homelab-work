@@ -7,31 +7,6 @@ metadata:
     name: homebridge
 
 ---
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: homebridge
-  labels:
-    type: local
-spec:
-  capacity: 
-    storage: 40Gi
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - kubenode1
-  storageClassName: local-storage
-  persistentVolumeReclaimPolicy: Retain
-  volumeMode: Filesystem
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data/homebridge"
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -40,6 +15,8 @@ metadata:
   name: homebridge
   namespace: homebridge
 spec:
+  strategy:
+    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -72,12 +49,11 @@ metadata:
   name: homebridge-pv
   namespace: homebridge
 spec:
-  storageClassName: local-storage
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 20Gi
 ---
 apiVersion: v1
 kind: Service

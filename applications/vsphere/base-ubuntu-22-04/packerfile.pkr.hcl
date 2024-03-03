@@ -38,9 +38,10 @@ source "vsphere-iso" "ubuntu-server" {
 ##https://kb.vmware.com/s/article/1003746
   vm_version = 19
   communicator = "ssh"
-  ssh_username = "ubuntu"
+  ssh_username = "jasonmcintosh"
   ssh_password = "packer-builder"
-  ssh_timeout = "30m"
+  ssh_timeout = "60m"
+  ssh_handshake_attempts = 1000
   ssh_clear_authorized_keys = true
   ssh_pty = false
   ssh_private_key_file = "${var.home_dir}/.ssh/id_rsa"

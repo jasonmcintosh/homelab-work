@@ -10,6 +10,7 @@ metadata:
     app: opa-opal-sever
     app.kubernetes.io/name: opa-opal-server
   name: opa-opal-server
+  namespace: spinnaker
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -81,6 +82,7 @@ metadata:
     app: opa-opal-db
     app.kubernetes.io/name: opa-opal-db
   name: opa-opal-db
+  namespace: spinnaker
 spec:
   replicas: 1
   revisionHistoryLimit: 5
@@ -148,6 +150,7 @@ metadata:
     app: opal-db
     owner: mcintoshj@gmail.com
   name: opa-opal-server
+  namespace: spinnaker
 spec:
   ports:
   - port: 7002
