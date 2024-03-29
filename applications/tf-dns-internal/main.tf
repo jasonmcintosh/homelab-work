@@ -108,6 +108,14 @@ resource "cloudflare_record" "spinnaker" {
   allow_overwrite = true
 }
 
+resource "cloudflare_record" "spinnaker" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "harness"
+  value   = "192.168.19.200"
+  type    = "A"
+  allow_overwrite = true
+}
+
 
 
 resource "cloudflare_record" "homebridge" {
