@@ -108,7 +108,7 @@ resource "cloudflare_record" "spinnaker" {
   allow_overwrite = true
 }
 
-resource "cloudflare_record" "spinnaker" {
+resource "cloudflare_record" "harnesssmp" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "harness"
   value   = "192.168.19.200"
