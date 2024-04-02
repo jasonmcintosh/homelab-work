@@ -8,7 +8,7 @@ pipeline:
     - stage:
         name: TF Apply
         identifier: TF_Apply
-        description: Updates cloudflare DNS Data
+        description: Updates cloudflare DNS Data for my home lab
         type: Custom
         spec:
           execution:
