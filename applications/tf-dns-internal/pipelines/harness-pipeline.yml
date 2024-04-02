@@ -32,18 +32,4 @@ pipeline:
                               connectorRef: GitHubPersonal
                             type: Github
                   timeout: 15m
-              - step:
-                  type: ShellScript
-                  name: ShellScript_1
-                  identifier: ShellScript_1
-                  spec:
-                    shell: Bash
-                    onDelegate: true
-                    source:
-                      type: Inline
-                      spec:
-                        script: echo "Hello it completed!"
-                    environmentVariables: []
-                    outputVariables: []
-                  timeout: 10m
         tags: {}
