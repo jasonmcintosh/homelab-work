@@ -1,0 +1,49 @@
+pipeline:
+  name: Update DNS
+  identifier: Update_DNS
+  projectIdentifier: DNS
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: TF Apply
+        identifier: TF_Apply
+        description: Updates cloudflare DNS Data
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: TerraformApply
+                  name: ApplyDNS
+                  identifier: ApplyDNS
+                  spec:
+                    provisionerIdentifier: tf_dns_internal
+                    configuration:
+                      type: Inline
+                      spec:
+                        configFiles:
+                          store:
+                            spec:
+                              repoName: spinnaker-work
+                              gitFetchType: Branch
+                              branch: main
+                              folderPath: applications/tf-dns-internal
+                              connectorRef: GitHubPersonal
+                            type: Github
+                  timeout: 15m
+              - step:
+                  type: ShellScript
+                  name: ShellScript_1
+                  identifier: ShellScript_1
+                  spec:
+                    shell: Bash
+                    onDelegate: true
+                    source:
+                      type: Inline
+                      spec:
+                        script: echo "Hello it completed!"
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+        tags: {}
