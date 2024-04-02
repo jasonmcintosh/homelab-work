@@ -1,0 +1,17 @@
+trigger:
+  name: Run Hourly
+  identifier: Run_Hourly
+  stagesToExecute: []
+  enabled: true
+  tags: {}
+  orgIdentifier: default
+  projectIdentifier: DNS
+  pipelineIdentifier: Update_DNS
+  source:
+    type: Scheduled
+    spec:
+      type: Cron
+      spec:
+        type: UNIX
+        expression: 0 0/1 * * *
+
