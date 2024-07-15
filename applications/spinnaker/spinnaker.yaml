@@ -1,29 +1,3 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  namespace: spinnaker
-  name: spinnaker
-spec:
-  rules:
-    - host: spinnaker.mcintosh.farm
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: spin-deck
-                port: 
-                  number: 9000
-          - path: /api/v1/
-            pathType: Prefix
-            backend:
-              service:
-                name: spin-gate
-                port: 
-                  number: 8084
-
----
 apiVersion: spinnaker.armory.io/v1alpha2
 kind: SpinnakerService
 metadata:
@@ -131,7 +105,7 @@ spec:
             - /bin/sh
             - -c
             - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar && chmod 775 /opt/apmagent/*
-            image: otel/autoinstrumentation-java:2.0.0
+            image: otel/autoinstrumentation-java:2.3.0
             imagePullPolicy: Always
             name: apm-initializer
             volumeMounts:
@@ -257,7 +231,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.32.1-rc1
+      version: 2.32.3
       webhook:
         trust:
           enabled: false
@@ -272,6 +246,8 @@ spec:
           accounts:
           - name: docker-ghcr-jasonmcintosh
             address: https://ghcr.io/
+            username: jasonmcintosh
+            password: encrypted:k8s!n:artifact-creds!k:githubPatToken
             repositories:
             - jasonmcintosh/spinnaker-work/demo-web-app
         credentials:
@@ -411,6 +387,8 @@ spec:
             repositories:
               pluginRepository:
                 url: https://raw.githubusercontent.com/armory-plugins/pluginRepository/master/repositories.json
+              observabilityy-plugin:
+                url: https://raw.githubusercontent.com/armory-plugins/armory-observability-plugin-releases/master/repositories.json
             deck-proxy:
               enabled: true
               plugins:
@@ -422,7 +400,13 @@ spec:
                   version: 1.0.9
             plugins:
               Armory.ObservabilityPlugin:
-                enabled: false
+                enabled: true
+                version: 1.5.0
+                config.metrics:
+                  prometheus:
+                    enabled: true
+                    meterRegistryConfig:
+                      armoryRecommendedFiltersEnabled: false
               Armory.ArmoryHeader:
                 enabled: true
                 version: 0.2.2
@@ -562,6 +546,9 @@ spec:
           useExecHealthCheck: false
       clouddriver:
         env:
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
+          OTEL_TRACES_EXPORTER: none
+          OTEL_LOGS_EXPORTER: none
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS: -XX:MaxRAMPercentage=50.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -575,7 +562,7 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 10
             successThreshold: 1
-            timeoutSeconds: 1
+            timeoutSeconds: 5
           readinessProbe:
             failureThreshold: 3
             httpGet:
@@ -585,7 +572,7 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 10
             successThreshold: 1
-            timeoutSeconds: 1
+            timeoutSeconds: 5
           startupProbe:
             failureThreshold: 3
             httpGet:
@@ -593,9 +580,9 @@ spec:
               port: 7002
               scheme: HTTP
             initialDelaySeconds: 180
-            periodSeconds: 10
+            periodSeconds: 30
             successThreshold: 1
-            timeoutSeconds: 1
+            timeoutSeconds: 5
           volumes:
           - id: shared-volume
             mountPath: /opt/apmagent
@@ -605,6 +592,9 @@ spec:
           useExecHealthCheck: false
       echo:
         env:
+          OTEL_TRACES_EXPORTER: none
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+          OTEL_LOGS_EXPORTER: none
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=echo-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -644,6 +634,9 @@ spec:
             type: emptyDir
       fiat:
         env:
+          OTEL_TRACES_EXPORTER: none
+          OTEL_LOGS_EXPORTER: none
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=fiat-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -683,6 +676,9 @@ spec:
             type: emptyDir
       front50:
         env:
+          OTEL_TRACES_EXPORTER: none
+          OTEL_LOGS_EXPORTER: none
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=front50-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -722,6 +718,9 @@ spec:
             type: emptyDir
       gate:
         env:
+          OTEL_TRACES_EXPORTER: none
+          OTEL_LOGS_EXPORTER: none
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=gate-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -761,8 +760,10 @@ spec:
             type: emptyDir
       igor:
         env:
+          OTEL_TRACES_EXPORTER: none
+          OTEL_LOGS_EXPORTER: none
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          #JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC 
           JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=igor-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
@@ -802,6 +803,9 @@ spec:
           useExecHealthCheck: false
       kayenta:
         env:
+          OTEL_TRACES_EXPORTER: none
+          OTEL_LOGS_EXPORTER: none
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -841,6 +845,9 @@ spec:
             type: emptyDir
       orca:
         env:
+          OTEL_TRACES_EXPORTER: none
+          OTEL_LOGS_EXPORTER: none
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=orca-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -880,6 +887,9 @@ spec:
             type: emptyDir
       rosco:
         env:
+          OTEL_TRACES_EXPORTER: none
+          OTEL_LOGS_EXPORTER: none
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS: -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=rosco-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -918,7 +928,6 @@ spec:
             mountPath: /opt/apmagent
             type: emptyDir
       terraformer:
-        artifactId: armory/terraformer:2023.10.27.17.07.10.master
         kubernetes:
           livenessProbe:
             failureThreshold: 3

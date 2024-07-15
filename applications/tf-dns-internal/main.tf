@@ -9,18 +9,18 @@ terraform {
   backend "kubernetes" {
     secret_suffix    = "tf-dns-encrypt"
     namespace = "default"
-    #config_path = "~/.kube/config.local"
+    config_path = "~/.kube/config.local"
   }
 }
 
 provider "kubernetes" {
-  #config_path = "~/.kube/config.local"
+  config_path = "~/.kube/config.local"
 }
 
 data "kubernetes_secret" "cloudflare-api" {
   metadata {
     name = "cloudflare-api-key"
-    namespace = "spinnaker"
+    namespace = "cert-manager"
   }
 }
 
@@ -38,72 +38,56 @@ resource "cloudflare_record" "dl380" {
   name    = "dl380"
   value   = "192.168.16.89"
   type    = "A"
+  allow_overwrite = true
 }
 resource "cloudflare_record" "dl380_ilo" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "dl380-ilo"
   value   = "192.168.18.128"
   type    = "A"
+  allow_overwrite = true
 }
 resource "cloudflare_record" "dl360" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "dl360"
   value   = "192.168.17.143"
   type    = "A"
+  allow_overwrite = true
 }
 resource "cloudflare_record" "dl360_ilo" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "dl360-ilo"
   value   = "192.168.17.89"
   type    = "A"
-}
-
-resource "cloudflare_record" "vcenter" {
-  zone_id = data.cloudflare_zone.farm.id
-  name    = "vcenter"
-  value   = "192.168.17.104"
-  type    = "A"
-}
-
-//Internal resources like traefik/etc. for k8s
-resource "cloudflare_record" "traefik" {
-  zone_id = data.cloudflare_zone.farm.id
-  name    = "traefik"
-  value   = "192.168.19.45"
-  type    = "A"
   allow_overwrite = true
 }
 
-
-resource "cloudflare_record" "traefik_2" {
+resource "cloudflare_record" "xen" {
   zone_id = data.cloudflare_zone.farm.id
-  name    = "traefik"
-  value   = "192.168.16.190"
+  name    = "xen"
+  value   = "192.168.19.195"
+  type    = "A"
+}
+
+resource "cloudflare_record" "nginx" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "nginx"
+  value   = "192.168.19.200"
   type    = "A"
   allow_overwrite = true
 }
 
-resource "cloudflare_record" "traefik_3" {
-  zone_id = data.cloudflare_zone.farm.id
-  name    = "traefik"
-  value   = "192.168.16.98"
-  type    = "A"
-  allow_overwrite = true
-}
+locals {
 
-resource "cloudflare_record" "nexus" {
-  zone_id = data.cloudflare_zone.farm.id
-  name = "nexus"
-  value = "192.168.17.162"
-  type = "A"
-  allow_overwrite = true
-
+  nginx_fronted_services = [
+    "spinnaker","harness", "demo", "harbor"
+  ]
 }
 
 resource "cloudflare_record" "spinnaker" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "spinnaker"
-  value   = "traefik.mcintosh.farm"
+  value   = "nginx.mcintosh.farm"
   type    = "CNAME"
   allow_overwrite = true
 }
@@ -111,26 +95,24 @@ resource "cloudflare_record" "spinnaker" {
 resource "cloudflare_record" "harnesssmp" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "harness"
-  value   = "192.168.19.200"
-  type    = "A"
+  value   = "nginx.mcintosh.farm"
+  type    = "CNAME"
   allow_overwrite = true
 }
-
-
 
 resource "cloudflare_record" "homebridge" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "homebridge"
-  value   = "traefik.mcintosh.farm"
-  type    = "CNAME"
+  value   = "192.168.19.201"
+  type    = "A"
   allow_overwrite = true
 }
 
 
 resource "cloudflare_record" "demo-webapp" {
   zone_id = data.cloudflare_zone.farm.id
-  name    = "demo-webapp"
-  value   = "traefik.mcintosh.farm"
+  name    = "demo"
+  value   = "nginx.mcintosh.farm"
   type    = "CNAME"
   allow_overwrite = true
 }
@@ -138,7 +120,7 @@ resource "cloudflare_record" "demo-webapp" {
 resource "cloudflare_record" "prometheus" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "prometheus"
-  value   = "traefik.mcintosh.farm"
+  value   = "nginx.mcintosh.farm"
   type    = "CNAME"
   allow_overwrite = true
 }
@@ -147,10 +129,21 @@ resource "cloudflare_record" "prometheus" {
 resource "cloudflare_record" "grafana" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "grafana"
-  value   = "traefik.mcintosh.farm"
+  value   = "nginx.mcintosh.farm"
   type    = "CNAME"
   allow_overwrite = true
 }
+
+
+resource "cloudflare_record" "harbor" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "harbor"
+  value   = "nginx.mcintosh.farm"
+  type    = "CNAME"
+  allow_overwrite = true
+}
+
+
 
 output "zone_status" {
   value = data.cloudflare_zone.farm.status

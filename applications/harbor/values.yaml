@@ -1,0 +1,13 @@
+externalURL: https://harbor.mcintosh.farm
+expose:
+  ingress:
+    hosts:
+      core: harbor.mcintosh.farm
+    annotations: 
+      cert-manager.io/cluster-issuer: cloudflare-issuer
+  tls:
+    enabled: true
+    certSource: secret
+    secret:
+      secretName: harbor-cert
+

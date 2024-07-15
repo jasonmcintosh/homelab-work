@@ -1,0 +1,29 @@
+global:
+  loadbalancerURL: https://harness.mcintosh.farm
+  license:
+    secrets:
+      kubernetesSecrets:
+      - secretName: "harness-license"
+        keys:
+          NG_LICENSE: "NG_LICENSE"
+  ingress:
+    objects:
+      annotations:
+        cert-manager.io/cluster-issuer: cloudflare-issuer
+    className: nginx
+    hosts: 
+    - harness.mcintosh.farm
+    enabled: true
+  ha: false
+  srm:
+    enabled: true
+  cet:
+    enabled: false
+  ## Features to enable
+  cd:
+    enabled: true
+  ci: 
+    enabled: true
+  ff: 
+    enabled: false
+  monitoring: false
