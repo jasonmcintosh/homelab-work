@@ -6,7 +6,7 @@ metadata:
     app: demo-web-app-canary
     type: spring-boot-app
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: demo-web-app-canary
