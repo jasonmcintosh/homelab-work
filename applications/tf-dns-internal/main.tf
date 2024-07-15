@@ -9,12 +9,10 @@ terraform {
   backend "kubernetes" {
     secret_suffix    = "tf-dns-encrypt"
     namespace = "default"
-    config_path = "~/.kube/config.local"
   }
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/config.local"
 }
 
 data "kubernetes_secret" "cloudflare-api" {
