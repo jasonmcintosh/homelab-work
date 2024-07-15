@@ -1,0 +1,238 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: harness-delegate-ng
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: harness-delegate-ng-cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: harness-delegate-ng
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+
+# If delegate needs to use a proxy, please follow instructions available in the documentation
+# https://ngdocs.harness.io/article/5ww21ewdt8-configure-delegate-proxy-settings
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    harness.io/name: kubernetes-delegate
+  name: kubernetes-delegate
+  namespace: harness-delegate-ng
+spec:
+  replicas: 1
+  minReadySeconds: 120
+  selector:
+    matchLabels:
+      harness.io/name: kubernetes-delegate
+  template:
+    metadata:
+      labels:
+        harness.io/name: kubernetes-delegate
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3460"
+        prometheus.io/path: "/api/metrics"
+    spec:
+      terminationGracePeriodSeconds: 600
+      restartPolicy: Always
+      containers:
+      - image: docker.io/harness/delegate:24.06.83204
+        imagePullPolicy: Always
+        name: delegate
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0
+        ports:
+          - containerPort: 8080
+        resources:
+          limits:
+            memory: "2048Mi"
+          requests:
+            cpu: "0.5"
+            memory: "2048Mi"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3460
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 3460
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 15
+        envFrom:
+        - secretRef:
+            name: kubernetes-delegate-account-token
+        env:
+        - name: JAVA_OPTS
+          value: "-Xms64M"
+        - name: ACCOUNT_ID
+          value: msHScXv3Qq2IZVz4SPclpw
+        - name: MANAGER_HOST_AND_PORT
+          value: https://harness.mcintosh.farm
+        - name: DEPLOY_MODE
+          value: KUBERNETES_ONPREM
+        - name: DELEGATE_NAME
+          value: kubernetes-delegate
+        - name: DELEGATE_TYPE
+          value: "KUBERNETES"
+        - name: DELEGATE_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: INIT_SCRIPT
+          value: "microdnf install unzip && curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh && chmod 755 install-opentofu.sh && ./install-opentofu.sh --install-method standalone && ln -s /opt/opentofu/tofu /usr/local/bin/terraform"
+        - name: DELEGATE_DESCRIPTION
+          value: ""
+        - name: DELEGATE_TAGS
+          value: ""
+        - name: NEXT_GEN
+          value: "true"
+        - name: CLIENT_TOOLS_DOWNLOAD_DISABLED
+          value: "true"
+        - name: LOG_STREAMING_SERVICE_URL
+          value: "https://harness.mcintosh.farm/log-service/"
+        - name: DELEGATE_RESOURCE_THRESHOLD
+          value: ""
+        - name: DYNAMIC_REQUEST_HANDLING
+          value: "false"
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+   name: kubernetes-delegate-hpa
+   namespace: harness-delegate-ng
+   labels:
+       harness.io/name: kubernetes-delegate
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kubernetes-delegate
+  minReplicas: 1
+  maxReplicas: 1
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+---
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: upgrader-cronjob
+  namespace: harness-delegate-ng
+rules:
+  - apiGroups: ["batch", "apps", "extensions"]
+    resources: ["cronjobs"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["extensions", "apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kubernetes-delegate-upgrader-cronjob
+  namespace: harness-delegate-ng
+subjects:
+  - kind: ServiceAccount
+    name: upgrader-cronjob-sa
+    namespace: harness-delegate-ng
+roleRef:
+  kind: Role
+  name: upgrader-cronjob
+  apiGroup: ""
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: upgrader-cronjob-sa
+  namespace: harness-delegate-ng
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-delegate-upgrader-config
+  namespace: harness-delegate-ng
+data:
+  config.yaml: |
+    mode: Delegate
+    dryRun: false
+    workloadName: kubernetes-delegate
+    namespace: harness-delegate-ng
+    containerName: delegate
+    delegateConfig:
+      accountId: msHScXv3Qq2IZVz4SPclpw
+      managerHost: https://harness.mcintosh.farm
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  labels:
+    harness.io/name: kubernetes-delegate-upgrader-job
+  name: kubernetes-delegate-upgrader-job
+  namespace: harness-delegate-ng
+spec:
+  schedule: "0 */1 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 20
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: upgrader-cronjob-sa
+          restartPolicy: Never
+          containers:
+          - image: docker.io/harness/upgrader:latest
+            name: upgrader
+            imagePullPolicy: Always
+            envFrom:
+            - secretRef:
+                name: kubernetes-delegate-upgrader-token
+            volumeMounts:
+              - name: config-volume
+                mountPath: /etc/config
+          volumes:
+            - name: config-volume
+              configMap:
+                name: kubernetes-delegate-upgrader-config
+
+

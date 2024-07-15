@@ -27,5 +27,5 @@ spec:
                 number: 8084
   tls:
   - hosts:
-    - spinnaker.mcintosh.farm
+    - "*.mcintosh.farm"
     secretName: spinnaker-ingress-cert

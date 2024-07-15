@@ -85,9 +85,15 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
   name: grafana
   namespace: monitoring
 spec:
+  tls:
+    - hosts:
+      - "*.mcintosh.farm"
+      secretName: mcintosh-farm
   rules:
   - host: grafana.mcintosh.farm
     http:
