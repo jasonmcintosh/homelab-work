@@ -9,7 +9,6 @@ spec:
   resources:
     requests:
       storage: 2Gi
-  volumeMode: Filesystem
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -31,20 +30,9 @@ spec:
         fsGroup: 472
         supplementalGroups:
           - 0
-      initContainers:
-      - name: take-data-dir-ownership
-        image: alpine:3
-        command:
-        - chown
-        - -R
-        - 472:472
-        - /var/lib/grafana
-        volumeMounts:
-        - name: grafana-pv
-          mountPath: /var/lib/grafana
       containers:
         - name: grafana
-          image: grafana/grafana:7.5.4
+          image: grafana/grafana:10.1.9-ubuntu
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000

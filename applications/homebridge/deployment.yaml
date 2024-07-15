@@ -61,28 +61,11 @@ metadata:
   name: homebridge
   namespace: homebridge
 spec:
+  type: LoadBalancer
   selector:
     app: homebridge
   ports:
   - targetPort: 8581
-    port: 8581
+    port: 80
     protocol: TCP
     name: config-server
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: homebridge
-  namespace: homebridge
-spec:
-  rules:
-  - host: homebridge.mcintosh.farm
-    http:
-      paths:
-      - backend:
-          service:
-            name: homebridge
-            port:
-              number: 8581
-        path: /
-        pathType: Prefix

@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: spinnaker
+  name: spinnaker-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: spinnaker.mcintosh.farm
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: spin-deck
+              port: 
+                number: 9000
+        - path: /api/v1/
+          pathType: Prefix
+          backend:
+            service:
+              name: spin-gate
+              port: 
+                number: 8084
+  tls:
+  - hosts:
+    - spinnaker.mcintosh.farm
+    secretName: spinnaker-ingress-cert

@@ -11,30 +11,23 @@ data:
           grpc:
           http:
 
+    exporters:
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        namespace: default
     processors:
       batch:
-
-    exporters:
-      otlp:
-        #https://docs.newrelic.com/docs/more-integrations/open-source-telemetry-integrations/opentelemetry/get-started/opentelemetry-set-up-your-app/#review-settings
-        endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
-        headers:
-          api-key: ${NEW_RELIC_LICENSE_KEY}
-
     service:
       pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
+        #traces:
+        #  receivers: [otlp]
+        #  exporters: []
         metrics:
           receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
-        logs:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
+          exporters: [prometheus]
+      #logs:
+      #    receivers: [otlp]
+      # exporters: []
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -53,14 +46,6 @@ spec:
     spec:
       containers:
       - name: otelcol
-        env:
-          - name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: https://otlp.nr-data.net:4317
-          - name: NEW_RELIC_LICENSE_KEY
-            valueFrom:
-              secretKeyRef:
-                key: NEW_RELIC_LICENSE_KEY
-                name: opa-secrets
         args:
         - --config=/conf/collector.yaml
         image: otel/opentelemetry-collector:0.95.0
@@ -90,6 +75,10 @@ spec:
     port: 4318
     protocol: TCP
     targetPort: 4318
+  - name: prometheus
+    port: 8889
+    protocol: TCP
+    targetPort: 8889
   selector:
   selector:
     app.kubernetes.io/name: opentelemetrycollector
