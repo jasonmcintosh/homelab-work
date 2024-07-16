@@ -69,7 +69,7 @@ spec:
               memory: 2Gi
           spin-igor:
             limits:
-              memory: 1.5Gi
+              memory: 2Gi
           spin-echo:
             limits:
               memory: 2Gi
@@ -80,7 +80,7 @@ spec:
             replicas: 1
           spin-kayenta:
             limits:
-              memory: 1.5Gi
+              memory: 2.5Gi
           spin-terraformer:
             limits:
               memory: .5Gi
@@ -205,7 +205,7 @@ spec:
                 - engineering-managed
       security:
         apiSecurity:
-          overrideBaseUrl: http://spinnaker.mcintosh.farm/api/v1
+          overrideBaseUrl: https://spinnaker.mcintosh.farm/api/v1
           ssl:
             enabled: false
         authn:
@@ -218,7 +218,7 @@ spec:
           groupMembership:
             service: EXTERNAL
         uiSecurity:
-          overrideBaseUrl: http://spinnaker.mcintosh.farm
+          overrideBaseUrl: https://spinnaker.mcintosh.farm
           ssl:
             enabled: false
       stats:
@@ -231,7 +231,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.32.3
+      version: 2.34.0-rc2
       webhook:
         trust:
           enabled: false
@@ -546,11 +546,11 @@ spec:
           useExecHealthCheck: false
       clouddriver:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_TRACES_EXPORTER: none
           OTEL_LOGS_EXPORTER: none
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:MaxRAMPercentage=50.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=50.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           useExecHealthCheck: false
           livenessProbe:
@@ -596,7 +596,7 @@ spec:
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_LOGS_EXPORTER: none
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=echo-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=echo-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           useExecHealthCheck: false
           livenessProbe:
@@ -638,7 +638,7 @@ spec:
           OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=fiat-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=fiat-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           useExecHealthCheck: false
           livenessProbe:
@@ -680,7 +680,7 @@ spec:
           OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=front50-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=front50-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -722,7 +722,7 @@ spec:
           OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=gate-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=gate-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           useExecHealthCheck: false
           livenessProbe:
@@ -762,9 +762,9 @@ spec:
         env:
           OTEL_TRACES_EXPORTER: none
           OTEL_LOGS_EXPORTER: none
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=igor-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=igor-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
             initialDelaySeconds: 60
@@ -805,9 +805,9 @@ spec:
         env:
           OTEL_TRACES_EXPORTER: none
           OTEL_LOGS_EXPORTER: none
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           useExecHealthCheck: false
           livenessProbe:
@@ -847,9 +847,9 @@ spec:
         env:
           OTEL_TRACES_EXPORTER: none
           OTEL_LOGS_EXPORTER: none
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=orca-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=orca-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -889,9 +889,9 @@ spec:
         env:
           OTEL_TRACES_EXPORTER: none
           OTEL_LOGS_EXPORTER: none
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=rosco-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=rosco-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
             failureThreshold: 3
