@@ -56,9 +56,6 @@ metadata:
   namespace: monitoring
 data:
   prometheus.yml: |
-    remote_write:
-      - url: "https://prometheus.mcintosh.farm/api/prom/push"
-
     # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
     rule_files:
       # - "first_rules.yml"
