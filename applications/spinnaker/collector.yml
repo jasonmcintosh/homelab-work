@@ -14,6 +14,8 @@ data:
     exporters:
       prometheus:
         endpoint: 0.0.0.0:8889
+      prometheusremotewrite:
+        endpoint: https://prometheus.mcintosh.farm/api/v1/write
     processors:
       batch:
     service:
@@ -23,7 +25,7 @@ data:
         #  exporters: []
         metrics:
           receivers: [otlp]
-          exporters: [prometheus]
+          exporters: [prometheus,prometheusremotewrite]
       #logs:
       #    receivers: [otlp]
       # exporters: []
