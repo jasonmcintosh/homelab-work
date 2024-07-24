@@ -231,7 +231,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.34.0-rc2
+      version: 2.34.0
       webhook:
         trust:
           enabled: false
@@ -480,6 +480,18 @@ spec:
               enabled: true
               baseUrl: http://localhost:8181/v1/data
               timeoutSeconds: 20
+        artifact-store:
+          enabled: true
+          type: s3
+          helm:
+            expandOverrides: true
+          s3:
+            enabled: true
+            bucket: artifact-store
+            region: local
+            url: http://minio:9000
+            accessKey: minio
+            secretKey: secretKey
         management:
           endpoints.web:
             exposure.include: "*"

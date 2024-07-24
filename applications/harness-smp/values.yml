@@ -27,3 +27,4 @@ global:
   ff: 
     enabled: false
   monitoring: false
+platform.bootstrap.networking.nginx.create: true
