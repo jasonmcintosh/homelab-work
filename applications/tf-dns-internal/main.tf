@@ -29,6 +29,13 @@ provider "cloudflare" {
 data "cloudflare_zone" "farm" {
   name = "mcintosh.farm"
 }
+resource "cloudflare_record" "nvr" {
+  zone_id = data.cloudflare_zone.farm.id
+  name = "nvr"
+  value = "192.168.18.192"
+  type = "A"
+  allow_overwrite = true
+}
 
 //VM Resources, esxi, demo lab stuff
 resource "cloudflare_record" "dl380" {
