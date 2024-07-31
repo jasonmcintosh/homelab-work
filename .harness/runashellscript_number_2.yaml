@@ -1,0 +1,32 @@
+---
+pipeline:
+  projectIdentifier: "dnsinternal"
+  orgIdentifier: "default"
+  tags: {}
+  stages:
+  - stage:
+      name: "shell-script"
+      identifier: "shellscript"
+      description: ""
+      type: "Custom"
+      spec:
+        execution:
+          steps:
+          - step:
+              type: "ShellScript"
+              name: "ShellScript_1"
+              identifier: "ShellScript_1"
+              spec:
+                shell: "Bash"
+                executionTarget: {}
+                source:
+                  type: "Inline"
+                  spec:
+                    script: "echo \"Helloooo world started at <+execution.steps.ShellScript_1.startTs>!\"\
+                      \nsleep 5\necho \"I finished...\""
+                environmentVariables: []
+                outputVariables: []
+              timeout: "10m"
+      tags: {}
+  identifier: "runashellscript_number_2"
+  name: "run-a-shell-script - number 2"
