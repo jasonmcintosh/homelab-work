@@ -1,7 +1,7 @@
-# spinnaker-work
-Generic tools/scripts/docs around spinnaker work.
+# home-work
+Generic tools/scripts/docs around my home lab.  Lab is an older DL380P Gen 9 running Xen & a multinode microk8s cluster (currently 1.30 based).  In the past it was vmware based, but... since I didn't managet to buy a license before the broadcom mess at 500, and the price for a purchase now is several thousand, I went OSS.  
 
-This contains docs, spinnaker.yaml, microk8s and instructions to run spinnaker locally auth'd against a dev okta instance using oauth2
+This contains numerous docs, installations, supporting installations for applications & services.  This includes harness, spinnaker, homebridge, metallb, etc. I  use a dev okta instance in several places (though keycloak is an option, I like Okta and recommend them and this lets me test various systems with it).
 
 
-NOTE:  MANY of the resources in this are done via Armory Enterprise Spinnaker which is NOT open source.  However, versions and settings can easily be changed to work with PURE OSS (aka using 1.28 instead of 2.28 for releases and using the OSS Operator vs. Armory operator.  
+NOTE:  MANY of the resources in this are done via COMMERCIAL licenses which are NOT open source.  There ARE resources that ARE OSS however.  WHere possible I use RAW manifests vs. helm charts or similar so you can see exactly what's going on under the hood.
