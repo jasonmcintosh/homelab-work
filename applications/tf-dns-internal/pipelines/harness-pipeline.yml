@@ -29,7 +29,7 @@ pipeline:
                               gitFetchType: Branch
                               branch: main
                               folderPath: applications/tf-dns-internal
-                              connectorRef: GH-JM-RW
+                              connectorRef: GHJMRW
                             type: Github
                   timeout: 15m
         tags: {}
