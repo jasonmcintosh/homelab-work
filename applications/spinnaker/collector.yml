@@ -12,8 +12,6 @@ data:
           http:
 
     exporters:
-      prometheus:
-        endpoint: 0.0.0.0:8889
       prometheusremotewrite:
         endpoint: https://prometheus.mcintosh.farm/api/v1/write
     processors:
@@ -25,7 +23,7 @@ data:
         #  exporters: []
         metrics:
           receivers: [otlp]
-          exporters: [prometheus,prometheusremotewrite]
+          exporters: [prometheusremotewrite]
       #logs:
       #    receivers: [otlp]
       # exporters: []
@@ -76,10 +74,6 @@ spec:
     port: 4318
     protocol: TCP
     targetPort: 4318
-  - name: prometheus
-    port: 8889
-    protocol: TCP
-    targetPort: 8889
   selector:
   selector:
     app.kubernetes.io/name: opentelemetrycollector
