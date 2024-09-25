@@ -145,7 +145,7 @@ spec:
           claimName: gitness-pv
       - name: docker-sock
         hostPath:
-          path: "/var/run/docker.sock"
+          path: "/var/snap/microk8s/common/run/containerd.sock"
           type: Socket
       - name: docker-directory
         hostPath:
@@ -181,9 +181,15 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
   name: gitness
   namespace: gitness
 spec:
+  tls:
+    - hosts:
+      - "*.mcintosh.farm"
+      secretName: mcintosh-farm
   rules:
   - host: git.mcintosh.farm
     http:
