@@ -148,6 +148,15 @@ resource "cloudflare_record" "harbor" {
   allow_overwrite = true
 }
 
+resource "cloudflare_record" "gitness" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "harbor"
+  value   = "git.mcintosh.farm"
+  type    = "CNAME"
+  allow_overwrite = true
+}
+
+
 
 
 output "zone_status" {
