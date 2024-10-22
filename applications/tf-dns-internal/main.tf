@@ -169,7 +169,7 @@ resource "cloudflare_record" "bluesky" {
   name = "_atproto"
   type = "TXT"
   allow_overwrite = true
-  value = "did=did:plc:67gtgajzomeli6ahmemyifwo"
+  value = "did=did:plc:67gtgajzomelj6ahmemyjfwo"
 }
 
 
