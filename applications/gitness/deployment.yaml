@@ -114,6 +114,10 @@ spec:
       labels:
         app: gitness
     spec:
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: gitness-pv
       containers:
       - name: gitness
         securityContext:
@@ -121,36 +125,44 @@ spec:
           runAsUser: 0
         image: harness/gitness:latest
         env:
+          - name: DOCKER_HOST
+            value: tcp://localhost:2375
           - name: GITNESS_DATABASE_DATASOURCE
             value: "host=postgresql.gitness.svc.cluster.local port=5432 sslmode=disable dbname=gitness user=gitness password=gitness"
           - name: GITNESS_DATABASE_DRIVER
             value: postgres 
           - name: GITNESS_URL_BASE
-            value: http://git.mcintosh.farm
+            value: https://git.mcintosh.farm
         ports:
         - name: web
           containerPort: 3000
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: web
+        readinessProbe:
+          httpGet:
+            path: /
+            port: web
         volumeMounts:
         - name: data
           mountPath: /data
-        - mountPath: /var/run/docker.sock
-          name: docker-sock
-          readOnly: false
-        - mountPath: "/var/lib/docker"
-          name: docker-directory
-          readOnly: false
-      volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: gitness-pv
-      - name: docker-sock
-        hostPath:
-          path: "/var/snap/microk8s/common/run/containerd.sock"
-          type: Socket
-      - name: docker-directory
-        hostPath:
-          path: "/var/lib/docker"
-
+      - name: dind
+        image: docker:24.0.3-dind
+        command: ["dockerd", "--host", "tcp://127.0.0.1:2375"]
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - "/bin/sh"
+                - "-c"
+                - "echo '127.0.0.1 host.docker.internal' >> /etc/hosts"
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: data
+            mountPath: /certs
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
