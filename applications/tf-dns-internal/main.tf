@@ -156,7 +156,21 @@ resource "cloudflare_record" "gitness" {
   allow_overwrite = true
 }
 
+resource "cloudflare_record" "gitness" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "git-ssh"
+  value   = "192.168.19.201"
+  type    = "A"
+  allow_overwrite = true
+}
 
+resource "cloudflare_record" "bluesky" {
+  zone_id = data.cloudflare_zone.farm.id
+  name = "_atproto"
+  type = "TXT"
+  allow_overwrite = true
+  value = "did=did:plc:67gtgajzomeli6ahmemyifwo"
+}
 
 
 output "zone_status" {
