@@ -9,7 +9,9 @@ data:
       otlp:
         protocols:
           grpc:
+            endpoint: 0.0.0.0:4317
           http:
+            endpoint: 0.0.0.0:4318
 
     exporters:
       prometheusremotewrite:
@@ -47,7 +49,7 @@ spec:
       - name: otelcol
         args:
         - --config=/conf/collector.yaml
-        image: otel/opentelemetry-collector:0.95.0
+        image: otel/opentelemetry-collector:0.109.0
         volumeMounts:
         - mountPath: /conf
           name: collector-config
