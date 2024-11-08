@@ -136,7 +136,7 @@ spec:
           - name: GITNESS_URL_REGISTRY
             value: https://git.mcintosh.farm
           - name: GITNESS_URL_GIT_SSH
-            value: ssh://git@git-ssh.mcintosh.farm:3022/homelab/homelab.git
+            value: ssh://git@git-ssh.mcintosh.farm:3022/
           - name: GITNESS_SSH_ENABLE
             value: "true"
           - name: GITNESS_DEBUG
