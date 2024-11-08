@@ -159,7 +159,7 @@ resource "cloudflare_record" "gitness" {
 resource "cloudflare_record" "gitness-ssh" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "git-ssh"
-  value   = "192.168.19.201"
+  value   = "192.168.19.202"
   type    = "A"
   allow_overwrite = true
 }
