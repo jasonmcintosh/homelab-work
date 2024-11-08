@@ -231,7 +231,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.34.0
+      version: 2.35.0-rc1
       webhook:
         trust:
           enabled: false
@@ -273,12 +273,8 @@ spec:
               defaults:
                 rateLimit: 5
         sql:
-          agent:
-            enabledPattern: .*
           cache:
             enabled: true
-            readBatchSize: 100
-            writeBatchSize: 100
           connectionPools:
             default:
               default: true
@@ -451,10 +447,17 @@ spec:
         tasks:
           useManagedServiceAccounts: true
         executionRepository:
+          compression:
+            bodyCompressionThreshold: 1024
+            compressionMode: read-write
+            compressionType: ZLIB
+            enabled: true
           redis:
             enabled: false
           sql:
             enabled: true
+            pipelineRef:
+              enabled: true
         monitor:
           activeExecutions:
             redis: false
@@ -503,33 +506,12 @@ spec:
             mime-types: text/html, text/xml, text/plain, text/css, text/javascript, application/javascript, application/json
             enabled: true
             min-response-size: 4096
-        default:
-          cipherSuites:
-            - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-            - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-            - TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
-            - TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
-            - TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
-            - TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
-            - TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
-            - TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
-            - TLS_AES_256_GCM_SHA384
-            - TLS_CHACHA20_POLY1305_SHA256
-            - TLS_AES_128_GCM_SHA256
-          tlsVersions:
-            - TLSv1.2
-            - TLSv1.3
         logging:
           level:
             com.amazonaws.latency: WARN
             com.netflix.spinnaker.clouddriver.cache: WARN
             com.netflix.spinnaker.clouddriver.kubernetes.OpaDeployDescriptionValidator: DEBUG
             io.armory.spinnaker.front50.validator.validator.OpenPolicyAgentValidator: INFO
-        ok-http-client:
-          connectTimeoutMs: 15000
-          maxRequests: 256
-          maxRequestsPerHost: 256
-          readTimeoutMs: 60000
         spinnaker:
           extensibility:
             deck-proxy:
@@ -571,7 +553,6 @@ spec:
               path: /health
               port: 7002
               scheme: HTTP
-            initialDelaySeconds: 60
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
@@ -581,17 +562,16 @@ spec:
               path: /health
               port: 7002
               scheme: HTTP
-            initialDelaySeconds: 60
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
           startupProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /health
               port: 7002
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 30
             periodSeconds: 30
             successThreshold: 1
             timeoutSeconds: 5
@@ -621,7 +601,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 180
             failureThreshold: 3
             httpGet:
               path: /health
@@ -631,12 +610,12 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /health
               port: 8089
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
@@ -663,7 +642,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 180
             failureThreshold: 3
             httpGet:
               path: /health
@@ -673,12 +651,12 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /health
               port: 7003
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
@@ -704,7 +682,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 180
             failureThreshold: 3
             httpGet:
               path: /health
@@ -714,12 +691,12 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /health
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
@@ -747,7 +724,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 180
             failureThreshold: 3
             httpGet:
               path: /api/v1/health
@@ -757,12 +733,12 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /api/v1/health
               port: 8084
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
@@ -779,7 +755,6 @@ spec:
           JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=igor-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
           livenessProbe:
-            initialDelaySeconds: 60
             failureThreshold: 3
             httpGet:
               path: /health
@@ -789,7 +764,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 80
             failureThreshold: 3
             httpGet:
               path: /health
@@ -799,12 +773,12 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /health
               port: 8088
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
@@ -832,7 +806,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 180
             failureThreshold: 3
             httpGet:
               path: /health
@@ -842,12 +815,12 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /health
               port: 8090
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
@@ -873,7 +846,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 180
             failureThreshold: 3
             httpGet:
               path: /health
@@ -883,12 +855,12 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /health
               port: 8083
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
@@ -915,7 +887,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 180
             failureThreshold: 3
             httpGet:
               path: /health
@@ -925,12 +896,12 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 3
+            failureThreshold: 30
             httpGet:
               path: /health
               port: 8087
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 30
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
@@ -951,7 +922,6 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           readinessProbe:
-            initialDelaySeconds: 180
             failureThreshold: 3
             httpGet:
               path: /health
