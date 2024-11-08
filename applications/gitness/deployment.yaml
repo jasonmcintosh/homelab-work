@@ -123,7 +123,7 @@ spec:
         securityContext:
           privileged: true
           runAsUser: 0
-        image: harness/gitness:latest
+        image: harness/harness:unstable
         env:
           - name: DOCKER_HOST
             value: tcp://localhost:2375
@@ -133,9 +133,24 @@ spec:
             value: postgres 
           - name: GITNESS_URL_BASE
             value: https://git.mcintosh.farm
+          - name: GITNESS_URL_REGISTRY
+            value: https://git.mcintosh.farm
+          - name: GITNESS_URL_GIT_SSH
+            value: ssh://git@git-ssh.mcintosh.farm:3022/homelab/homelab.git
+          - name: GITNESS_SSH_ENABLE
+            value: "true"
+          - name: GITNESS_DEBUG
+            value: "true"
+          - name: GITNESS_SSH_HOST
+            value: 0.0.0.0
+          - name: GITNESS_SSH_PORT
+            value: "3022"
         ports:
         - name: web
           containerPort: 3000
+          protocol: TCP
+        - name: ssh
+          containerPort: 3022
           protocol: TCP
         livenessProbe:
           httpGet:
@@ -182,6 +197,7 @@ metadata:
   name: gitness
   namespace: gitness
 spec:
+  type: LoadBalancer
   selector:
     app: gitness
   ports:
@@ -190,11 +206,29 @@ spec:
     protocol: TCP
     name: config-server
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitness-ssh
+  namespace: gitness
+spec:
+  type: LoadBalancer
+  selector:
+    app: gitness
+  ports:
+  - targetPort: 3022
+    port: 3022
+    protocol: TCP
+    name: ssh-server
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: cloudflare-issuer
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
   name: gitness
   namespace: gitness
 spec:
