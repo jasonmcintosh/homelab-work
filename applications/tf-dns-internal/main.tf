@@ -108,7 +108,7 @@ resource "cloudflare_record" "harnesssmp" {
 resource "cloudflare_record" "homebridge" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "homebridge"
-  value   = "192.168.18.7"
+  value   = "192.168.18.76"
   type    = "A"
   allow_overwrite = true
 }
