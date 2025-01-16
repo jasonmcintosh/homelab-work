@@ -203,6 +203,13 @@ spec:
                 WRITE:
                 - everyone
                 - engineering-managed
+            - name: k8s-homelab
+              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+              permissions:
+                READ:
+                - engineering-managed
+                WRITE:
+                - engineering-managed
       security:
         apiSecurity:
           overrideBaseUrl: https://spinnaker.mcintosh.farm/api/v1
@@ -231,7 +238,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.35.0-rc1
+      version: 2.35.0-rc2
       webhook:
         trust:
           enabled: false
@@ -415,6 +422,9 @@ spec:
           pollingSafeguard:
             itemUpperThreshold: 10000
       orca:
+        oldPipelineCleanup:
+          enabled: true
+          thresholdDays: 14
         webhook:
           preconfigured:
           - label: KNative Notification
