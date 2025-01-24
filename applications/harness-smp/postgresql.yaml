@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tiemscaledb
+  namespace: harness
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    app: tiemscaledb
+    owner: mcintoshj@gmail.com
+  labels:
+    app: tiemscaledb
+  name: tiemscaledb
+  namespace: harness
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: tiemscaledb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        app: tiemscaledb
+        owner: mcintoshj@gmail.com
+      labels:
+        app: tiemscaledb
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: "Always"
+      containers:
+        - env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: harness-secrets
+                key: timescaledbPostgresPassword
+          - name: POSTGRES_USER
+            value: postgres
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+          image: timescale/timescaledb-ha:pg17
+          imagePullPolicy: Always
+          livenessProbe: &probe-config
+            failureThreshold: 3
+            tcpSocket:
+              port: 5432
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe: *probe-config
+          startupProbe: *probe-config
+          name: timescaledb
+          ports: 
+          - containerPort: 5432
+            protocol: TCP
+          volumeMounts:
+          - name: data
+            mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: tiemscaledb
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    app: tiemscaledb
+    owner: mcintoshj@gmail.com
+  name: timescaledb
+  namespace: harness
+spec:
+  ports:
+  - port: 5432
+  selector:
+    app: tiemscaledb
+  clusterIP: None
+--- 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tsdb-secret
+  namespace: harness
+type: Opaque
+data:
+    username: postgres
+    password: "ZkFLTEZVa2E5UGh5bXdXTA=="

@@ -140,13 +140,14 @@ resource "cloudflare_record" "grafana" {
 }
 
 
-resource "cloudflare_record" "harbor" {
+resource "cloudflare_record" "splunk" {
   zone_id = data.cloudflare_zone.farm.id
-  name    = "harbor"
+  name    = "splunk"
   value   = "nginx.mcintosh.farm"
   type    = "CNAME"
   allow_overwrite = true
 }
+
 
 resource "cloudflare_record" "gitness" {
   zone_id = data.cloudflare_zone.farm.id
