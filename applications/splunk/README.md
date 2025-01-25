@@ -1,5 +1,9 @@
 ## Splunk example (free) and a sample dashboard.  
 
+MOSTLY built using:
+https://splunk.github.io/docker-splunk/
+
+
 Built off of 
 https://docs.armory.io/continuous-deployment/armory-admin/observe/integrations-logging/#enable-logging-data
 
