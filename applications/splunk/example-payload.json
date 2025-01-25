@@ -1,0 +1,41 @@
+{
+    "event": {
+        "details": {
+            "source": "gate",
+            "type": "gate:session",
+            "created": "1737767131128",
+            "requestHeaders": {}
+        },
+        "content": {
+            "headers": {
+                "x-request-id": "2383646e9a37c715102d119c9622ebf2",
+                "sec-fetch-mode": "cors",
+                "referer": "https://spinnaker.mcintosh.farm/",
+                "sec-fetch-site": "same-origin",
+                "x-forwarded-proto": "https",
+                "accept-language": "en-US,en;q=0.9",
+                "cookie": "SESSION=YzdlOWIzOGQtZjJlMC00MDMwLWI2ZWEtNWYyZDMzZTNjYzM4",
+                "x-forwarded-port": "443",
+                "priority": "u=1, i",
+                "accept": "application/json, text/plain, */*",
+                "x-real-ip": "192.168.18.108",
+                "x-forwarded-scheme": "https",
+                "sec-ch-ua": "\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"",
+                "sec-ch-ua-mobile": "?0",
+                "x-forwarded-host": "spinnaker.mcintosh.farm",
+                "sec-ch-ua-platform": "\"macOS\"",
+                "host": "spinnaker.mcintosh.farm",
+                "x-ratelimit-app": "deck",
+                "x-scheme": "https",
+                "accept-encoding": "gzip, deflate, br, zstd",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+                "sec-fetch-dest": "empty"
+            },
+            "method": "GET",
+            "params": {},
+            "uri": "/api/v1/pipelines/01JJDFW4W8RTQPCCCAYWYVWXWD",
+            "user": "mcintoshj@gmail.com",
+            "url": "https://spinnaker.mcintosh.farm/api/v1/pipelines/01JJDFW4W8RTQPCCCAYWYVWXWD"
+        }
+    }
+}

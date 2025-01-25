@@ -1,0 +1,185 @@
+{
+    "title": "Compliance Center",
+    "description": "",
+    "inputs": {
+        "input_1": {
+            "options": {
+                "defaultValue": "-30d@d,now",
+                "token": "field1"
+            },
+            "title": "Select Time",
+            "type": "input.timerange"
+        }
+    },
+    "defaults": {
+        "dataSources": {
+            "ds.search": {
+                "options": {
+                    "queryParameters": {}
+                }
+            }
+        }
+    },
+    "visualizations": {
+        "viz_chart_1": {
+            "containerOptions": {},
+            "context": {},
+            "dataSources": {
+                "primary": "ds_search_1"
+            },
+            "options": {},
+            "showLastUpdated": false,
+            "showProgressBar": false,
+            "title": "Top Spinnaker Deployment Accounts",
+            "type": "splunk.line"
+        },
+        "viz_chart_2": {
+            "context": {},
+            "dataSources": {
+                "primary": "ds_search_3"
+            },
+            "options": {
+                "legendTruncation": "ellipsisMiddle",
+                "showRoundedY2AxisLabels": false,
+                "showY2MajorGridLines": true,
+                "y2AxisAbbreviation": "off",
+                "yAxisAbbreviation": "off"
+            },
+            "title": "Gate API sessions by Authenticated Users",
+            "type": "splunk.area"
+        },
+        "viz_table_1": {
+            "dataSources": {
+                "primary": "ds_search_2"
+            },
+            "options": {
+                "drilldown": "none",
+                "refresh.display": "progressbar"
+            },
+            "title": "Manual Judgements - Approvals for Production Deployments",
+            "type": "splunk.table"
+        },
+        "viz_table_2": {
+            "dataSources": {
+                "primary": "ds_search_4"
+            },
+            "options": {
+                "drilldown": "none"
+            },
+            "title": "Deployments to Namespace Environment - by Deployment Account",
+            "type": "splunk.table"
+        }
+    },
+    "dataSources": {
+        "ds_search_1": {
+            "options": {
+                "query": "index=main \"details.type\"=\"orca:pipeline:starting\" | timechart count by content.execution.stages{}.context.account limit=10 usenull=f",
+                "queryParameters": {
+                    "earliest": "$field1.earliest$",
+                    "latest": "$field1.latest$"
+                }
+            },
+            "type": "ds.search"
+        },
+        "ds_search_2": {
+            "name": "Manual Judgements",
+            "options": {
+                "query": "index=main \"content.execution.stages{}.name\"=\"Manual Judgment\" | stats count by content.execution.trigger.user | rename content.execution.trigger.user as \"Approval Users\"",
+                "queryParameters": {
+                    "earliest": "$field1.earliest$",
+                    "latest": "$field1.latest$"
+                }
+            },
+            "type": "ds.search"
+        },
+        "ds_search_3": {
+            "name": "API Sessions by Users",
+            "options": {
+                "query": "\"details.source\"=gate  index=main| spath \"content.user\" | search \"content.user\"!=\"anonymous\" | timechart count by content.user",
+                "queryParameters": {
+                    "earliest": "$field1.earliest$",
+                    "latest": "$field1.latest$"
+                }
+            },
+            "type": "ds.search"
+        },
+        "ds_search_4": {
+            "name": "By Env",
+            "options": {
+                "query": "index=main | stats count by content.execution.stages{}.context.account, content.execution.name, content.context.kato.tasks{}.resultObjects{}.manifests{}.metadata.namespace | sort -count | stats list(content.context.kato.tasks{}.resultObjects{}.manifests{}.metadata.namespace) as \"Deployment Namespaces\", list(content.execution.name) as \"Pipeline Name\", list(count) as count, sum(count) as total by content.execution.stages{}.context.account | sort -total | rename content.execution.stages{}.context.account as \"Spinnaker Deployment Accounts\"",
+                "queryParameters": {
+                    "earliest": "$field1.earliest$",
+                    "latest": "$field1.latest$"
+                }
+            },
+            "type": "ds.search"
+        }
+    },
+    "layout": {
+        "globalInputs": [
+            "input_1"
+        ],
+        "layoutDefinitions": {
+            "layout_1": {
+                "options": {
+                    "display": "auto-scale",
+                    "height": 500
+                },
+                "structure": [
+                    {
+                        "item": "viz_chart_1",
+                        "position": {
+                            "h": 250,
+                            "w": 600,
+                            "x": 0,
+                            "y": 0
+                        },
+                        "type": "block"
+                    },
+                    {
+                        "item": "viz_table_1",
+                        "position": {
+                            "h": 250,
+                            "w": 600,
+                            "x": 600,
+                            "y": 0
+                        },
+                        "type": "block"
+                    },
+                    {
+                        "item": "viz_chart_2",
+                        "position": {
+                            "h": 250,
+                            "w": 600,
+                            "x": 0,
+                            "y": 250
+                        },
+                        "type": "block"
+                    },
+                    {
+                        "item": "viz_table_2",
+                        "position": {
+                            "h": 250,
+                            "w": 600,
+                            "x": 600,
+                            "y": 250
+                        },
+                        "type": "block"
+                    }
+                ],
+                "type": "absolute"
+            }
+        },
+        "options": {
+            "submitButton": false
+        },
+        "tabs": {
+            "items": [
+                {
+                    "label": "New tab",
+                    "layoutId": "layout_1"
+                }
+            ]
+        }
+    }
+}
