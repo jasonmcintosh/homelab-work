@@ -42,7 +42,7 @@ spec:
       - image: mysql:8
         name: mysql
         args:
-          - --binlog_expire_logs_seconds=86400
+          - --disable-log-bin
         env:
           # Use secret in real usage
         - name: MYSQL_ROOT_PASSWORD
