@@ -170,46 +170,7 @@ spec:
         kubernetes:
           enabled: true
           primaryAccount: k8s-namespace-dev
-          accounts:
-            - name: k8s-spinnaker-prod
-              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-              namespaces: 
-              - spinnaker
-              permissions:
-                READ:
-                - everyone
-                - engineering-managed
-                WRITE:
-                - everyone
-                - engineering-managed
-            - name: k8s-namespace-prod
-              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-              namespaces: 
-              - prod
-              permissions:
-                READ:
-                - everyone
-                - engineering-managed
-                WRITE:
-                - engineering-managed
-            - name: k8s-namespace-dev
-              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-              namespaces: 
-              - dev
-              permissions:
-                READ:
-                - everyone
-                - engineering-managed
-                WRITE:
-                - everyone
-                - engineering-managed
-            - name: k8s-homelab
-              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-              permissions:
-                READ:
-                - engineering-managed
-                WRITE:
-                - engineering-managed
+
       security:
         apiSecurity:
           overrideBaseUrl: https://spinnaker.mcintosh.farm/api/v1
@@ -238,7 +199,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.35.0-rc2
+      version: 2.36.1
       webhook:
         trust:
           enabled: false
@@ -247,6 +208,50 @@ spec:
         kubernetes:
           loadNamespacesInAccount: false
           verifyAccountHealth: false
+          accounts:
+            - name: k8s-spinnaker-prod
+              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+              kubectlExecutable: kubectl-1.29
+              namespaces: 
+              - spinnaker
+              permissions:
+                READ:
+                - everyone
+                - engineering-managed
+                WRITE:
+                - everyone
+                - engineering-managed
+            - name: k8s-namespace-prod
+              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+              kubectlExecutable: kubectl-1.29
+              namespaces: 
+              - prod
+              permissions:
+                READ:
+                - everyone
+                - engineering-managed
+                WRITE:
+                - engineering-managed
+            - name: k8s-namespace-dev
+              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+              kubectlExecutable: kubectl-1.29
+              namespaces: 
+              - dev
+              permissions:
+                READ:
+                - everyone
+                - engineering-managed
+                WRITE:
+                - everyone
+                - engineering-managed
+            - name: k8s-homelab
+              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+              kubernetesVersion: kubectl-1.29
+              permissions:
+                READ:
+                - engineering-managed
+                WRITE:
+                - engineering-managed
         ## done here... Maybe could move to providers block... hit some ODD issues with halyard validation this though :( 
         docker-registry:
           enabled: true
@@ -529,14 +534,14 @@ spec:
               plugins:
                 Armory.PolicyEngine:
                   enabled: true
-                  version: 0.3.0
+                  version: 0.4.0
                 Armory.ArmoryHeader:
                   enabled: true
                   version: 0.2.2
             plugins:
               Armory.PolicyEngine:
                 enabled: true
-                version: 0.3.0
+                version: 0.4.0
             repositories:
               opa:
                 url: https://raw.githubusercontent.com/armory-plugins/policy-engine-releases/master/repositories.json
