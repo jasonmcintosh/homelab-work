@@ -100,5 +100,5 @@ metadata:
   namespace: harness
 type: Opaque
 data:
-    username: postgres
+    username: LXIgcG9zdGdyZXMK
     password: "ZkFLTEZVa2E5UGh5bXdXTA=="

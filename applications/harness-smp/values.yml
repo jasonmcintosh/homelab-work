@@ -1,5 +1,17 @@
 global:
+  autoscaling:
+    enabled: false
+  pdb:
+    create: true
   loadbalancerURL: https://harness.mcintosh.farm
+  database:
+    timescaledb:
+      autoscaling:
+        enabled: false
+      hosts: 
+      - timescaledb:5432
+      installed: false
+      sslEnabled: false
   license:
     secrets:
       kubernetesSecrets:
@@ -15,6 +27,8 @@ global:
     - harness.mcintosh.farm
     enabled: true
   ha: false
+  iacm:
+    enabled: false
   srm:
     enabled: true
   cet:
@@ -25,6 +39,5 @@ global:
   ci: 
     enabled: true
   ff: 
-    enabled: false
+    enabled: true
   monitoring: false
-platform.bootstrap.networking.nginx.create: true

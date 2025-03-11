@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-service
+  namespace: harness
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ng-manager
+  namespace: harness
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+      - name: regcred
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ng-manager
+  namespace: harness
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harness-manager
+  namespace: harness
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ci-manager
+  namespace: harness
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+      - name: regcred
+

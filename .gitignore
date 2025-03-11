@@ -2,6 +2,9 @@
 kubeconfig
 
 credentials/*
+## Kustomize chart cache
+**/charts/**
+**/credentials/**
 cluster/opencontext/values*
 
 .gradle

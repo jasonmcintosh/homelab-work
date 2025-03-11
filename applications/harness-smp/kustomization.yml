@@ -1,0 +1,26 @@
+helmCharts:
+- name: harness
+  namespace: harness
+  includeCRDs: true
+  valuesFile: values.yml
+  releaseName: harness
+  version: 0.26.3
+  repo: https://harness.github.io/helm-charts
+resources:
+  - credentials/harness-license.yml
+  - credentials/docker-regcred.yml
+  - postgresql.yaml
+
+images:
+  ## Useful if I'm testing locally built custom stuff
+# - name: docker.io/harness/pipeline-service-signed
+#   newName: git.mcintosh.farm/homelab/harness/pipeline-service
+#   newTag: 1.113.5
+
+
+patches:
+  - path: credentials/harness-secrets.yaml
+  - path: patch-images.yml
+  - path: fix-certs.yml
+    target:
+      kind: Ingress
