@@ -1,0 +1,16 @@
+## BYpasses NGINX for direct access via a metal LB system.  Which loses SSL Cert ingection but reduces load on nginx
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-web-app-lb
+  annotations:
+    app: demo-web-app
+    type: spring-boot-app
+spec:
+  type: LoadBalancer
+  selector:
+    app: demo-web-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
