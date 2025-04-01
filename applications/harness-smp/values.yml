@@ -3,6 +3,14 @@ global:
     enabled: false
   pdb:
     create: true
+  database:
+    timescaledb:
+      autoscaling:
+        enabled: false
+      hosts: 
+      - timescaledb:5432
+      installed: false
+      sslEnabled: false
   loadbalancerURL: https://harness.mcintosh.farm
   database:
     timescaledb:
