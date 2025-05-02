@@ -323,6 +323,32 @@ spec:
         Logging:
           Level: INFO
       echo:
+        quiet-period:
+          enabled: true
+          endIso: "2025-05-28T21:00:00Z"
+          startIso: "2025-02-09T21:00:00Z"
+          suppressedTriggerTypes:
+          - cron
+          - webhook
+          - git
+          - concourse
+          - jenkins
+          - docker
+          - pubsub
+          - dryrun
+          - pipeline
+          - plugin
+          - helm
+          - manual
+        rest:
+          enabled: true
+          endpoints:
+          - headers:
+              Authorization: Splunk 1BD1BBDF-F7C2-4205-9113-427724465EDB
+            template: '{"event":{{event}} }'
+            url: https://splunk.mcintosh.farm/hec/services/collector/event?
+            wrap: true
+          insecure: false
         scheduler:
           enabled: true
           pipelineConfigsPoller:
