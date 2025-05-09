@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "6"
+  generation: 6
+  labels:
+    harness.io/name: kubernetes-delegate
+  name: kubernetes-delegate
+  namespace: harness-delegate-ng
+spec:
+  minReadySeconds: 120
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      harness.io/name: kubernetes-delegate
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /api/metrics
+        prometheus.io/port: "3460"
+        prometheus.io/scrape: "true"
+      creationTimestamp: null
+      labels:
+        harness.io/name: kubernetes-delegate
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTS
+          value: -Xms64M
+        - name: ACCOUNT_ID
+          value: U2Z9_DtlQEKwy1IqXZdITA
+        - name: MANAGER_HOST_AND_PORT
+          value: https://harness.mcintosh.farm
+        - name: DEPLOY_MODE
+          value: KUBERNETES_ONPREM
+        - name: DELEGATE_NAME
+          value: kubernetes-delegate
+        - name: DELEGATE_TYPE
+          value: KUBERNETES
+        - name: PROXY_HOST
+          value: envoy-proxy
+        - name: PROXY_SCHEME
+          value: http
+        - name: PROXY_PORT
+          value: "3128"
+        - name: DELEGATE_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: INIT_SCRIPT
+          value: |
+            microdnf install unzip && curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh \
+            -o install-opentofu.sh && chmod 755 install-opentofu.sh && ./install-opentofu.sh \
+            --install-method standalone && ln -s /opt/opentofu/tofu /usr/local/bin/terraform  \
+            && microdnf install libpcap \
+            && microdnf install shadow-utils \
+            && curl -O https://rpmfind.net/linux/centos-stream/9-stream/AppStream/x86_64/os/Packages/tcpdump-4.99.0-9.el9.x86_64.rpm \
+            && rpm -Uvh tcpdump-4.99.0-9.el9.x86_64.rpm
+
+        - name: DELEGATE_DESCRIPTION
+        - name: DELEGATE_TAGS
+        - name: NEXT_GEN
+          value: "true"
+        - name: CLIENT_TOOLS_DOWNLOAD_DISABLED
+          value: "true"
+        - name: DELEGATE_RESOURCE_THRESHOLD
+        - name: DYNAMIC_REQUEST_HANDLING
+          value: "false"
+        envFrom:
+        - secretRef:
+            name: kubernetes-delegate-account-token
+        image: docker.io/harness/delegate:25.02.85201
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /api/health
+            port: 3460
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: delegate
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0
+        startupProbe:
+          failureThreshold: 15
+          httpGet:
+            path: /api/health
+            port: 3460
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 3600

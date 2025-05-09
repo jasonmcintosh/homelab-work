@@ -385,22 +385,26 @@ spec:
         armory:
           cloud:
             enabled: false
-        security:
-          oauth2:
-            resource:
-              userInfoUri: https://dev-200769.okta.com/oauth2/default/v1/userinfo
-            client:
-              accessTokenUri: https://dev-200769.okta.com/oauth2/default/v1/token
-              clientId: 0oa9htg5c5Kv1ZEAK4x7
-              clientSecret: encrypted:k8s!n:auth-credentials!k:clientSecret
-              scope: groups email profile openid
-              userAuthorizationUri: https://dev-200769.okta.com/oauth2/default/v1/authorize
-            userInfoMapping:
-              email: email
-              firstName: given_name
-              lastName: family_name
-              username: preferred_username
-              roles: groups
+        saml:
+          enabled: true
+          issuerId: spinnaker
+          metadataUrl: https://dev-200769.okta.com/app/exkrb6efezGBrbCUz4x7/sso/saml/metadata
+#       security:
+#         oauth2:
+#           resource:
+#             userInfoUri: https://dev-200769.okta.com/oauth2/default/v1/userinfo
+#           client:
+#             accessTokenUri: https://dev-200769.okta.com/oauth2/default/v1/token
+#             clientId: 0oa9htg5c5Kv1ZEAK4x7
+#             clientSecret: encrypted:k8s!n:auth-credentials!k:clientSecret
+#             scope: groups email profile openid
+#             userAuthorizationUri: https://dev-200769.okta.com/oauth2/default/v1/authorize
+#           userInfoMapping:
+#             email: email
+#             firstName: given_name
+#             lastName: family_name
+#             username: preferred_username
+#             roles: groups
         default:
           apiPort: 8085
         proxies:
