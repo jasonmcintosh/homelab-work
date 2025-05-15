@@ -72,9 +72,9 @@ data:
           insecure_skip_verify: true
         static_configs:
         - targets: 
-          - 'kubenode1:10250'
-          - 'kubenode2:10250'
-          - 'kubenode3:10250'
+          - 'kubenode1.mcintosh.farm:10250'
+          - 'kubenode2.mcintosh.farm:10250'
+          - 'kubenode3.mcintosh.farm:10250'
 
      #- job_name: 'otel-collector'
      #  metrics_path: /metrics

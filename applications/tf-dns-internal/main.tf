@@ -4,6 +4,10 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 3.0"
     }
+    kubernetes = {
+      source = "opentofu/kubernetes"
+      version = "2.36.0"
+    }
   }
 
   backend "kubernetes" {
@@ -25,6 +29,8 @@ data "kubernetes_secret" "cloudflare-api" {
 provider "cloudflare" {
   api_token = data.kubernetes_secret.cloudflare-api.data["api_key"]
 }
+
+
 
 data "cloudflare_zone" "farm" {
   name = "mcintosh.farm"
@@ -83,23 +89,19 @@ resource "cloudflare_record" "nginx" {
 }
 
 locals {
-
-  nginx_fronted_services = [
-    "spinnaker","harness", "demo", "harbor"
-  ]
+  kubenodes = { 
+    kubenode1="192.168.16.37"
+    kubenode2="192.168.18.69"
+    kubenode3="192.168.16.50"
+  }
+  nginx_fronted_services = toset([ "spinnaker","harness", "demo", "git", "prometheus", "grafana", "splunK" ])
 }
 
-resource "cloudflare_record" "spinnaker" {
-  zone_id = data.cloudflare_zone.farm.id
-  name    = "spinnaker"
-  value   = "nginx.mcintosh.farm"
-  type    = "CNAME"
-  allow_overwrite = true
-}
+resource "cloudflare_record" "services" {
+  for_each  = local.nginx_fronted_services
+  name    = each.key
 
-resource "cloudflare_record" "harnesssmp" {
   zone_id = data.cloudflare_zone.farm.id
-  name    = "harness"
   value   = "nginx.mcintosh.farm"
   type    = "CNAME"
   allow_overwrite = true
@@ -110,50 +112,6 @@ resource "cloudflare_record" "homebridge" {
   name    = "homebridge"
   value   = "192.168.18.76"
   type    = "A"
-  allow_overwrite = true
-}
-
-
-resource "cloudflare_record" "demo-webapp" {
-  zone_id = data.cloudflare_zone.farm.id
-  name    = "demo"
-  value   = "nginx.mcintosh.farm"
-  type    = "CNAME"
-  allow_overwrite = true
-}
-
-resource "cloudflare_record" "prometheus" {
-  zone_id = data.cloudflare_zone.farm.id
-  name    = "prometheus"
-  value   = "nginx.mcintosh.farm"
-  type    = "CNAME"
-  allow_overwrite = true
-}
-
-
-resource "cloudflare_record" "grafana" {
-  zone_id = data.cloudflare_zone.farm.id
-  name    = "grafana"
-  value   = "nginx.mcintosh.farm"
-  type    = "CNAME"
-  allow_overwrite = true
-}
-
-
-resource "cloudflare_record" "splunk" {
-  zone_id = data.cloudflare_zone.farm.id
-  name    = "splunk"
-  value   = "nginx.mcintosh.farm"
-  type    = "CNAME"
-  allow_overwrite = true
-}
-
-
-resource "cloudflare_record" "gitness" {
-  zone_id = data.cloudflare_zone.farm.id
-  name    = "git"
-  value   = "nginx.mcintosh.farm"
-  type    = "CNAME"
   allow_overwrite = true
 }
 
@@ -173,6 +131,14 @@ resource "cloudflare_record" "bluesky" {
   value = "did=did:plc:67gtgajzomelj6ahmemyjfwo"
 }
 
+resource "cloudflare_record" "kubenodes" {
+  zone_id = data.cloudflare_zone.farm.id
+  for_each  = local.kubenodes
+  name    = each.key
+  value   = each.value
+  type    = "A"
+  allow_overwrite = true
+}
 
 output "zone_status" {
   value = data.cloudflare_zone.farm.status
