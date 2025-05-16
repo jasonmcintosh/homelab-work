@@ -139,6 +139,14 @@ resource "cloudflare_record" "kubenodes" {
   type    = "A"
   allow_overwrite = true
 }
+resource "cloudflare_record" "nas" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "truenas"
+  value   = "192.168.17.150"
+  type    = "A"
+  allow_overwrite = true
+}
+
 
 output "zone_status" {
   value = data.cloudflare_zone.farm.status
