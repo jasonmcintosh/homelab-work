@@ -36,7 +36,7 @@ global:
     enabled: true
   ha: false
   iacm:
-    enabled: false
+    enabled: true
   srm:
     enabled: true
   cet:
@@ -44,7 +44,11 @@ global:
   ## Features to enable
   cd:
     enabled: true
+  code:
+    enabled: true
   ci: 
+    enabled: true
+  sto:
     enabled: true
   ff: 
     enabled: true
