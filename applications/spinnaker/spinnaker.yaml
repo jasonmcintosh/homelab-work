@@ -457,9 +457,10 @@ spec:
           pollingSafeguard:
             itemUpperThreshold: 10000
       orca:
-        oldPipelineCleanup:
-          enabled: true
-          thresholdDays: 14
+        pollers:
+          oldPipelineCleanup:
+            enabled: true
+            thresholdDays: 14
         webhook:
           preconfigured:
           - label: KNative Notification
