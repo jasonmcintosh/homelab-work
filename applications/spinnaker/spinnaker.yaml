@@ -205,6 +205,12 @@ spec:
           enabled: false
     profiles:
       clouddriver:
+        cache-sharding:
+          enabled: true
+          heartbeatIntervalSeconds: 30
+          replicaTtlSeconds: 60
+        caching:
+          sharding-enabled: true
         kubernetes:
           loadNamespacesInAccount: false
           verifyAccountHealth: false
@@ -270,7 +276,7 @@ spec:
             enabled: false
           enabled: false
           scheduler:
-            enabled: false
+            enabled: true
           taskRepository:
             enabled: false
         serviceLimits:
@@ -299,7 +305,7 @@ spec:
             password: password
             user: root
           scheduler:
-            enabled: true
+            enabled: false
           taskRepository:
             enabled: true
           unknown-agent-cleanup-agent:
