@@ -94,7 +94,7 @@ locals {
     kubenode2="192.168.18.69"
     kubenode3="192.168.16.50"
   }
-  nginx_fronted_services = toset([ "spinnaker","harness", "demo", "git", "prometheus", "grafana", "splunK" ])
+  nginx_fronted_services = toset([ "spinnaker","harness", "demo", "git", "prometheus", "grafana", "splunK", "opencloud" ])
 }
 
 resource "cloudflare_record" "services" {

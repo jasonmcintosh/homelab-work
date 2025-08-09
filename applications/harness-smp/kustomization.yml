@@ -21,6 +21,6 @@ images:
 patches:
   - path: credentials/harness-secrets.yaml
   - path: patch-images.yml
-  - path: fix-certs.yml
-    target:
-      kind: Ingress
+# - path: fix-certs.yml
+#   target:
+#     kind: Ingress
