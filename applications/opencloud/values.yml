@@ -5,7 +5,7 @@ opencloud:
         enabled: false
       external:
         enabled: true
-        endpoint: https://truenas.mcintosh.farm:9002
+        endpoint: https://truenas.mcintosh.farm:9000
         existingSecret: opencloudcredentials
         bucket: opencloud
         createBucket: false
