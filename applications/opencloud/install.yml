@@ -120,7 +120,7 @@ data:
         - 'https://companion.mcintosh.farm/'
         - 'wss://companion.mcintosh.farm/'
         - 'https://raw.githubusercontent.com/opencloud-eu/awesome-apps/'
-        - 'https://keycloak.opencloud.test/'
+        - 'https://integrator-3395767.okta.com/'
       default-src:
         - '''none'''
       font-src:
@@ -376,7 +376,7 @@ spec:
         app.kubernetes.io/component: opencloud
       annotations:
         checksum/config-json: aa4ce85d0481423707012cd293e8d10efa433fd294fdcc56134d0f456a22e54a
-        checksum/configmap: 951d6b082e7c12b42a84dc205b4566950c8f1bc0a16db4557ca09ec4d148c4c8
+        checksum/configmap: 2dcf89522370cc034062b77a091079c06ceb2e89c6daad3a18bd2333a4618c91
         checksum/web-extensions-init: 7e42110cff1a64dfb5c8fcf9e7081d866bf96ef2cf7b617bfd524446fc12c22e
     spec:
       securityContext:
@@ -511,13 +511,13 @@ spec:
             - name: PROXY_ROLE_ASSIGNMENT_DRIVER
               value: "oidc"
             - name: OC_OIDC_ISSUER
-              value: "https://integrator-3395767.okta.com"
+              value: "https://integrator-3395767.okta.com/oauth2/default"
             - name: WEB_OPTION_ACCOUNT_EDIT_LINK_HREF
-              value: "https://integrator-3395767.okta.com/oauth2/v1/userinfo"
+              value: "https://integrator-3395767.okta.com/oauth2/default/v1/userinfo"
             - name: PROXY_OIDC_REWRITE_WELLKNOWN
               value: "true"
             - name: WEB_OIDC_CLIENT_ID
-              value: "0oau1ro0niGJD1a4I697"
+              value: "0oau1w8hyrE07CNO8697"
             - name: PROXY_USER_OIDC_CLAIM
               value: "preferred_username"
             - name: PROXY_USER_CS3_CLAIM
@@ -533,7 +533,7 @@ spec:
             - name: PROXY_OIDC_ACCESS_TOKEN_VERIFY_METHOD
               value: "jwt"
             - name: WEB_OIDC_METADATA_URL
-              value: "https://integrator-3395767.okta.com/.well-known/openid-configuration"
+              value: "https://integrator-3395767.okta.com/oauth2/default/.well-known/openid-configuration"
             - name: WEB_OIDC_SCOPE
               value: "openid profile email groups roles"
             # Admin user password

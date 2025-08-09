@@ -19,15 +19,17 @@ global:
     enabled: true
     secretName: opencloud-tls-secret
   domain:
+    ## This is quasi-hack to allow content-security-policy access
+    keycloak: integrator-3395767.okta.com
     collabora: collabora.mcintosh.farm
     onlyoffice: onlyoffice.mcintosh.farm
     opencloud: opencloud.mcintosh.farm
     wopi: wopi.mcintosh.farm
     companion: companion.mcintosh.farm
   oidc:
-    accountUrl: https://integrator-3395767.okta.com/oauth2/v1/userinfo
-    issuer: https://integrator-3395767.okta.com
-    clientId: 0oau1ro0niGJD1a4I697
+    accountUrl: https://integrator-3395767.okta.com/oauth2/default/v1/userinfo
+    issuer: https://integrator-3395767.okta.com/oauth2/default
+    clientId: 0oau1w8hyrE07CNO8697
 
 collabora:
   enabled: false
