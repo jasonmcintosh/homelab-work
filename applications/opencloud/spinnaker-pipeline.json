@@ -1,0 +1,94 @@
+{
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "jason@mcintosh.farm",
+  "limitConcurrent": true,
+  "roles": [
+    "engineering-managed"
+  ],
+  "schema": "1",
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "expectedArtifacts": [
+        {
+          "defaultArtifact": {
+            "customKind": true,
+            "id": "45504fcd-3c47-4fa3-a51a-8a63a9f5e6ce"
+          },
+          "displayName": "opencloudManifest",
+          "id": "35d5e4e5-f8cd-40be-aa62-c0874a585b82",
+          "matchArtifact": {
+            "artifactAccount": "embedded-artifact",
+            "customKind": false,
+            "id": "f04c6b79-73a6-4875-85be-b6026a40304a",
+            "name": "opencloud",
+            "type": "embedded/base64"
+          },
+          "useDefaultArtifact": false,
+          "usePriorArtifact": false
+        }
+      ],
+      "helmChartFilePath": "charts/opencloud",
+      "inputArtifacts": [
+        {
+          "account": "github-repo-clone-ro",
+          "artifact": {
+            "artifactAccount": "github-repo-clone-ro",
+            "id": "3f1a50cd-7460-4cbf-b377-7ef5a983a8fc",
+            "location": "charts/opencloud",
+            "reference": "https://github.com/opencloud-eu/helm.git",
+            "type": "git/repo",
+            "version": "main"
+          }
+        },
+        {
+          "account": "github-files-jm",
+          "artifact": {
+            "artifactAccount": "github-files-jm",
+            "id": "c0f878fd-b504-4d02-abdd-cff5fef4674c",
+            "name": "applications/opencloud/values.yml",
+            "reference": "https://api.github.com/repos/jasonmcintosh/homelab-work/contents/applications/opencloud/values.yml",
+            "type": "github/file",
+            "version": "main"
+          }
+        }
+      ],
+      "name": "Bake (Manifest)",
+      "namespace": "opencloud",
+      "outputName": "opencloud",
+      "overrides": {},
+      "refId": "1",
+      "requisiteStageRefIds": [],
+      "templateRenderer": "HELM3",
+      "type": "bakeManifest"
+    },
+    {
+      "account": "k8s-homelab",
+      "cloudProvider": "kubernetes",
+      "manifestArtifactId": "35d5e4e5-f8cd-40be-aa62-c0874a585b82",
+      "moniker": {
+        "app": "opencloud"
+      },
+      "name": "Deploy (Manifest)",
+      "namespaceOverride": "opencloud",
+      "refId": "2",
+      "requiredArtifactIds": [],
+      "requiredArtifacts": [],
+      "requisiteStageRefIds": [
+        "1"
+      ],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    }
+  ],
+  "triggers": [],
+  "updateTs": "1754781577954"
+}
