@@ -1,0 +1,40 @@
+opencloud:
+  storage:
+    s3:
+      internal:
+        enabled: false
+      external:
+        enabled: true
+        endponit: https://truenas.mcintosh.farm:9002
+        existingSecret: opencloudcredentials
+ingress:
+  enabled: true
+global:
+  tls:
+    enabled: true
+  domain:
+    collabora: collabora.mcintosh.farm
+    onlyoffice: onlyoffice.mcintosh.farm
+    opencloud: opencloud.mcintosh.farm
+    wopi: wopi.mcintosh.farm
+    companion: companion.mcintosh.farm
+  oidc:
+    issuer: "https://integrator-3395767.okta.com/oauth2/default"
+    clientId: "0oau1ro0niGJD1a4I697"
+
+collabora:
+  enabled: false
+postgres:
+  enabled: false
+
+onlyoffice:
+  wopi:
+    enabled: false
+  enabled: false
+  collaboration:
+    enabled: false
+
+keycloak:
+  internal:
+    enabled: false
+
