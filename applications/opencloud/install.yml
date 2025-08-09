@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: release-name-opencloud-opencloud
+  name: opencloud-opencloud
 type: Opaque
 stringData:
   adminPassword: admin
@@ -12,11 +12,11 @@ stringData:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: release-name-opencloud-opencloud-config-json
+  name: opencloud-opencloud-config-json
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: opencloud
@@ -32,11 +32,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: release-name-opencloud-opencloud-config
+  name: opencloud-opencloud-config
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: opencloud
@@ -198,11 +198,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: release-name-opencloud-opencloud-web-extensions-init
+  name: opencloud-opencloud-web-extensions-init
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: opencloud
@@ -234,13 +234,13 @@ data:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: release-name-opencloud-minio-data
+  name: opencloud-minio-data
   annotations:
     "helm.sh/resource-policy": "keep"
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: minio
@@ -255,13 +255,13 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: release-name-opencloud-opencloud-config
+  name: opencloud-opencloud-config
   annotations:
     "helm.sh/resource-policy": "keep"
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: opencloud
@@ -276,13 +276,13 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: release-name-opencloud-opencloud-data
+  name: opencloud-opencloud-data
   annotations:
     "helm.sh/resource-policy": "keep"
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: opencloud
@@ -297,11 +297,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: release-name-opencloud-opencloud
+  name: opencloud-opencloud
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: opencloud
@@ -318,18 +318,18 @@ spec:
       name: nats
   selector:
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/component: opencloud
 ---
 # Source: opencloud/templates/tika/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: release-name-opencloud-tika
+  name: opencloud-tika
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: tika
@@ -342,18 +342,18 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/component: tika
 ---
 # Source: opencloud/templates/opencloud/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: release-name-opencloud-opencloud
+  name: opencloud-opencloud
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: opencloud
@@ -364,7 +364,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: opencloud
-      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/instance: opencloud
       app.kubernetes.io/component: opencloud
   strategy:
     type: Recreate
@@ -372,12 +372,12 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: opencloud
-        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/instance: opencloud
         app.kubernetes.io/component: opencloud
       annotations:
-        checksum/config-json: aa4ce85d0481423707012cd293e8d10efa433fd294fdcc56134d0f456a22e54a
-        checksum/configmap: 2dcf89522370cc034062b77a091079c06ceb2e89c6daad3a18bd2333a4618c91
-        checksum/web-extensions-init: 7e42110cff1a64dfb5c8fcf9e7081d866bf96ef2cf7b617bfd524446fc12c22e
+        checksum/config-json: 74c952847c9d8581403e1471143362626dd86186a3f6bc73c719183fb07400d5
+        checksum/configmap: 37355f596d47489274a6dc713e6fda326af2684b12f8fa6f90c82b0efaa001fa
+        checksum/web-extensions-init: 84ae401f0b3d9a84d276357fb000add33060db05142b1987f00c3337145e9308
     spec:
       securityContext:
         fsGroup: 1000
@@ -497,7 +497,7 @@ spec:
             - name: SEARCH_EXTRACTOR_TYPE
               value: "tika"
             - name: SEARCH_EXTRACTOR_TIKA_TIKA_URL
-              value: "http://release-name-opencloud-tika:9998"
+              value: "http://opencloud-tika:9998"
             # Performance settings
             - name: OC_GRPC_MAX_RECEIVED_MESSAGE_SIZE
               value: "102400000"
@@ -541,7 +541,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name:
-                          release-name-opencloud-opencloud
+                          opencloud-opencloud
                   key: adminPassword
             # Demo users
             - name: IDM_CREATE_DEMO_USERS
@@ -635,35 +635,35 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: release-name-opencloud-opencloud-config
+            claimName: opencloud-opencloud-config
         - name: data
           persistentVolumeClaim:
-            claimName: release-name-opencloud-opencloud-data
+            claimName: opencloud-opencloud-data
         - name: config-json
           configMap:
-            name: release-name-opencloud-opencloud-config-json
+            name: opencloud-opencloud-config-json
         - name: config-files
           configMap:
-            name: release-name-opencloud-opencloud-config
+            name: opencloud-opencloud-config
         - name: proxy-config
           configMap:
-            name: release-name-opencloud-opencloud-proxy-config
+            name: opencloud-opencloud-proxy-config
         
         - name: extensions
           emptyDir: {}
         - name: web-extensions-init-script
           configMap:
-            name: release-name-opencloud-opencloud-web-extensions-init
+            name: opencloud-opencloud-web-extensions-init
 ---
 # Source: opencloud/templates/tika/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: release-name-opencloud-tika
+  name: opencloud-tika
   labels:
     helm.sh/chart: opencloud-0.2.3
     app.kubernetes.io/name: opencloud
-    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/instance: opencloud
     app.kubernetes.io/version: "latest"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: tika
@@ -672,13 +672,13 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: opencloud
-      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/instance: opencloud
       app.kubernetes.io/component: tika
   template:
     metadata:
       labels:
         app.kubernetes.io/name: opencloud
-        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/instance: opencloud
         app.kubernetes.io/component: tika
     spec:
       containers:
@@ -704,7 +704,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: release-name-opencloud-opencloud
+  name: opencloud-opencloud
   annotations:
     cert-manager.io/cluster-issuer: cloudflare-issuer
 spec:
@@ -721,6 +721,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: release-name-opencloud-opencloud
+                name: opencloud-opencloud
                 port:
                   number: 9200
