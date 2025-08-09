@@ -5,13 +5,19 @@ opencloud:
         enabled: false
       external:
         enabled: true
-        endponit: https://truenas.mcintosh.farm:9002
+        endpoint: https://truenas.mcintosh.farm:9002
         existingSecret: opencloudcredentials
+        bucket: opencloud
+        createBucket: false
 ingress:
   enabled: true
+  ingressClassName: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
 global:
   tls:
     enabled: true
+    secretName: opencloud-tls-secret
   domain:
     collabora: collabora.mcintosh.farm
     onlyoffice: onlyoffice.mcintosh.farm
@@ -19,8 +25,9 @@ global:
     wopi: wopi.mcintosh.farm
     companion: companion.mcintosh.farm
   oidc:
-    issuer: "https://integrator-3395767.okta.com/oauth2/default"
-    clientId: "0oau1ro0niGJD1a4I697"
+    accountUrl: https://integrator-3395767.okta.com/oauth2/v1/userinfo
+    issuer: https://integrator-3395767.okta.com
+    clientId: 0oau1ro0niGJD1a4I697
 
 collabora:
   enabled: false
