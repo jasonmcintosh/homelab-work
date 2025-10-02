@@ -14,6 +14,8 @@ spec:
       app: demo-web-app-baseline
   template:
     metadata:
+      annotations:
+        owner: "mcintoshj@gmail.com"
       labels:
         type: spring-boot-app
         app: demo-web-app-baseline
