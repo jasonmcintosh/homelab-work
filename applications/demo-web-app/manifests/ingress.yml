@@ -58,6 +58,7 @@ metadata:
   name: demo-ingress
   namespace: prod
   annotations:
+    owner: "mcintoshj@gmail.com" 
     cert-manager.io/cluster-issuer: cloudflare-issuer
 spec:
   rules:
