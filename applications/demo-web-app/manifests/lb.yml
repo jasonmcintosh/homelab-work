@@ -6,6 +6,8 @@ metadata:
   annotations:
     app: demo-web-app
     type: spring-boot-app
+    owner: "mcintoshj@gmail.com"
+
 spec:
   type: LoadBalancer
   selector:
