@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: demo-web-app-baseline
+  annotations:
+    owner: "mcintoshj@gmail.com"
   labels:
     app: demo-web-app-baseline
     type: spring-boot-app
@@ -26,6 +28,8 @@ kind: Service
 metadata:
   name: demo-web-app-service-baseline
   annotations:
+    owner: "mcintoshj@gmail.com"
+  labels:
     app: demo-web-app-baseline
     type: spring-boot-app
 spec:
