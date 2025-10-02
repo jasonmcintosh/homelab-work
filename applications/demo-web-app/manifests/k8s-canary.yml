@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: demo-web-app-canary
+  annotations:
+    owner: "mcintoshj@gmail.com"
   labels:
     app: demo-web-app-canary
     type: spring-boot-app
@@ -28,6 +30,7 @@ metadata:
   annotations:
     app: demo-web-app-canary
     type: spring-boot-app
+    owner: "mcintoshj@gmail.com"
 spec:
   selector:
     app: demo-web-app-canary
