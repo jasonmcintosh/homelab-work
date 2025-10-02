@@ -4,6 +4,7 @@ metadata:
   name: demo-ingress-canary
   namespace: prod
   annotations:
+    owner: "mcintoshj@gmail.com"
     cert-manager.io/cluster-issuer: cloudflare-issuer
     nginx.ingress.kubernetes.io/canary: "true"
     nginx.ingress.kubernetes.io/canary-weight: "0"
@@ -30,6 +31,7 @@ metadata:
   name: demo-ingress-baseline
   namespace: prod
   annotations:
+    owner: "mcintoshj@gmail.com"
     cert-manager.io/cluster-issuer: cloudflare-issuer
     nginx.ingress.kubernetes.io/canary: "true"
     nginx.ingress.kubernetes.io/canary-weight: "0"
