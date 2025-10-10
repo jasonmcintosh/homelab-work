@@ -50,7 +50,7 @@ spec:
                   key: OPAL_POLICY_REPO_SSH_KEY
                   name: opa-secrets
             - name: OPAL_BROADCAST_URI
-              value: postgresql://opal:opal@opa-opal-db/opal
+              value: postgresql://opal:opal@opa-opal-db.spinnaker/opal
           image: permitio/opal-server
           imagePullPolicy: Always
           livenessProbe: &probe-config
@@ -133,9 +133,10 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    app: opal-server
+    app: opal-db
     owner: mcintoshj@gmail.com
   name: opa-opal-db
+  namespace: spinnaker
 spec:
   ports:
   - port: 5432
@@ -147,7 +148,7 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    app: opal-db
+    app: opal-server
     owner: mcintoshj@gmail.com
   name: opa-opal-server
   namespace: spinnaker
