@@ -25,11 +25,21 @@ pipeline:
                         configFiles:
                           store:
                             spec:
-                              repoName: spinnaker-work
+                              repoName: jasonmcintosh/spinnaker-work
                               gitFetchType: Branch
                               branch: main
                               folderPath: applications/tf-dns-internal
                               connectorRef: account.GitHubRW
                             type: Github
                   timeout: 15m
+          environment:
+            environmentRef: Prod
+            deployToAll: false
         tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.GitHubRW
+        repoName: jasonmcintosh/homelab-work
+        build: <+input>
+        sparseCheckout: []
