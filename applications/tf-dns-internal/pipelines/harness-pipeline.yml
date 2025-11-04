@@ -1,7 +1,7 @@
 pipeline:
   name: Update DNS
   identifier: Update_DNS
-  projectIdentifier: dns
+  projectIdentifier: DNSInternal
   orgIdentifier: default
   tags: {}
   stages:
