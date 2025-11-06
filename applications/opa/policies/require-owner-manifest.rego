@@ -5,9 +5,11 @@
       annotations := object.get(metadata,"annotations",{})
       # Use object.get to check if data exists
       object.get(annotations,required_annotations[_],null)==null
+      0 == 1
   }{
       metadata :=input.stage.context.manifests[_].spec.template.metadata
       annotations := object.get(metadata,"annotations",{})
       # Use object.get to check if data exists
       object.get(annotations,required_annotations[_],null)==null
+      0 == 1
   }
