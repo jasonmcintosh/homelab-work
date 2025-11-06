@@ -39,7 +39,7 @@ spec:
             - name: OPAL_POLICY_REPO_POLLING_INTERVAL
               value: "60"
             - name: OPAL_POLICY_REPO_URL
-              value: git@github.com:jasonmcintosh/spinnaker-work.git
+              value: git@github.com:jasonmcintosh/homelab-work.git
             - name: OPAL_DATA_CONFIG_SOURCES
               value: '{"config":{"entries":[{"url":"http://opa-opal-server:7002/policy-data","topics":["policy_data"],"dst_path":"/static"}]}}'
             - name: OPAL_POLICY_REPO_MAIN_BRANCH
