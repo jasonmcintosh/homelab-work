@@ -30,11 +30,15 @@ spec:
             enabled: false
             endpoint: https://debug.armory.io/v1/logs
       artifacts:
+        http:
+          enabled: true
         helm:
           enabled: true
           accounts:
           - name: helm-hashicorp
             repository: https://helm.releases.hashicorp.com
+          - name: helm-otel-collector
+            repository: https://open-telemetry.github.io/opentelemetry-helm-charts
         gitrepo:
           enabled: true
           accounts:
@@ -199,7 +203,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.36.1
+      version: 2.38.1
       webhook:
         trust:
           enabled: false
@@ -218,6 +222,7 @@ spec:
             - name: k8s-spinnaker-prod
               kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
               kubectlExecutable: kubectl-1.29
+              cacheIntervalSeconds: 60
               namespaces: 
               - spinnaker
               permissions:
@@ -230,6 +235,7 @@ spec:
             - name: k8s-namespace-prod
               kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
               kubectlExecutable: kubectl-1.29
+              cacheIntervalSeconds: 60
               namespaces: 
               - prod
               permissions:
@@ -241,6 +247,7 @@ spec:
             - name: k8s-namespace-dev
               kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
               kubectlExecutable: kubectl-1.29
+              cacheIntervalSeconds: 60
               namespaces: 
               - dev
               permissions:
@@ -253,6 +260,7 @@ spec:
             - name: k8s-homelab
               kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
               kubernetesVersion: kubectl-1.29
+              cacheIntervalSeconds: 60
               permissions:
                 READ:
                 - engineering-managed
@@ -394,7 +402,14 @@ spec:
         saml:
           enabled: true
           issuerId: spinnaker
-          metadataUrl: https://dev-200769.okta.com/app/exkrb6efezGBrbCUz4x7/sso/saml/metadata
+          metadataUrl: https://integrator-3395767.okta.com/app/exku1rxeyhJeP16iJ697/sso/saml/metadata
+          ## Keeping it here so i don't have to recreate this someday :) 
+          metadataUrlKeycloak: http://192.168.16.167:8080/realms/master/protocol/saml/descriptor
+          ## this isn't ACUTALLY used in okta... but I leave it here for testing if I do keycloak or other systems
+          sign-requests: true
+          signing-credentials:
+          - certificate-location: encryptedFile:k8s!n:saml-signing-secret!k:certificate.pem
+            private-key-location: encryptedFile:k8s!n:saml-signing-secret!k:private_key.pem
 #       security:
 #         oauth2:
 #           resource:
@@ -429,8 +444,6 @@ spec:
         spinnaker:
           extensibility:
             repositories:
-              pluginRepository:
-                url: https://raw.githubusercontent.com/armory-plugins/pluginRepository/master/repositories.json
               observabilityy-plugin:
                 url: https://raw.githubusercontent.com/armory-plugins/armory-observability-plugin-releases/master/repositories.json
             deck-proxy:
@@ -536,12 +549,12 @@ spec:
               baseUrl: http://localhost:8181/v1/data
               timeoutSeconds: 20
         artifact-store:
-          enabled: true
+          enabled: false
           type: s3
           helm:
             expandOverrides: true
           s3:
-            enabled: true
+            enabled: false
             bucket: artifact-store
             region: local
             url: http://minio:9000
@@ -568,20 +581,6 @@ spec:
           extensibility:
             deck-proxy:
               enabled: true
-              plugins:
-                Armory.PolicyEngine:
-                  enabled: true
-                  version: 0.4.0
-                Armory.ArmoryHeader:
-                  enabled: true
-                  version: 0.2.2
-            plugins:
-              Armory.PolicyEngine:
-                enabled: true
-                version: 0.4.0
-            repositories:
-              opa:
-                url: https://raw.githubusercontent.com/armory-plugins/policy-engine-releases/master/repositories.json
       terraformer:
         redis:
           host: spin-redis

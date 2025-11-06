@@ -1,17 +1,22 @@
+platform:
+  bootstrap:
+    harness-secrets:
+      mongodb:
+        password: mqaiNXZAJUq6xXs5
+      timescaledb:
+        adminPassword: 6BlH8VD3Dt99bIF
+        postgresPassword: ucgKJC6Tx0ZgigJm
+        timescaledbStandbyPassword: zcYlJecQwWZf9ou0
+      postgresdb:
+        adminPassword: 6BlH8VD3Dt99bIF4
+      sto:
+        appHarnessToken: cHlDhwE0SgW3cMvn%
+        appAuditJWTSecret: s5DTU2RsexjenlCr%
 global:
   autoscaling:
     enabled: false
   pdb:
     create: true
-  database:
-    timescaledb:
-      autoscaling:
-        enabled: false
-      hosts: 
-      - timescaledb:5432
-      installed: false
-      sslEnabled: false
-  loadbalancerURL: https://harness.mcintosh.farm
   database:
     timescaledb:
       autoscaling:
@@ -26,6 +31,7 @@ global:
       - secretName: "harness-license"
         keys:
           NG_LICENSE: "NG_LICENSE"
+  loadbalancerURL: https://harness.mcintosh.farm
   ingress:
     objects:
       annotations:
@@ -45,11 +51,11 @@ global:
   cd:
     enabled: true
   code:
-    enabled: true
+    enabled: false
   ci: 
     enabled: true
   sto:
-    enabled: true
+    enabled: false
   ff: 
-    enabled: true
+    enabled: false
   monitoring: false
