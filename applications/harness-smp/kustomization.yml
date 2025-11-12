@@ -4,7 +4,7 @@ helmCharts:
   includeCRDs: true
   valuesFile: values.yml
   releaseName: harness
-  version: 0.34.0
+  version: 0.33.2
   repo: https://harness.github.io/helm-charts
 resources:
   - credentials/harness-license.yml
