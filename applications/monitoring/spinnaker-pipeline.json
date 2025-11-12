@@ -1,0 +1,119 @@
+{
+    "keepWaitingPipelines": false,
+    "lastModifiedBy": "jason@mcintosh.farm",
+    "limitConcurrent": true,
+    "schema": "1",
+    "spelEvaluator": "v4",
+    "stages": [
+        {
+            "expectedArtifacts": [
+                {
+                    "defaultArtifact": {
+                        "customKind": true,
+                        "id": "7f80e75e-0f3d-43c4-956f-521f31589bd2"
+                    },
+                    "displayName": "OTEL Honeycomb Rendered",
+                    "id": "1b83e146-4c0f-4031-8613-a7dae3c4c2ca",
+                    "matchArtifact": {
+                        "artifactAccount": "embedded-artifact",
+                        "customKind": false,
+                        "id": "ed43c410-37c0-4398-9dcd-848c1ca125b5",
+                        "name": "monitoring-otel",
+                        "type": "embedded/base64"
+                    },
+                    "useDefaultArtifact": false,
+                    "usePriorArtifact": false
+                }
+            ],
+            "inputArtifacts": [
+                {
+                    "account": "helm-otel-collector",
+                    "artifact": {
+                        "artifactAccount": "helm-otel-collector",
+                        "id": "5d576dbd-3d5f-4304-92a2-057572ea4435",
+                        "name": "opentelemetry-collector",
+                        "type": "helm/chart",
+                        "version": "0.138.1"
+                    }
+                },
+                {
+                    "account": "github-files-jm",
+                    "artifact": {
+                        "artifactAccount": "github-files-jm",
+                        "id": "876a8a96-c7c6-455b-bdbe-59cff9290495",
+                        "name": "applications/monitoring/collector-k8s-events.yml",
+                        "reference": "https://api.github.com/repos/jasonmcintosh/homelab-work/contents/applications/monitoring/collector-k8s-events.yml",
+                        "type": "github/file",
+                        "version": "main"
+                    }
+                }
+            ],
+            "name": "Bake (Manifest)",
+            "namespace": "monitoring",
+            "outputName": "monitoring-otel",
+            "overrides": {},
+            "refId": "1",
+            "requisiteStageRefIds": [],
+            "templateRenderer": "HELM3",
+            "type": "bakeManifest"
+        },
+        {
+            "account": "k8s-homelab",
+            "cloudProvider": "kubernetes",
+            "manifests": [
+                {
+                    "apiVersion": "v1",
+                    "kind": "Namespace",
+                    "metadata": {
+                        "name": "monitoring"
+                    }
+                }
+            ],
+            "moniker": {
+                "app": "monitoring"
+            },
+            "name": "Deploy Namespace",
+            "namespaceOverride": "",
+            "refId": "2",
+            "requisiteStageRefIds": [
+                "1"
+            ],
+            "skipExpressionEvaluation": false,
+            "source": "text",
+            "trafficManagement": {
+                "enabled": false,
+                "options": {
+                    "enableTraffic": false,
+                    "services": []
+                }
+            },
+            "type": "deployManifest"
+        },
+        {
+            "account": "k8s-homelab",
+            "cloudProvider": "kubernetes",
+            "manifestArtifactId": "1b83e146-4c0f-4031-8613-a7dae3c4c2ca",
+            "moniker": {
+                "app": "monitoring"
+            },
+            "name": "Deploy (Manifest)",
+            "namespaceOverride": "monitoring",
+            "refId": "3",
+            "requisiteStageRefIds": [
+                "2"
+            ],
+            "skipExpressionEvaluation": false,
+            "source": "artifact",
+            "trafficManagement": {
+                "enabled": false,
+                "options": {
+                    "enableTraffic": false,
+                    "services": []
+                }
+            },
+            "type": "deployManifest"
+        }
+    ],
+    "triggers": [],
+    "updateTs": "1762449880828"
+}
