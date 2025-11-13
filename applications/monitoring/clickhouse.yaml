@@ -1,0 +1,129 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-config
+  namespace: monitoring
+data:
+  logging.xml: |
+    <clickhouse>
+        <listen_host>0.0.0.0</listen_host> <!-- For IPv4 -->
+
+        <!-- Other configurations like http_port, tcp_port, etc. -->
+        <http_port>8123</http_port>
+        <tcp_port>9000</tcp_port>
+        
+      <logger>
+        <console>true</console>
+        <log remove="remove"/>
+        <errorlog remove="remove"/>
+      </logger>
+    </clickhouse>
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickhouse
+  namespace: monitoring
+  labels:
+    app: clickhouse
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: clickhouse
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+    spec:
+      containers:
+      - name: clickhouse
+        image: clickhouse/clickhouse-server:25.10
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: CLICKHOUSE_USER
+            value: clickhouse
+          - name: CLICKHOUSE_PASSWORD
+            value: changeme
+        ports:
+        - name: web
+          containerPort: 8123
+        - name: tcp
+          containerPort: 9000
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/clickhouse-server/config.d
+        - name: data
+          mountPath: /var/lib/clickhouse
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 2000
+        runAsUser: 1000
+        runAsNonRoot: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: config-volume
+        configMap:
+          name: clickhouse-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: clickhouse-storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clickhouse-storage
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 60Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse
+  namespace: monitoring
+spec:
+  ports:
+  - port: 8123
+    name: web
+    targetPort: 8123
+    protocol: TCP
+  - port: 9000
+    protocol: TCP
+    targetPort: 9000
+    name: tcp
+  selector:
+    app: clickhouse
+  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+  name: clickhouse
+  namespace: monitoring
+spec:
+  tls:
+    - hosts:
+      - "*.mcintosh.farm"
+      secretName: mcintosh-farm
+  rules:
+  - host: clickhouse.mcintosh.farm
+    http:
+      paths:
+      - backend:
+          service:
+            name: clickhouse
+            port:
+              number: 8123
+        path: /
+        pathType: Prefix
+
