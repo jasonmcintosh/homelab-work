@@ -65,6 +65,8 @@ config:
     nop:
     prometheusremotewrite:
         endpoint: https://prometheus.mcintosh.farm/api/v1/write
+        resource_to_telemetry_conversion:
+          enabled: true
 #    otlp/k8s-metrics:
 #      endpoint: "api.honeycomb.io:443" # US instance
       #endpoint: "api.eu1.honeycomb.io:443" # EU instance
