@@ -85,7 +85,7 @@ config:
         #exporters: [ otlp/k8s-metrics ]
       logs:
         processors: [ memory_limiter, transform/events, batch ]
-        exporters: [ prometheusremotewrite]
+        exporters: []
         #exporters: [ otlp/k8s-events ]
         
 ports:
