@@ -17,10 +17,10 @@ replicaCount: 1
 presets:
   # enables the k8sclusterreceiver and adds it to the metrics pipelines
   clusterMetrics:
-    enabled: true
+    enabled: false
   # enables the k8sobjectsreceiver to collect events only and adds it to the logs pipelines
   kubernetesEvents:
-    enabled: true
+    enabled: false
 
 config:
   receivers:
@@ -33,6 +33,32 @@ config:
           enabled: false
         k8s.replicaset.available:
           enabled: false 
+  processors:
+    transform/events:
+      error_mode: ignore
+      log_statements:
+        - context: log
+          statements:
+            # adds a new watch-type attribute from the body if it exists
+            - set(attributes["watch-type"], body["type"]) where IsMap(body) and body["type"] != nil
+
+            # create new attributes from the body if the body is an object
+            - merge_maps(attributes, body, "upsert") where IsMap(body) and body["object"] == nil
+            - merge_maps(attributes, body["object"], "upsert") where IsMap(body) and body["object"] != nil
+
+            # Transform the attributes so that the log events use the k8s.* semantic conventions
+            - merge_maps(attributes, attributes[ "metadata"], "upsert") where IsMap(attributes[ "metadata"])
+            - set(attributes["k8s.pod.name"], attributes["regarding"]["name"]) where attributes["regarding"]["kind"] == "Pod"
+            - set(attributes["k8s.node.name"], attributes["regarding"]["name"]) where attributes["regarding"]["kind"] == "Node"
+            - set(attributes["k8s.job.name"], attributes["regarding"]["name"]) where attributes["regarding"]["kind"] == "Job"
+            - set(attributes["k8s.cronjob.name"], attributes["regarding"]["name"]) where attributes["regarding"]["kind"] == "CronJob"
+            - set(attributes["k8s.namespace.name"], attributes["regarding"]["namespace"]) where attributes["regarding"]["kind"] == "Pod" or attributes["regarding"]["kind"] == "Job" or attributes["regarding"]["kind"] == "CronJob"
+
+            # Transform the type attribtes into OpenTelemetry Severity types.
+            - set(severity_text, attributes["type"]) where attributes["type"] == "Normal" or attributes["type"] == "Warning"
+            - set(severity_number, SEVERITY_NUMBER_INFO) where attributes["type"] == "Normal"
+            - set(severity_number, SEVERITY_NUMBER_WARN) where attributes["type"] == "Warning"
+
   exporters:
     clickhouse:
       endpoint: tcp://192.168.19.204:9000?dial_timeout=10s&compress=lz4
@@ -48,4 +74,5 @@ config:
         exporters: [ clickhouse ]
         #exporters: [ otlp/k8s-metrics ]
       logs:
+        processors: [ memory_limiter, transform/events, batch ]
         exporters: [clickhouse]
