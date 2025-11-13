@@ -33,8 +33,6 @@ config:
           enabled: false
         k8s.replicaset.available:
           enabled: false 
-    jaeger: null
-    zipkin: null
   processors:
     transform/events:
       error_mode: ignore
@@ -76,13 +74,3 @@ config:
       logs:
         processors: [ memory_limiter, transform/events, batch ]
         exporters: [clickhouse]
-        
-ports:
-  jaeger-compact:
-    enabled: false
-  jaeger-thrift:
-    enabled: false
-  jaeger-grpc:
-    enabled: false
-  zipkin:
-    enabled: false
