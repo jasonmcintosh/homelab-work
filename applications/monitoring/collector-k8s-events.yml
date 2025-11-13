@@ -62,6 +62,7 @@ config:
             - set(severity_number, SEVERITY_NUMBER_WARN) where attributes["type"] == "Warning"
 
   exporters:
+    nop:
     prometheusremotewrite:
         endpoint: https://prometheus.mcintosh.farm/api/v1/write
 #    otlp/k8s-metrics:
@@ -85,7 +86,7 @@ config:
         #exporters: [ otlp/k8s-metrics ]
       logs:
         processors: [ memory_limiter, transform/events, batch ]
-        exporters: []
+        exporters: [nop]
         #exporters: [ otlp/k8s-events ]
         
 ports:
