@@ -62,34 +62,20 @@ config:
             - set(severity_number, SEVERITY_NUMBER_WARN) where attributes["type"] == "Warning"
 
   exporters:
-    nop:
-    prometheusremotewrite:
-        endpoint: https://prometheus.mcintosh.farm/api/v1/write
-        resource_to_telemetry_conversion:
-          enabled: true
-#    otlp/k8s-metrics:
-#      endpoint: "api.honeycomb.io:443" # US instance
-      #endpoint: "api.eu1.honeycomb.io:443" # EU instance
-#      headers:
-#        "x-honeycomb-team": "${env:HONEYCOMB_API_KEY}"
-#        "x-honeycomb-dataset": "k8s-metrics"
-#    otlp/k8s-events:
-#      endpoint: "api.honeycomb.io:443" # US instance
-      #endpoint: "api.eu1.honeycomb.io:443" # EU instance
-#      headers:
-#        "x-honeycomb-team": "${env:HONEYCOMB_API_KEY}"
-#        "x-honeycomb-dataset": "k8s-events"
+    clickhouse:
+      endpoint: tcp://192.168.19.204:9000?dial_timeout=10s&compress=lz4
+      database: otel
+      async_insert: true
+      create_schema: true
 
   service:
     pipelines:
-      traces: null
       metrics:
-        exporters: [ prometheusremotewrite ]
+        exporters: [ clickhouse ]
         #exporters: [ otlp/k8s-metrics ]
       logs:
         processors: [ memory_limiter, transform/events, batch ]
-        exporters: [nop]
-        #exporters: [ otlp/k8s-events ]
+        exporters: [clickhouse]
         
 ports:
   jaeger-compact:
