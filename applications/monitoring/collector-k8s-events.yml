@@ -80,10 +80,12 @@ config:
     pipelines:
       traces: null
       metrics:
-        exporters: [ otlp/k8s-metrics ]
+        exporters: [ prometheusremotewrite ]
+        #exporters: [ otlp/k8s-metrics ]
       logs:
         processors: [ memory_limiter, transform/events, batch ]
-        exporters: [ otlp/k8s-events ]
+        exporters: [ prometheusremotewrite]
+        #exporters: [ otlp/k8s-events ]
         
 ports:
   jaeger-compact:
