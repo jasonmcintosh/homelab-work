@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ilo-collector-config
+  namespace: monitoring
+data:
+  collector.yaml: |
+    receivers:
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: 'ilo-collector'
+            scrape_timeout: 120s
+            scrape_interval: 360s
+            static_configs:
+            - targets: 
+              ## Host1 & 2
+              - 192.168.19.60
+              - 192.168.18.128
+            relabel_configs:
+              - source_labels: [__address__]
+                target_label: __param_host
+              - source_labels: [__param_host]
+                target_label: instance
+              - target_label: __address__
+                replacement: ilo-prometheus:9545
+    exporters:
+      clickhouse:
+        endpoint: tcp://192.168.19.204:9000?dial_timeout=10s&compress=lz4
+        username: clickhouse
+        password: changeme
+        database: otel
+        async_insert: true
+    processors:
+      batch:
+    service:
+      pipelines:
+        metrics:
+          receivers: [prometheus]
+          exporters: [clickhouse]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ilo-collector
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: opentelemetrycollector
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: opentelemetrycollector
+    spec:
+      containers:
+      - name: otelcol
+        args:
+        - --config=/conf/collector.yaml
+        image: otel/opentelemetry-collector-contrib:0.138.0
+        volumeMounts:
+        - mountPath: /conf
+          name: ilo-collector-config
+      volumes:
+      - configMap:
+          items:
+          - key: collector.yaml
+            path: collector.yaml
+          name: ilo-collector-config
+        name: ilo-collector-config
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ilo-prometheus
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ilo-prometheus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ilo-prometheus
+    spec:
+      containers:
+      - name: otelcol
+        image: mauvesoftware/ilo_exporter:latest
+        envFrom:
+        - secretRef:
+            name: ilocredentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ilo-prometheus
+  namespace: monitoring
+spec:
+  ports:
+  - name: http
+    port: 9545
+    protocol: TCP
+    targetPort: 9545
+  selector:
+    app.kubernetes.io/name: ilo-prometheus
+  type: ClusterIP
