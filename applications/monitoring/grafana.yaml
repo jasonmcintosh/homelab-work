@@ -18,6 +18,8 @@ metadata:
   name: grafana
   namespace: monitoring
 spec:
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: grafana
@@ -32,7 +34,7 @@ spec:
           - 0
       containers:
         - name: grafana
-          image: grafana/grafana:10.1.9-ubuntu
+          image: grafana/grafana:12.2.1-ubuntu
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
@@ -57,6 +59,9 @@ spec:
               port: 3000
             timeoutSeconds: 1
           resources:
+            limits:
+              cpu: 2000m
+              memory: 2Gi
             requests:
               cpu: 250m
               memory: 750Mi
