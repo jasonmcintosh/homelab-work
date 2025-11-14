@@ -32,7 +32,7 @@ data:
           exporters: [clickhouse]
         metrics:
           receivers: [otlp]
-          exporters: [clickhouse]
+          exporters: [clickhouse, prometheusremotewrite]
         logs:
           receivers: [otlp]
           exporters: [clickhouse]

@@ -592,8 +592,6 @@ spec:
       clouddriver:
         env:
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
-          OTEL_TRACES_EXPORTER: none
-          OTEL_LOGS_EXPORTER: none
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=50.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -635,9 +633,7 @@ spec:
           useExecHealthCheck: false
       echo:
         env:
-          OTEL_TRACES_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
-          OTEL_LOGS_EXPORTER: none
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=echo-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
         kubernetes:
@@ -676,8 +672,6 @@ spec:
             type: emptyDir
       fiat:
         env:
-          OTEL_TRACES_EXPORTER: none
-          OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=fiat-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
@@ -717,8 +711,6 @@ spec:
             type: emptyDir
       front50:
         env:
-          OTEL_TRACES_EXPORTER: none
-          OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=front50-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
@@ -758,8 +750,6 @@ spec:
             type: emptyDir
       gate:
         env:
-          OTEL_TRACES_EXPORTER: none
-          OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=gate-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
@@ -799,8 +789,6 @@ spec:
             type: emptyDir
       igor:
         env:
-          OTEL_TRACES_EXPORTER: none
-          OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=igor-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
@@ -840,8 +828,6 @@ spec:
           useExecHealthCheck: false
       kayenta:
         env:
-          OTEL_TRACES_EXPORTER: none
-          OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
@@ -881,8 +867,6 @@ spec:
             type: emptyDir
       orca:
         env:
-          OTEL_TRACES_EXPORTER: none
-          OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=orca-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
@@ -922,8 +906,6 @@ spec:
             type: emptyDir
       rosco:
         env:
-          OTEL_TRACES_EXPORTER: none
-          OTEL_LOGS_EXPORTER: none
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=rosco-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
