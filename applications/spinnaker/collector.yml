@@ -8,8 +8,6 @@ data:
     receivers:
       otlp:
         protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
 
@@ -75,10 +73,6 @@ metadata:
   namespace: spinnaker
 spec:
   ports:
-  - name: grpc-otlp
-    port: 4317
-    protocol: TCP
-    targetPort: 4317
   - name: http-protobuff
     port: 4318
     protocol: TCP
