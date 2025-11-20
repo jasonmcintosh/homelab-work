@@ -1,5 +1,4 @@
 package spinnaker.http.authz
-deny {
+allow {
     1 == 1
 }
-message = "Deny for a test!"
