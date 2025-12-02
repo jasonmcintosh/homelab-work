@@ -10,8 +10,8 @@ data:
         config:
           scrape_configs:
           - job_name: 'ilo-collector'
-            scrape_timeout: 120s
-            scrape_interval: 360s
+            scrape_timeout: 180s
+            scrape_interval: 900s
             static_configs:
             - targets: 
               ## Host1 & 2
@@ -31,13 +31,15 @@ data:
         password: changeme
         database: otel
         async_insert: true
+      prometheusremotewrite:
+        endpoint: https://prometheus.mcintosh.farm/api/v1/write
     processors:
       batch:
     service:
       pipelines:
         metrics:
           receivers: [prometheus]
-          exporters: [clickhouse]
+          exporters: [clickhouse,prometheusremotewrite]
 ---
 apiVersion: apps/v1
 kind: Deployment
