@@ -577,6 +577,7 @@ spec:
             com.netflix.spinnaker.clouddriver.cache: WARN
             com.netflix.spinnaker.clouddriver.kubernetes.OpaDeployDescriptionValidator: DEBUG
             io.armory.spinnaker.front50.validator.validator.OpenPolicyAgentValidator: INFO
+            com.netflix.spinnaker.okhttp.MetricsInterceptor: ERROR
         spinnaker:
           extensibility:
             deck-proxy:
