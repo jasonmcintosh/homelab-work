@@ -13,6 +13,7 @@ terraform {
   backend "kubernetes" {
     secret_suffix    = "tf-dns-encrypt"
     namespace = "default"
+      
   }
 }
 
@@ -99,6 +100,7 @@ locals {
     kubenode1="192.168.16.37"
     kubenode2="192.168.18.69"
     kubenode3="192.168.16.50"
+    kubenode4="192.168.19.6"
   }
   nginx_fronted_services = toset([ "spinnaker","harness", "demo", "git", "prometheus", "grafana", "splunK", "opencloud" ])
 }

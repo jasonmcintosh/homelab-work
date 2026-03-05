@@ -22,6 +22,16 @@ spec:
     app: mysql
   clusterIP: None
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: spinnaker
+data:
+  config.cnf: |
+    [mysqld]
+    disable-log-bin=1
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,11 +49,11 @@ spec:
         app: mysql
     spec:
       containers:
-      - image: mysql:8
+      - image: mysql:9
         name: mysql
-        args:
-          - --disable-log-bin
         env:
+        - name: MYSQL_LOG_BIN
+          value: "0"
           # Use secret in real usage
         - name: MYSQL_ROOT_PASSWORD
           value: password
@@ -53,7 +63,12 @@ spec:
         volumeMounts:
         - name: mysql-storage
           mountPath: /var/lib/mysql
+        - name: mysql-storage
+          mountPath: /etc/mysql/conf.d/
       volumes:
+      - name: mysql-config
+        configMap:
+          name: mysql-config
       - name: mysql-storage
         persistentVolumeClaim:
           claimName: mysql-pv-spinnaker
