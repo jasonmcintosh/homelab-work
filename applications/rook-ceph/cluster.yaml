@@ -16,17 +16,17 @@ metadata:
 spec:
   cephVersion:
     # The container image used to launch the Ceph daemon pods (mon, mgr, osd, mds, rgw).
-    # v17 is Quincy, v18 is Reef.
-    # RECOMMENDATION: In production, use a specific version tag instead of the general v17 flag, which pulls the latest release and could result in different
+    # v19 is Squid, v20 is Tentacle
+    # RECOMMENDATION: In production, use a specific version tag instead of the general v20 flag, which pulls the latest release and could result in different
     # versions running within the cluster. See tags available at https://hub.docker.com/r/ceph/ceph/tags/.
-    # If you want to be more precise, you can always use a timestamp tag such as quay.io/ceph/ceph:v18.2.4-20240724
+    # If you want to be more precise, you can always use a timestamp tag such as quay.io/ceph/ceph:v20.2.0-20251104
     # This tag might not contain a new Ceph version, just security fixes from the underlying operating system, which will reduce vulnerabilities
-    image: quay.io/ceph/ceph:v18.2.4
-    # Whether to allow unsupported versions of Ceph. Currently `quincy` and `reef` are supported.
-    # Future versions such as `squid` (v19) would require this to be set to `true`.
+    image: quay.io/ceph/ceph:v19.2.3
+    # Whether to allow unsupported versions of Ceph. Currently Squid and Tentacle are supported.
+    # Future versions such as Umbrella (v21) would require this to be set to `true`.
     # Do not set to true in production.
     allowUnsupported: false
-  # The path on the host where configuration files will be persisted. Must be specified.
+  # The path on the host where configuration files will be persisted. Must be specified. If there are multiple clusters, the directory must be unique for each cluster.
   # Important: if you reinstall the cluster, make sure you delete this directory from each host or else the mons will fail to start on the new cluster.
   # In Minikube, the '/data' directory is configured to persist across reboots. Use "/data/rook" in Minikube environment.
   dataDirHostPath: /var/lib/rook
@@ -163,6 +163,7 @@ spec:
       method: quick
       # dataSource indicate where to get random bytes from to write on the disk
       # possible choices are 'zero' (default) or 'random'
+      # the 'random' source only works with the 'complete' method, the 'quick' method will use the 'zero' source
       # using random sources will consume entropy from the system and will take much more time then the zero source
       dataSource: zero
       # iteration overwrite N times instead of the default (1)
@@ -251,6 +252,7 @@ spec:
   #   logcollector:
   #   cleanup:
   #   exporter:
+  #   cmd-reporter:
   # The option to automatically remove OSDs that are out and are safe to destroy.
   removeOSDsIfOutAndSafeToRemove: false
   priorityClassNames:
@@ -285,6 +287,9 @@ spec:
     #     config: # configuration can be specified at the node level which overrides the cluster level config
     #   - name: "172.17.4.301"
     #     deviceFilter: "^sd."
+    # Whether to always schedule OSD pods on nodes declared explicitly in the "nodes" section, even if they are
+    # temporarily not schedulable. If set to true, consider adding placement tolerations for unschedulable nodes.
+    scheduleAlways: false
     # when onlyApplyOSDPlacement is false, will merge both placement.All() and placement.osd
     onlyApplyOSDPlacement: false
     # Time for which an OSD pod will sleep before restarting, if it stopped due to flapping
@@ -304,10 +309,6 @@ spec:
     # A duration in minutes that determines how long an entire failureDomain like `region/zone/host` will be held in `noout` (in addition to the
     # default DOWN/OUT interval) when it is draining. This is only relevant when  `managePodBudgets` is `true`. The default value is `30` minutes.
     osdMaintenanceTimeout: 30
-    # A duration in minutes that the operator will wait for the placement groups to become healthy (active+clean) after a drain was completed and OSDs came back up.
-    # Operator will continue with the next drain if the timeout exceeds. It only works if `managePodBudgets` is `true`.
-    # No values or 0 means that the operator will wait until the placement groups are healthy before unblocking the next drain.
-    pgHealthCheckTimeout: 0
 
   # csi defines CSI Driver settings applied per cluster.
   csi:
@@ -322,7 +323,7 @@ spec:
     cephfs:
       # Set CephFS Kernel mount options to use https://docs.ceph.com/en/latest/man/8/mount.ceph/#options.
       # kernelMountOptions: ""
-      # Set CephFS Fuse mount options to use https://docs.ceph.com/en/quincy/man/8/ceph-fuse/#options.
+      # Set CephFS Fuse mount options to use https://docs.ceph.com/en/latest/man/8/ceph-fuse/#options.
       # fuseMountOptions: ""
 
   # healthChecks
