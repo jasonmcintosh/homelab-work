@@ -123,6 +123,17 @@ spec:
           kayenta: *apmInitConfig
           orca: *apmInitConfig
           rosco: *apmInitConfig
+          terraformer:
+          - command:
+            - /bin/sh
+            - -c
+            - echo "Copying files into the versions folder" && mkdir -p /terraform/versions/1.11.5-tofu
+              && cp /bin/tofu /terraform/versions/1.11.5-tofu/terraform && chmod 755 /terraform/versions/1.11.5-tofu/terraform
+            image: scalr/opentofu:1.11.5
+            name: opentofu
+            volumeMounts:
+            - mountPath: /terraform/versions
+              name: terraformer-versions
       canary:
         enabled: true
         defaultMetricsAccount: local-prometheus
@@ -203,7 +214,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.38.1
+      version: 2.36.7
       webhook:
         trust:
           enabled: false
@@ -969,3 +980,7 @@ spec:
             runAsGroup: 1000
             runAsUser: 1000
           useExecHealthCheck: false
+          volumes:
+          - id: terraformer-versions
+            mountPath: /terraform/versions
+            type: emptyDir
