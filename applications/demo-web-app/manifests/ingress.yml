@@ -9,6 +9,7 @@ metadata:
     nginx.ingress.kubernetes.io/canary: "true"
     nginx.ingress.kubernetes.io/canary-weight: "0"
 spec:
+  ingressClassName: traefik
   rules:
   - host: demo.mcintosh.farm
     http:
@@ -36,6 +37,7 @@ metadata:
     nginx.ingress.kubernetes.io/canary: "true"
     nginx.ingress.kubernetes.io/canary-weight: "0"
 spec:
+  ingressClassName: traefik
   rules:
   - host: demo.mcintosh.farm
     http:
@@ -61,6 +63,7 @@ metadata:
     owner: "mcintoshj@gmail.com" 
     cert-manager.io/cluster-issuer: cloudflare-issuer
 spec:
+  ingressClassName: traefik
   rules:
   - host: demo.mcintosh.farm
     http:
