@@ -46,7 +46,7 @@ resource "cloudflare_record" "nvr" {
 resource "cloudflare_record" "printer" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "printer"
-  value   = "192.168.18.43"
+  value   = "192.168.18.117"
   type    = "A"
   allow_overwrite = true
 }
