@@ -1,0 +1,9 @@
+ingressClass:
+  isDefaultClass: false
+  name: traefik
+
+  ## It's a lab :) Expose the dashboard
+ingressRoute:
+  dashboard:
+    # -- Create an IngressRoute for the dashboard
+    enabled: true
