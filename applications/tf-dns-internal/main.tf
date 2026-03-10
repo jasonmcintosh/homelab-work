@@ -120,7 +120,7 @@ locals {
     kubenode4="192.168.19.6"
   }
   nginx_fronted_services = toset([ "spinnaker","harness",  "git", "prometheus", "grafana", "splunK", "opencloud" ])
-  traefik_fronted_services = toset("demo")
+  traefik_fronted_services = toset(["demo"])
 }
 
 resource "cloudflare_record" "services" {
