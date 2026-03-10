@@ -94,6 +94,23 @@ resource "cloudflare_record" "nginx" {
   type    = "A"
   allow_overwrite = true
 }
+resource "cloudflare_record" "traefik" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "traefik"
+  value   = "192.168.19.201"
+  type    = "A"
+  allow_overwrite = true
+}
+
+resource "cloudflare_record" "traefik_services" {
+  for_each  = local.traefik_fronted_services
+  name    = each.key
+
+  zone_id = data.cloudflare_zone.farm.id
+  value   = "traefik.mcintosh.farm"
+  type    = "CNAME"
+  allow_overwrite = true
+}
 
 locals {
   kubenodes = { 
@@ -102,7 +119,8 @@ locals {
     kubenode3="192.168.16.50"
     kubenode4="192.168.19.6"
   }
-  nginx_fronted_services = toset([ "spinnaker","harness", "demo", "git", "prometheus", "grafana", "splunK", "opencloud" ])
+  nginx_fronted_services = toset([ "spinnaker","harness",  "git", "prometheus", "grafana", "splunK", "opencloud" ])
+  traefik_fronted_services = toset("demo")
 }
 
 resource "cloudflare_record" "services" {
