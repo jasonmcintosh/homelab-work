@@ -7,3 +7,8 @@ ingressRoute:
   dashboard:
     # -- Create an IngressRoute for the dashboard
     enabled: true
+providers:
+  kubernetesIngress:
+    ingressClass: "traefik"
+  kubernetesCRD:
+    ingressClass: "traefik"
