@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'io.armory.canary.demo'
-version = '0.0.5'
+version = '0.0.6'
 
 repositories {
 	mavenCentral()
@@ -26,7 +26,7 @@ dependencies {
 }
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
