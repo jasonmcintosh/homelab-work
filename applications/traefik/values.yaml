@@ -7,8 +7,15 @@ ingressRoute:
   dashboard:
     # -- Create an IngressRoute for the dashboard
     enabled: true
+    matchRule: Host(`traefik.mcintosh.farm`)
+    entryPoints:
+    - web
+    - websecure
 providers:
   kubernetesIngress:
     ingressClass: "traefik"
   kubernetesCRD:
+    allowCrossNamespace: true
     ingressClass: "traefik"
+deployment:
+  replicas: 2
