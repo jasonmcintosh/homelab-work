@@ -33,17 +33,19 @@ spec:
       - name: demo-web-app-service-canary
         port: 8080
         weight: 0
+
+## TWO ingress routes, one for TLS, one for regular... this is annoying
+## https://github.com/traefik/traefik/issues/6894
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: demo-ingress
+  name: demo-ingress-tls
   namespace: prod
   annotations:
     kubernetes.io/ingress.class: traefik
 spec:
   entryPoints:
-  - web
   - websecure
   routes:
   - match: Host(`demo.mcintosh.farm`)
@@ -56,4 +58,24 @@ spec:
       kind: TraefikService 
   tls:
     secretName: demo-ingress-cert
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: demo-ingress
+  namespace: prod
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  entryPoints:
+  - web
+  routes:
+  - match: Host(`demo.mcintosh.farm`)
+    kind: Rule
+    observability:
+      metrics: true
+      accessLogs: true
+    services:
+    - name: demo-service
+      kind: TraefikService 
 
