@@ -19501,7 +19501,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
   annotations:
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/name: traefik
@@ -19538,6 +19538,7 @@ spec:
         - --metrics.prometheus.entrypoint=metrics
         - --providers.kubernetescrd
         - --providers.kubernetescrd.ingressClass=traefik
+        - --providers.kubernetescrd.allowCrossNamespace=true
         - --providers.kubernetescrd.allowEmptyServices=true
         - --providers.kubernetesingress
         - --providers.kubernetesingress.allowEmptyServices=true
@@ -19556,7 +19557,7 @@ spec:
               fieldPath: metadata.namespace
         - name: USER
           value: traefik
-        image: docker.io/traefik:v3.6.9
+        image: docker.io/traefik:v3.6.10
         imagePullPolicy: IfNotPresent
         lifecycle: null
         livenessProbe:
@@ -19650,9 +19651,10 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 spec:
   entryPoints:
-  - traefik
+  - web
+  - websecure
   routes:
-  - match: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
+  - match: Host(`traefik.mcintosh.farm`)
     kind: Rule
     services:
       - kind: TraefikService

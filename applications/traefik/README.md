@@ -5,5 +5,5 @@ This is used in my cluster in a few places to do weighted route rules (e.g. my d
 Installed/udpated by:
 
 ```
-helm template --values values.yaml --namespace traefik traefik traefik/traefik
+helm template --include-crds --values values.yaml --namespace traefik traefik traefik/traefik > traefik.yaml
 ```

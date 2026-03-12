@@ -1,81 +1,59 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: cert-manager.io/v1
+kind: Certificate
 metadata:
-  name: demo-ingress-canary
+  name: demo-ingress-cert
   namespace: prod
-  annotations:
-    owner: "mcintoshj@gmail.com"
-    cert-manager.io/cluster-issuer: cloudflare-issuer
-    nginx.ingress.kubernetes.io/canary: "true"
-    nginx.ingress.kubernetes.io/canary-weight: "0"
 spec:
-  ingressClassName: traefik
-  rules:
-  - host: demo.mcintosh.farm
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: demo-web-app-service-canary
-            port:
-              number: 8080
-  tls:
-  - hosts:
-    - "*.mcintosh.farm"
-    secretName: demo-ingress-cert
+  dnsNames:
+  - '*.mcintosh.farm'
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: cloudflare-issuer
+  secretName: demo-ingress-cert
+  usages:
+  - digital signature
+  - key encipherment
+
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: traefik.io/v1alpha1
+kind: TraefikService
 metadata:
-  name: demo-ingress-baseline
+  name: demo-service
   namespace: prod
-  annotations:
-    owner: "mcintoshj@gmail.com"
-    cert-manager.io/cluster-issuer: cloudflare-issuer
-    nginx.ingress.kubernetes.io/canary: "true"
-    nginx.ingress.kubernetes.io/canary-weight: "0"
 spec:
-  ingressClassName: traefik
-  rules:
-  - host: demo.mcintosh.farm
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: demo-web-app-service-baseline
-            port:
-              number: 8080
-  tls:
-  - hosts:
-    - "*.mcintosh.farm"
-    secretName: demo-ingress-cert
+  weighted:
+    services:
+      - name: demo-web-app-service
+        port: 8080
+        weight: 8
+      - name: demo-web-app-service-baseline
+        port: 8080
+        weight: 0
+      - name: demo-web-app-service-canary
+        port: 8080
+        weight: 0
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
 metadata:
   name: demo-ingress
   namespace: prod
   annotations:
-    owner: "mcintoshj@gmail.com" 
-    cert-manager.io/cluster-issuer: cloudflare-issuer
+    kubernetes.io/ingress.class: traefik
 spec:
-  ingressClassName: traefik
-  rules:
-  - host: demo.mcintosh.farm
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: demo-web-app-service
-            port: 
-              number: 8080
+  entryPoints:
+  - web
+  - websecure
+  routes:
+  - match: Host(`demo.mcintosh.farm`)
+    kind: Rule
+    observability:
+      metrics: true
+      accessLogs: true
+    services:
+    - name: demo-service
+      kind: TraefikService 
   tls:
-  - hosts:
-    - "*.mcintosh.farm"
     secretName: demo-ingress-cert
+
