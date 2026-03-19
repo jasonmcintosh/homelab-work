@@ -63,7 +63,7 @@ spec:
         volumeMounts:
         - name: mysql-storage
           mountPath: /var/lib/mysql
-        - name: mysql-storage
+        - name: mysql-config
           mountPath: /etc/mysql/conf.d/
       volumes:
       - name: mysql-config
