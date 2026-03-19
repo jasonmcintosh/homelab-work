@@ -183,7 +183,6 @@ resource "cloudflare_dns_record" "kubenodes" {
 resource "cloudflare_dns_record" "nas" {
   zone_id = data.cloudflare_zone.farm.id
   ttl = 3600
-  ttl = 3600
   name    = "truenas"
   value   = "192.168.17.150"
   type    = "A"
