@@ -2,7 +2,7 @@ terraform {
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "~> 5.18"
+      version = "4.52.5"
     }
     kubernetes = {
       source = "opentofu/kubernetes"
@@ -13,14 +13,16 @@ terraform {
   backend "kubernetes" {
     secret_suffix    = "tf-dns-encrypt"
     namespace = "default"
+  config_path = "~/.kube/config.local"
       
   }
 }
 
 provider "kubernetes" {
+  config_path = "~/.kube/config.local"
 }
 
-data "kubernetes_secret" "cloudflare-api" {
+data "kubernetes_secret_v1" "cloudflare-api" {
   metadata {
     name = "cloudflare-api-key"
     namespace = "cert-manager"
@@ -28,7 +30,7 @@ data "kubernetes_secret" "cloudflare-api" {
 }
 
 provider "cloudflare" {
-  api_token = data.kubernetes_secret.cloudflare-api.data["api_key"]
+  api_token = data.kubernetes_secret_v1.cloudflare-api.data["api_key"]
 }
 
 
@@ -36,88 +38,78 @@ provider "cloudflare" {
 data "cloudflare_zone" "farm" {
   name = "mcintosh.farm"
 }
-resource "cloudflare_dns_record" "nvr" {
+resource "cloudflare_record" "nvr" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name = "nvr"
-  value = "192.168.18.192"
+  content = "192.168.18.192"
   type = "A"
   allow_overwrite = true
 }
-resource "cloudflare_dns_record" "printer" {
+resource "cloudflare_record" "printer" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "printer"
-  value   = "192.168.18.117"
+  content   = "192.168.18.117"
   type    = "A"
   allow_overwrite = true
 }
 //VM Resources, esxi, demo lab stuff
-resource "cloudflare_dns_record" "dl380" {
+resource "cloudflare_record" "dl380" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "dl380"
-  value   = "192.168.16.89"
+  content   = "192.168.16.89"
   type    = "A"
   allow_overwrite = true
 }
-resource "cloudflare_dns_record" "dl380_ilo" {
+resource "cloudflare_record" "dl380_ilo" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "dl380-ilo"
-  value   = "192.168.18.128"
+  content   = "192.168.18.128"
   type    = "A"
   allow_overwrite = true
 }
-resource "cloudflare_dns_record" "dl360" {
+resource "cloudflare_record" "dl360" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "dl360"
-  value   = "192.168.17.143"
+  content   = "192.168.17.143"
   type    = "A"
   allow_overwrite = true
 }
-resource "cloudflare_dns_record" "dl360_ilo" {
+resource "cloudflare_record" "dl360_ilo" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "dl360-ilo"
-  value   = "192.168.17.89"
+  content   = "192.168.17.89"
   type    = "A"
   allow_overwrite = true
 }
 
-resource "cloudflare_dns_record" "xen" {
+resource "cloudflare_record" "xen" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "xen"
-  value   = "192.168.19.195"
+  content   = "192.168.19.195"
   type    = "A"
 }
 
-resource "cloudflare_dns_record" "nginx" {
+resource "cloudflare_record" "nginx" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "nginx"
-  value   = "192.168.19.200"
+  content   = "192.168.19.200"
   type    = "A"
   allow_overwrite = true
 }
-resource "cloudflare_dns_record" "traefik" {
+resource "cloudflare_record" "traefik" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "traefik"
-  value   = "192.168.19.201"
+  content   = "192.168.19.201"
   type    = "A"
   allow_overwrite = true
 }
 
-resource "cloudflare_dns_record" "traefik_services" {
+resource "cloudflare_record" "traefik_services" {
   for_each  = local.traefik_fronted_services
   name    = each.key
 
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
-  value   = "traefik.mcintosh.farm"
+  content   = "traefik.mcintosh.farm"
   type    = "CNAME"
   allow_overwrite = true
 }
@@ -133,58 +125,52 @@ locals {
   traefik_fronted_services = toset(["demo"])
 }
 
-resource "cloudflare_dns_record" "services" {
+resource "cloudflare_record" "services" {
   for_each  = local.nginx_fronted_services
   name    = each.key
 
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
-  value   = "nginx.mcintosh.farm"
+  content   = "nginx.mcintosh.farm"
   type    = "CNAME"
   allow_overwrite = true
 }
 
-resource "cloudflare_dns_record" "homebridge" {
+resource "cloudflare_record" "homebridge" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "homebridge"
-  value   = "192.168.18.76"
+  content   = "192.168.18.76"
   type    = "A"
   allow_overwrite = true
 }
 
-resource "cloudflare_dns_record" "gitness-ssh" {
+resource "cloudflare_record" "gitness-ssh" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "git-ssh"
-  value   = "192.168.19.202"
+  content   = "192.168.19.202"
   type    = "A"
   allow_overwrite = true
 }
 
-resource "cloudflare_dns_record" "bluesky" {
+resource "cloudflare_record" "bluesky" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name = "_atproto"
   type = "TXT"
   allow_overwrite = true
-  value = "did=did:plc:67gtgajzomelj6ahmemyjfwo"
+  content = "did=did:plc:67gtgajzomelj6ahmemyjfwo"
 }
 
-resource "cloudflare_dns_record" "kubenodes" {
+resource "cloudflare_record" "kubenodes" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   for_each  = local.kubenodes
   name    = each.key
-  value   = each.value
+  content   = each.value
   type    = "A"
   allow_overwrite = true
 }
-resource "cloudflare_dns_record" "nas" {
+resource "cloudflare_record" "nas" {
   zone_id = data.cloudflare_zone.farm.id
-  ttl = 3600
   name    = "truenas"
-  value   = "192.168.17.150"
+  content   = "192.168.17.150"
   type    = "A"
   allow_overwrite = true
 }
