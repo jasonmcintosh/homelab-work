@@ -32469,6 +32469,7 @@ spec:
       containers:
       - args:
         - /usr/local/bin/argocd-server
+        - --insecure
         env:
         - name: REDIS_PASSWORD
           valueFrom:
