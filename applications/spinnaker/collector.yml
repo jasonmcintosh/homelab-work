@@ -12,6 +12,10 @@ data:
             endpoint: 0.0.0.0:4318
 
     exporters:
+      otlphttp/newrelic:
+        endpoint: https://otlp.nr-data.net
+        headers:
+          api-key: ${env:NR_API_KEY}
       debug/noop:
         verbosity: normal
         sampling_initial: 0
@@ -31,16 +35,13 @@ data:
       pipelines:
         traces:
           receivers: [otlp]
-          exporters: [clickhouse]
-          exporters: [debug/noop]
+          exporters: [otlphttp/newrelic, debug/noop]
         metrics:
           receivers: [otlp]
-          exporters: [clickhouse, prometheusremotewrite]
-          exporters: [prometheusremotewrite]
+          exporters: [otlphttp/newrelic, prometheusremotewrite]
         logs:
           receivers: [otlp]
-          exporters: [clickhouse]
-          exporters: [debug/noop]
+          exporters: [otlphttp/newrelic, debug/noop]
   collector.yaml: |
     receivers:
       otlp:
@@ -48,6 +49,10 @@ data:
           http:
             endpoint: 0.0.0.0:4318
     exporters:
+      otlphttp/newrelic:
+        endpoint: https://otlp.nr-data.net
+        headers:
+          api-key: "${env:NR_API_KEY}"
       debug/noop:
         verbosity: normal
         sampling_initial: 0
@@ -60,13 +65,13 @@ data:
       pipelines:
         traces:
           receivers: [otlp]
-          exporters: [debug/noop]
+          exporters: [otlphttp/newrelic,debug/noop]
         metrics:
           receivers: [otlp]
-          exporters: [prometheusremotewrite]
+          exporters: [otlphttp/newrelic,prometheusremotewrite]
         logs:
           receivers: [otlp]
-          exporters: [debug/noop]
+          exporters: [otlphttp/newrelic,debug/noop]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -88,6 +93,10 @@ spec:
         args:
         - --config=/conf/collector.yaml
         image: otel/opentelemetry-collector-contrib:0.145.0
+        envFrom:
+        - secretRef:
+            name: newrelic-api-key
+
         volumeMounts:
         - mountPath: /conf
           name: collector-config

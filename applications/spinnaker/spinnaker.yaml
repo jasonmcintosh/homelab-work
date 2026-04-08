@@ -584,11 +584,20 @@ spec:
             min-response-size: 4096
         logging:
           level:
+            ## Remove access logs and INFO level logs that are VERY verbose.
+            root: WARN
+            ## Have AWS be warn as well or adjust for example
             com.amazonaws.latency: WARN
-            com.netflix.spinnaker.clouddriver.cache: WARN
-            com.netflix.spinnaker.clouddriver.kubernetes.OpaDeployDescriptionValidator: DEBUG
+            ## This disables most basic logging which can be VERY verbose. 
+            com.netflix.spinnaker: WARN
+            ## Could turn on more logging here IF desired. Should pull more from metrics/traces
+            com.netflix.spinnaker.clouddriver.caching: WARN
+            ## Debug for OPA policies.  
+            com.netflix.spinnaker.clouddriver.kubernetes.OpaDeployDescriptionValidator: INFO
             io.armory.spinnaker.front50.validator.validator.OpenPolicyAgentValidator: INFO
+            ## The anonymous header alert is in here as a WARN, so go to ERROR level to reduce the noise from those
             com.netflix.spinnaker.okhttp.MetricsInterceptor: ERROR
+            com.netflix.spinnaker.okhttp.OkHttp3MetricsInterceptor: ERROR
         spinnaker:
           extensibility:
             deck-proxy:
