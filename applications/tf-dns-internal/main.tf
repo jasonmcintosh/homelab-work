@@ -6,7 +6,7 @@ terraform {
     }
     kubernetes = {
       source = "opentofu/kubernetes"
-      version = "3.0.1"
+      version = "3.1.0"
     }
   }
 
