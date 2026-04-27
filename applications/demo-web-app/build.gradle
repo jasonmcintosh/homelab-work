@@ -1,12 +1,12 @@
 plugins {
-	id 'org.springframework.boot' version '4.0.5'
+	id 'org.springframework.boot' version '4.0.6'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'java'
 	id "io.github.itzg.simple-boot-image" version "3.4.3"
 }
 
 group = 'io.armory.canary.demo'
-version = '0.0.7'
+version = '0.0.8'
 
 repositories {
 	mavenCentral()
@@ -19,10 +19,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 
-	compileOnly 'org.projectlombok:lombok:1.18.44'
-	annotationProcessor 'org.projectlombok:lombok:1.18.44'
-	testCompileOnly 'org.projectlombok:lombok:1.18.44'
-	testAnnotationProcessor 'org.projectlombok:lombok:1.18.44'
+	compileOnly 'org.projectlombok:lombok:1.18.46'
+	annotationProcessor 'org.projectlombok:lombok:1.18.46'
+	testCompileOnly 'org.projectlombok:lombok:1.18.46'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.46'
 }
 java {
     toolchain {
