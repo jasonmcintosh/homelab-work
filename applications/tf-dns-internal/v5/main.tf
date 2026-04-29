@@ -2,7 +2,7 @@ terraform {
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "5.19.0-beta.5"
+      version = "5.19.0"
     }
     kubernetes = {
       source = "opentofu/kubernetes"
