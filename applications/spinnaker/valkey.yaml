@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: valkey-config
+  namespace: spinnaker
+  labels:
+    app: valkey
+data:
+  valkey.conf: |
+    bind 0.0.0.0
+    port 6379
+    protected-mode no
+    save 900 1
+    save 300 10
+    appendonly yes
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: valkey
+  namespace: spinnaker
+  labels:
+    app: valkey
+spec:
+  ports:
+    - name: valkey
+      port: 6379
+      targetPort: 6379
+  clusterIP: None
+  selector:
+    app: valkey
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: valkey
+  namespace: spinnaker
+  labels:
+    app: valkey
+spec:
+  serviceName: "valkey"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: valkey
+  template:
+    metadata:
+      labels:
+        app: valkey
+    spec:
+      containers:
+        - name: valkey
+          image: valkey/valkey:8.0-alpine
+          command:
+            - valkey-server
+            - /usr/local/etc/valkey/valkey.conf
+          ports:
+            - containerPort: 6379
+              name: valkey
+          volumeMounts:
+            - name: config
+              mountPath: /usr/local/etc/valkey
+            - name: valkey-data
+              mountPath: /data
+      volumes:
+        - name: config
+          configMap:
+            name: valkey-config
+  volumeClaimTemplates:
+    - metadata:
+        name: valkey-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi
