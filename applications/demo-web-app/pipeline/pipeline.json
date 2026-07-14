@@ -23,7 +23,7 @@
     }
   ],
   "keepWaitingPipelines": false,
-  "lastModifiedBy": "mcintoshj@gmail.com",
+  "lastModifiedBy": "jason@mcintosh.farm",
   "limitConcurrent": true,
   "parameterConfig": [
     {
@@ -157,7 +157,7 @@
           "services": [
             "service demo-web-app-service-baseline"
           ],
-          "strategy": "redblack"
+          "strategy": "bluegreen"
         }
       },
       "type": "deployManifest"
@@ -241,7 +241,7 @@
           "services": [
             "service demo-web-app-service-canary"
           ],
-          "strategy": "redblack"
+          "strategy": "bluegreen"
         }
       },
       "type": "deployManifest"
@@ -250,8 +250,9 @@
       "analysisType": "realTime",
       "canaryConfig": {
         "baselineAnalysisOffsetInMins": "0",
+        "beginCanaryAnalysisAfterMins": "0",
         "canaryAnalysisIntervalMins": "5",
-        "canaryConfigId": "7b612968-c805-4612-b27a-076f6ae7e7ae",
+        "canaryConfigId": "7c86e35a-aeaa-4736-abc5-6964d164f9ec",
         "lifetimeDuration": "PT0H5M",
         "metricsAccountName": "local-prometheus",
         "scopes": [
@@ -335,7 +336,7 @@
           "services": [
             "service demo-web-app-service"
           ],
-          "strategy": "redblack"
+          "strategy": "bluegreen"
         }
       },
       "type": "deployManifest"
@@ -375,10 +376,10 @@
       "cloudProvider": "kubernetes",
       "manifests": [
         {
-          "apiVersion": "traefik.containo.us/v1alpha1",
+          "apiVersion": "traefik.io/v1alpha1",
           "kind": "TraefikService",
           "metadata": {
-            "name": "demo-web-app"
+            "name": "demo-service"
           },
           "spec": {
             "weighted": {
@@ -433,10 +434,10 @@
       "comments": "DO THIS or... canaries when they're shut off break the app entirely due to how traefik works :(",
       "manifests": [
         {
-          "apiVersion": "traefik.containo.us/v1alpha1",
+          "apiVersion": "traefik.io/v1alpha1",
           "kind": "TraefikService",
           "metadata": {
-            "name": "demo-web-app",
+            "name": "demo-service",
             "namespace": "prod"
           },
           "spec": {
@@ -493,6 +494,46 @@
         "11"
       ],
       "type": "checkPreconditions"
+    },
+    {
+      "account": "k8s-namespace-prod",
+      "alias": "runJob",
+      "application": "demo",
+      "cloudProvider": "kubernetes",
+      "credentials": "k8s-namespace-prod",
+      "manifest": {
+        "apiVersion": "batch/v1",
+        "kind": "Job",
+        "metadata": {
+          "name": "demo-load-test",
+          "namespace": "prod"
+        },
+        "spec": {
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "command": [
+                    "/bin/sh",
+                    "-c",
+                    "count=0; while [ \"$count\" -le 600 ]; do curl -sS demo.mcintosh.farm; echo \"\"; sleep 0.5; count=$((count + 1)); done"
+                  ],
+                  "image": "curlimages/curl:latest",
+                  "name": "demo-job"
+                }
+              ],
+              "restartPolicy": "OnFailure"
+            }
+          }
+        }
+      },
+      "name": "Load test the system",
+      "refId": "14",
+      "requisiteStageRefIds": [
+        "10"
+      ],
+      "source": "text",
+      "type": "runJobManifest"
     }
   ],
   "triggers": [
@@ -505,8 +546,9 @@
       "organization": "jasonmcintosh/spinnaker-work",
       "registry": "ghcr.io",
       "repository": "jasonmcintosh/spinnaker-work/demo-web-app",
-      "runAsUser": "fbfc7e17-dab2-4669-9cc4-0e20cec9a0e9@managed-service-account",
+      "runAsUser": "6500b0c0-3fa8-4496-87cd-4f7a0262d0c0@managed-service-account",
       "type": "docker"
     }
-  ]
+  ],
+  "updateTs": "1778606543441"
 }
