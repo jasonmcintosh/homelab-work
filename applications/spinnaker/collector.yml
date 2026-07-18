@@ -4,44 +4,6 @@ metadata:
   name: collector-config
   namespace: spinnaker
 data:
-  collector-not-used.yaml: |
-    receivers:
-      otlp:
-        protocols:
-          http:
-            endpoint: 0.0.0.0:4318
-
-    exporters:
-      otlphttp/newrelic:
-        endpoint: https://otlp.nr-data.net
-        headers:
-          api-key: ${env:NR_API_KEY}
-      debug/noop:
-        verbosity: normal
-        sampling_initial: 0
-        sampling_thereafter: 0
-      clickhouse:
-        endpoint: tcp://192.168.19.204:9000?dial_timeout=10s&compress=lz4
-        username: clickhouse
-        password: changeme
-        database: otel
-        async_insert: true
-        create_schema: true
-      prometheusremotewrite:
-        endpoint: https://prometheus.mcintosh.farm/api/v1/write
-    processors:
-      batch:
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          exporters: [otlphttp/newrelic, debug/noop]
-        metrics:
-          receivers: [otlp]
-          exporters: [otlphttp/newrelic, prometheusremotewrite]
-        logs:
-          receivers: [otlp]
-          exporters: [otlphttp/newrelic, debug/noop]
   collector.yaml: |
     receivers:
       otlp:
@@ -59,19 +21,30 @@ data:
         sampling_thereafter: 0
       prometheusremotewrite:
         endpoint: https://prometheus.mcintosh.farm/api/v1/write
+      clickhouse:
+        endpoint: tcp://192.168.19.204:9000?dial_timeout=10s&compress=lz4
+        username: clickhouse
+        password: changeme
+        database: otel
+        async_insert: true
+        create_schema: true
     processors:
-      batch:
+      ## Reduce data... we just have too much in spinnaker at thi stime.
+      probabilistic_sampler/trace:
+        sampling_percentage: 10 # Sample 10% of traces
+      #batch:
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          exporters: [otlphttp/newrelic,debug/noop]
+          processors: [probabilistic_sampler/trace]
+          exporters: [debug/noop]
         metrics:
           receivers: [otlp]
-          exporters: [otlphttp/newrelic,prometheusremotewrite]
+          exporters: [prometheusremotewrite]
         logs:
           receivers: [otlp]
-          exporters: [otlphttp/newrelic,debug/noop]
+          exporters: [debug/noop]
 ---
 apiVersion: apps/v1
 kind: Deployment
