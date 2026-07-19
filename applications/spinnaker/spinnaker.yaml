@@ -8,167 +8,267 @@ spec:
     kayenta:
       deployment:
         patchesStrategicMerge:
-          - |
-            spec:
-              template:
-                spec:
-                  ## not really needed since we set below
-                  containers:
-                    - name: kayenta
-                      livenessProbe:
-                        initialDelaySeconds: 160
+        - |
+          spec:
+            template:
+              spec:
+                ## not really needed since we set below
+                containers:
+                  - name: kayenta
+                    livenessProbe:
+                      initialDelaySeconds: 160
   spinnakerConfig:
     config:
       armory:
-        terraform:
-          enabled:
-            true
         diagnostics:
-          uuid: jason-mcintosh-local
           enabled: false
           logging:
             enabled: false
             endpoint: https://debug.armory.io/v1/logs
+          uuid: jason-mcintosh-local
+        terraform:
+          enabled: true
       artifacts:
-        http:
+        github:
+          accounts:
+          - name: github-files-jm
+            token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
+            username: jasonmcintosh
+          enabled: true
+        gitrepo:
+          accounts:
+          - name: github-repo-clone-ro
+            token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
+            username: jasonmcintosh
+          - name: github-repo-clone-ro-noauth
           enabled: true
         helm:
-          enabled: true
           accounts:
           - name: helm-hashicorp
             repository: https://helm.releases.hashicorp.com
           - name: helm-otel-collector
             repository: https://open-telemetry.github.io/opentelemetry-helm-charts
-        gitrepo:
           enabled: true
-          accounts:
-          - name: github-repo-clone-ro
-            username: jasonmcintosh
-            token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
-        github:
+        http:
           enabled: true
-          accounts:
-            ## For loading a SINGLE file using github API's
-            - name: github-files-jm
-              username: jasonmcintosh
-              token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
+      canary:
+        defaultMetricsAccount: local-prometheus
+        defaultMetricsStore: prometheus
+        defaultStorageAccount: minio
+        enabled: true
+        serviceIntegrations:
+        - accounts:
+          - accessKeyId: minio
+            bucket: spinnaker
+            endpoint: https://truenas.mcintosh.farm:9000
+            name: minio
+            rootFolder: canaries
+            secretAccessKey: secretKey
+            supportedTypes:
+            - OBJECT_STORE
+            - CONFIGURATION_STORE
+          enabled: true
+          name: aws
+          s3Enabled: true
+        - accounts:
+          - endpoint:
+              baseUrl: http://prometheus.monitoring:9090
+            name: local-prometheus
+            supportedTypes:
+            - METRICS_STORE
+          - endpoint:
+              baseUrl: http://prometheus.monitoring:9090
+            name: local-prometheus-2
+            supportedTypes:
+            - METRICS_STORE
+          enabled: true
+          name: prometheus
       deploymentEnvironment:
         customSizing:
           spin-clouddriver:
             limits:
-              memory: 2Gi
+              memory: 4Gi
             replicas: 2
-          spin-gate:
-            limits:
-              memory: 2Gi
-          spin-rosco:
-            limits:
-              memory: 1Gi
-          spin-front50:
-            limits:
-              memory: 2Gi
-            replicas: 2
-          spin-orca:
-            limits:
-              memory: 2Gi
-          spin-igor:
-            limits:
-              memory: 2Gi
           spin-echo:
             limits:
-              memory: 2Gi
+              memory: 3Gi
             replicas: 1
           spin-fiat:
             limits:
               memory: 2Gi
             replicas: 1
+          spin-front50:
+            limits:
+              memory: 3Gi
+            replicas: 2
+          spin-gate:
+            limits:
+              memory: 2Gi
+          spin-igor:
+            limits:
+              memory: 2Gi
           spin-kayenta:
             limits:
               memory: 2.5Gi
+          spin-orca:
+            limits:
+              memory: 3Gi
+          spin-rosco:
+            limits:
+              memory: 1Gi
           spin-terraformer:
             limits:
               memory: .5Gi
-
-        sidecars:
-          orca: &opa-client-config
-            - name: opal-client
-              dockerImage: permitio/opal-client:latest
-              env:
-                OPAL_SERVER_URL: http://opa-opal-server:7002
-                OPAL_POLICY_SUBSCRIPTION_DIRS: applications/opa/
-              ## IF we switch to a more advanced sidecar config, we can open up BOTH opa and opal ports.  Opal sidecar runs both it seems
-              port: 8181
-          front50: *opa-client-config
-          clouddriver: *opa-client-config
-          gate: *opa-client-config
-
-          ## Example init container for an APM agent (honeycomb, newrelic, etc.)
         initContainers:
-          clouddriver: &apmInitConfig
+          clouddriver:
           - command:
             - /bin/sh
             - -c
-            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar && chmod 775 /opt/apmagent/*
-            image: otel/autoinstrumentation-java:2.3.0
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar
+              && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.27.0
             imagePullPolicy: Always
             name: apm-initializer
             volumeMounts:
             - mountPath: /opt/apmagent
               name: shared-volume
-          echo: *apmInitConfig
-          fiat: *apmInitConfig
-          front50: *apmInitConfig
-          gate: *apmInitConfig
-          igor: *apmInitConfig
-          kayenta: *apmInitConfig
-          orca: *apmInitConfig
-          rosco: *apmInitConfig
+          echo:
+          - command:
+            - /bin/sh
+            - -c
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar
+              && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.27.0
+            imagePullPolicy: Always
+            name: apm-initializer
+            volumeMounts:
+            - mountPath: /opt/apmagent
+              name: shared-volume
+          fiat:
+          - command:
+            - /bin/sh
+            - -c
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar
+              && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.27.0
+            imagePullPolicy: Always
+            name: apm-initializer
+            volumeMounts:
+            - mountPath: /opt/apmagent
+              name: shared-volume
+          front50:
+          - command:
+            - /bin/sh
+            - -c
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar
+              && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.27.0
+            imagePullPolicy: Always
+            name: apm-initializer
+            volumeMounts:
+            - mountPath: /opt/apmagent
+              name: shared-volume
+          gate:
+          - command:
+            - /bin/sh
+            - -c
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar
+              && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.27.0
+            imagePullPolicy: Always
+            name: apm-initializer
+            volumeMounts:
+            - mountPath: /opt/apmagent
+              name: shared-volume
+          igor:
+          - command:
+            - /bin/sh
+            - -c
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar
+              && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.27.0
+            imagePullPolicy: Always
+            name: apm-initializer
+            volumeMounts:
+            - mountPath: /opt/apmagent
+              name: shared-volume
+          kayenta:
+          - command:
+            - /bin/sh
+            - -c
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar
+              && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.27.0
+            imagePullPolicy: Always
+            name: apm-initializer
+            volumeMounts:
+            - mountPath: /opt/apmagent
+              name: shared-volume
+          orca:
+          - command:
+            - /bin/sh
+            - -c
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar
+              && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.27.0
+            imagePullPolicy: Always
+            name: apm-initializer
+            volumeMounts:
+            - mountPath: /opt/apmagent
+              name: shared-volume
+          rosco:
+          - command:
+            - /bin/sh
+            - -c
+            - mkdir -p /opt/apmagent && cp /javaagent.jar /opt/apmagent/javaagent.jar
+              && chmod 775 /opt/apmagent/*
+            image: otel/autoinstrumentation-java:2.27.0
+            imagePullPolicy: Always
+            name: apm-initializer
+            volumeMounts:
+            - mountPath: /opt/apmagent
+              name: shared-volume
           terraformer:
           - command:
             - /bin/sh
             - -c
             - echo "Copying files into the versions folder" && mkdir -p /terraform/versions/1.11.5-tofu
-              && cp /bin/tofu /terraform/versions/1.11.5-tofu/terraform && chmod 755 /terraform/versions/1.11.5-tofu/terraform
+              && cp /bin/tofu /terraform/versions/1.11.5-tofu/terraform && chmod 755
+              /terraform/versions/1.11.5-tofu/terraform
             image: scalr/opentofu:1.11.5
             name: opentofu
             volumeMounts:
             - mountPath: /terraform/versions
               name: terraformer-versions
-      canary:
-        enabled: true
-        defaultMetricsAccount: local-prometheus
-        defaultStorageAccount: minio
-        defaultMetricsStore: prometheus
-        serviceIntegrations:
-          - name: aws
-            enabled: true
-            s3Enabled: true
-            accounts:
-            - name: minio
-              bucket: canaries
-              endpoint: http://minio:9000
-              accessKeyId: minio
-              secretAccessKey: secretKey
-              supportedTypes:
-              - OBJECT_STORE
-              - CONFIGURATION_STORE
-          - name: prometheus
-            enabled: true
-            accounts:
-            - name: local-prometheus
-              endpoint:
-                baseUrl: http://prometheus.monitoring:9090
-              supportedTypes:
-              - METRICS_STORE
-            - name: local-prometheus-2
-              endpoint:
-                baseUrl: http://prometheus.monitoring:9090
-              supportedTypes:
-              - METRICS_STORE
-
-      persistentStorage:
-        persistentStoreType: s3
-
+        sidecars:
+          clouddriver:
+          - dockerImage: permitio/opal-client:latest
+            env:
+              OPAL_POLICY_SUBSCRIPTION_DIRS: applications/opa/
+              OPAL_SERVER_URL: http://opa-opal-server:7002
+            name: opal-client
+            port: 8181
+          front50:
+          - dockerImage: permitio/opal-client:latest
+            env:
+              OPAL_POLICY_SUBSCRIPTION_DIRS: applications/opa/
+              OPAL_SERVER_URL: http://opa-opal-server:7002
+            name: opal-client
+            port: 8181
+          gate:
+          - dockerImage: permitio/opal-client:latest
+            env:
+              OPAL_POLICY_SUBSCRIPTION_DIRS: applications/opa/
+              OPAL_SERVER_URL: http://opa-opal-server:7002
+            name: opal-client
+            port: 8181
+          orca:
+          - dockerImage: permitio/opal-client:latest
+            env:
+              OPAL_POLICY_SUBSCRIPTION_DIRS: applications/opa/
+              OPAL_SERVER_URL: http://opa-opal-server:7002
+            name: opal-client
+            port: 8181
       features:
         artifacts: true
         pipelineTemplates: true
@@ -176,16 +276,18 @@ spec:
         github-status:
           enabled: true
           token: encrypted:k8s!n:artifact-creds!k:githubReadOnlyToken
-
+        slack:
+          botName: SpinnakerNotifications
+          enabled: true
+          token: encrypted:k8s!n:notification-secrets!k:slack-bot-token
+      persistentStorage:
+        persistentStoreType: s3
       providers:
-        ## Forces igor to be built...
         dockerRegistry:
           enabled: true
-
         kubernetes:
           enabled: true
           primaryAccount: k8s-namespace-dev
-
       security:
         apiSecurity:
           overrideBaseUrl: https://spinnaker.mcintosh.farm/api/v1
@@ -214,7 +316,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.36.7
+      version: 2.40.1
       webhook:
         trust:
           enabled: false
@@ -226,70 +328,96 @@ spec:
           replicaTtlSeconds: 60
         caching:
           sharding-enabled: true
-        kubernetes:
-          loadNamespacesInAccount: false
-          verifyAccountHealth: false
-          accounts:
-            - name: k8s-spinnaker-prod
-              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-              kubectlExecutable: kubectl-1.29
-              cacheIntervalSeconds: 60
-              namespaces: 
-              - spinnaker
-              permissions:
-                READ:
-                - everyone
-                - engineering-managed
-                WRITE:
-                - everyone
-                - engineering-managed
-            - name: k8s-namespace-prod
-              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-              kubectlExecutable: kubectl-1.29
-              cacheIntervalSeconds: 60
-              namespaces: 
-              - prod
-              permissions:
-                READ:
-                - everyone
-                - engineering-managed
-                WRITE:
-                - engineering-managed
-            - name: k8s-namespace-dev
-              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-              kubectlExecutable: kubectl-1.29
-              cacheIntervalSeconds: 60
-              namespaces: 
-              - dev
-              permissions:
-                READ:
-                - everyone
-                - engineering-managed
-                WRITE:
-                - everyone
-                - engineering-managed
-            - name: k8s-homelab
-              kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-              kubernetesVersion: kubectl-1.29
-              cacheIntervalSeconds: 60
-              permissions:
-                READ:
-                - engineering-managed
-                WRITE:
-                - engineering-managed
-        ## done here... Maybe could move to providers block... hit some ODD issues with halyard validation this though :( 
-        docker-registry:
-          enabled: true
-          accounts:
-          - name: docker-ghcr-jasonmcintosh
-            address: https://ghcr.io/
-            username: jasonmcintosh
-            password: encrypted:k8s!n:artifact-creds!k:githubPatToken
-            repositories:
-            - jasonmcintosh/spinnaker-work/demo-web-app
+        cats:
+          pubsub:
+            enabled: true
         credentials:
           poller:
             enabled: true
+        docker-registry:
+          accounts:
+          - address: https://ghcr.io/
+            name: docker-ghcr-jasonmcintosh
+            password: encrypted:k8s!n:artifact-creds!k:githubPatToken
+            repositories:
+            - jasonmcintosh/spinnaker-work/demo-web-app
+            username: jasonmcintosh
+          - address: https://ghcr.io/
+            name: docker-ghcr-spinnaker
+            password: encrypted:k8s!n:artifact-creds!k:githubPatToken
+            repositories:
+            - spinnaker/clouddriver
+            - spinnaker/deck
+            - spinnaker/front50
+            - spinnaker/echo
+            - spinnaker/orca
+            - spinnaker/fiat
+            - spinnaker/rosco
+            - spinnaker/igor
+            - spinnaker/keel
+            - spinnaker/kayenta
+            - spinnaker/gate
+            username: jasonmcintosh
+          enabled: true
+        kubernetes:
+          accounts:
+          - cacheIntervalSeconds: 60
+            kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+            kubectlExecutable: kubectl-1.29
+            name: k8s-spinnaker-prod
+            namespaces:
+            - spinnaker
+            permissions:
+              READ:
+              - everyone
+              - engineering-managed
+              WRITE:
+              - everyone
+              - engineering-managed
+          - cacheIntervalSeconds: 60
+            kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+            kubectlExecutable: kubectl-1.29
+            name: k8s-namespace-prod
+            namespaces:
+            - prod
+            permissions:
+              READ:
+              - everyone
+              - engineering-managed
+              WRITE:
+              - engineering-managed
+          - cacheIntervalSeconds: 60
+            kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+            kubectlExecutable: kubectl-1.29
+            name: k8s-namespace-dev
+            namespaces:
+            - dev
+            permissions:
+              READ:
+              - everyone
+              - engineering-managed
+              WRITE:
+              - everyone
+              - engineering-managed
+          - cacheIntervalSeconds: 60
+            kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
+            kubernetesVersion: kubectl-1.29
+            name: k8s-homelab
+            permissions:
+              READ:
+              - engineering-managed
+              WRITE:
+              - engineering-managed
+          loadNamespacesInAccount: false
+          verifyAccountHealth: false
+        proxmox:
+          accounts:
+          - insecure: true
+            name: jm-lab
+            password: yay4Linux
+            server: 192.168.16.184
+            userName: root@pam
+          enabled: true
         redis:
           cache:
             enabled: false
@@ -309,6 +437,7 @@ spec:
             AmazonElasticLoadBalancing:
               defaults:
                 rateLimit: 5
+        spring.data.redis.url: redis://valkey:6379
         sql:
           cache:
             enabled: true
@@ -325,6 +454,7 @@ spec:
             user: root
           scheduler:
             enabled: false
+          table-namespace: v1
           taskRepository:
             enabled: true
           unknown-agent-cleanup-agent:
@@ -343,7 +473,8 @@ spec:
           window.spinnakerSettings.authEnabled = true;
           window.spinnakerSettings.feature.terraform = true;
           window.spinnakerSettings.feature.managedServiceAccounts = true;
-          
+          window.spinnakerSettings.defaultProviders = ["proxmox","kubernetes"];
+          window.spinnakerSettings.providers.proxmox = {};
       dinghy:
         Logging:
           Level: INFO
@@ -365,8 +496,12 @@ spec:
           - plugin
           - helm
           - manual
+        resilience4j.circuitbreaker:
+          instances:
+            telemetry:
+              registerHealthIndicator: false
         rest:
-          enabled: true
+          enabled: false
           endpoints:
           - headers:
               Authorization: Splunk 1BD1BBDF-F7C2-4205-9113-427724465EDB
@@ -378,75 +513,89 @@ spec:
           enabled: true
           pipelineConfigsPoller:
             enabled: true
-        resilience4j.circuitbreaker:
-          instances:
-            telemetry:
-              registerHealthIndicator: false
         sql:
-          enabled: true
           connectionPool:
             jdbcUrl: jdbc:mysql://mysql:3306/echo
             password: password
             user: root
+          enabled: true
           migration:
             jdbcUrl: jdbc:mysql://mysql:3306/echo
             password: password
             user: root
+      fiat:
+        fiat:
+          admin:
+            roles:
+            - engineering-managed
+        permissions-repository:
+          redis:
+            enabled: false
+          sql:
+            async-pool-size: 20
+            enabled: true
+            max-query-concurrency: 20
+            read-batch-size: 500
+            write-batch-size: 500
+        sql:
+          connectionPools:
+            default:
+              jdbcUrl: jdbc:mysql://mysql:3306/fiat
+              maxPoolSize: 10
+              password: password
+              user: root
+          enabled: true
+          migration:
+            jdbcUrl: jdbc:mysql://mysql:3306/fiat
+            password: password
+            user: root
+          retries:
+            transactions:
+              backoffMs: 50
+              maxRetries: 3
       front50:
         spinnaker.s3.enabled: false
         sql:
-          enabled: true
           connectionPools:
             default:
               default: true
               jdbcUrl: jdbc:mysql://mysql:3306/front50
               password: password
               user: root
+          enabled: true
           migration:
             jdbcUrl: jdbc:mysql://mysql:3306/front50
             password: password
             user: root
       gate:
+        api-tokens:
+          allowed-minting-roles:
+          - engineering-managed
+          enabled: true
         armory:
           cloud:
             enabled: false
+        default:
+          apiPort: 8085
+        proxies:
+        - id: terraform
+          methods:
+          - GET
+          uri: http://spin-terraformer:7088
         saml:
           enabled: true
           issuerId: spinnaker
           metadataUrl: https://integrator-3395767.okta.com/app/exku1rxeyhJeP16iJ697/sso/saml/metadata
-          ## Keeping it here so i don't have to recreate this someday :) 
           metadataUrlKeycloak: http://192.168.16.167:8080/realms/master/protocol/saml/descriptor
-          ## this isn't ACUTALLY used in okta... but I leave it here for testing if I do keycloak or other systems
           sign-requests: true
           signing-credentials:
           - certificate-location: encryptedFile:k8s!n:saml-signing-secret!k:certificate.pem
             private-key-location: encryptedFile:k8s!n:saml-signing-secret!k:private_key.pem
-#       security:
-#         oauth2:
-#           resource:
-#             userInfoUri: https://dev-200769.okta.com/oauth2/default/v1/userinfo
-#           client:
-#             accessTokenUri: https://dev-200769.okta.com/oauth2/default/v1/token
-#             clientId: 0oa9htg5c5Kv1ZEAK4x7
-#             clientSecret: encrypted:k8s!n:auth-credentials!k:clientSecret
-#             scope: groups email profile openid
-#             userAuthorizationUri: https://dev-200769.okta.com/oauth2/default/v1/authorize
-#           userInfoMapping:
-#             email: email
-#             firstName: given_name
-#             lastName: family_name
-#             username: preferred_username
-#             roles: groups
-        default:
-          apiPort: 8085
-        proxies:
-          - id: terraform
-            methods:
-              - GET
-            uri: http://spin-terraformer:7088
         server:
           servlet:
             context-path: /api/v1
+            session:
+              timeout: 86400
           tomcat:
             httpsServerPort: X-Forwarded-Port
             internalProxies: .*
@@ -454,32 +603,28 @@ spec:
             remoteIpHeader: X-Forwarded-For
         spinnaker:
           extensibility:
-            repositories:
-              observabilityy-plugin:
-                url: https://raw.githubusercontent.com/armory-plugins/armory-observability-plugin-releases/master/repositories.json
             deck-proxy:
               enabled: true
               plugins:
                 Armory.EvaluateArtifactsPlugin:
                   enabled: true
                   version: 0.1.1
-                Aws.LambdaDeploymentPlugin:
-                  enabled: true
-                  version: 1.0.9
             plugins:
-              Armory.ObservabilityPlugin:
-                enabled: true
-                version: 1.5.0
-                config.metrics:
-                  prometheus:
-                    enabled: true
-                    meterRegistryConfig:
-                      armoryRecommendedFiltersEnabled: false
               Armory.ArmoryHeader:
                 enabled: true
                 version: 0.2.2
               Armory.InstanceRegistration:
                 enabled: false
+              Armory.ObservabilityPlugin:
+                config.metrics:
+                  prometheus:
+                    enabled: false
+                    meterRegistryConfig:
+                      armoryRecommendedFiltersEnabled: false
+                enabled: false
+          services:
+            redis:
+              baseUrl: redis://valkey:6379
       igor:
         locking:
           enabled: true
@@ -487,41 +632,6 @@ spec:
           pollingSafeguard:
             itemUpperThreshold: 10000
       orca:
-        pollers:
-          oldPipelineCleanup:
-            enabled: true
-            thresholdDays: 14
-        webhook:
-          preconfigured:
-          - label: KNative Notification
-            type: knative
-            enabled: true
-            description: Send to KNative a CDEvents
-            method: POST
-            url: https://localhost:8090/default/events-broker
-            parameters:
-            - label: Subject for Event
-              name: subject
-              description: The CdEvent is going to get this subject
-              type: string
-            - label: 
-              name: URL of requesting pipeline
-              description: The URL to the execution id of the pipeline
-              type: string
-            - label: Context
-              name: context
-              description: The context to make this make sense
-              type: string
-            customHeaders:
-              Ce-Type: cd.artifact.packaged.v1
-            payload: |-
-              {
-                "id": "${parameterValues['subject']}",
-                "url": "${parameterValues['url']}",
-                "name": "${parameterValues['context']}"
-              }
-        tasks:
-          useManagedServiceAccounts: true
         executionRepository:
           compression:
             bodyCompressionThreshold: 1024
@@ -537,6 +647,10 @@ spec:
         monitor:
           activeExecutions:
             redis: false
+        pollers:
+          oldPipelineCleanup:
+            enabled: true
+            thresholdDays: 14
         sql:
           connectionPool:
             connectionTimeout: 5000
@@ -550,73 +664,93 @@ spec:
             jdbcUrl: jdbc:mysql://mysql:3306/orca
             password: password
             user: root
+        tasks:
+          useManagedServiceAccounts: true
+        webhook:
+          preconfigured:
+          - customHeaders:
+              Ce-Type: cd.artifact.packaged.v1
+            description: Send to KNative a CDEvents
+            enabled: true
+            label: KNative Notification
+            method: POST
+            parameters:
+            - description: The CdEvent is going to get this subject
+              label: Subject for Event
+              name: subject
+              type: string
+            - description: The URL to the execution id of the pipeline
+              name: URL of requesting pipeline
+              type: string
+            - description: The context to make this make sense
+              label: Context
+              name: context
+              type: string
+            payload: |-
+              {
+                "id": "${parameterValues['subject']}",
+                "url": "${parameterValues['url']}",
+                "name": "${parameterValues['context']}"
+              }
+            type: knative
+            url: https://localhost:8090/default/events-broker
       spinnaker:
         armory:
           policyEngine:
-            ## Allows for things to pass when no policy is explicitly set
             failOpen: true
             opa:
-              enabled: true
               baseUrl: http://localhost:8181/v1/data
+              enabled: true
               timeoutSeconds: 20
         artifact-store:
-          enabled: false
-          type: s3
+          enabled: true
           helm:
             expandOverrides: true
           s3:
-            enabled: false
-            bucket: artifact-store
-            region: local
-            url: http://minio:9000
             accessKey: minio
-            secretKey: secretKey
-        management:
-          endpoints.web:
-            exposure.include: "*"
-        server:
-          http2:
-            enabled: false 
-          max-http-header-size: 512KB
-          compression: 
-            mime-types: text/html, text/xml, text/plain, text/css, text/javascript, application/javascript, application/json
+            bucket: spinnaker
             enabled: true
-            min-response-size: 4096
+            region: us-east-1
+            secretKey: secretKey
+            url: https://truenas.mcintosh.farm:9000
+          type: s3
         logging:
           level:
-            ## Remove access logs and INFO level logs that are VERY verbose.
-            root: WARN
-            ## Have AWS be warn as well or adjust for example
             com.amazonaws.latency: WARN
-            ## This disables most basic logging which can be VERY verbose. 
-            com.netflix.spinnaker: WARN
-            ## Could turn on more logging here IF desired. Should pull more from metrics/traces
-            com.netflix.spinnaker.clouddriver.caching: WARN
-            ## Debug for OPA policies.  
-            com.netflix.spinnaker.clouddriver.kubernetes.OpaDeployDescriptionValidator: INFO
-            io.armory.spinnaker.front50.validator.validator.OpenPolicyAgentValidator: INFO
-            ## The anonymous header alert is in here as a WARN, so go to ERROR level to reduce the noise from those
+            com.netflix.spinnaker.clouddriver.cache: WARN
+            com.netflix.spinnaker.clouddriver.kubernetes.OpaDeployDescriptionValidator: DEBUG
             com.netflix.spinnaker.okhttp.MetricsInterceptor: ERROR
-            com.netflix.spinnaker.okhttp.OkHttp3MetricsInterceptor: ERROR
+            io.armory.spinnaker.front50.validator.validator.OpenPolicyAgentValidator: INFO
+            root: INFO
+        management:
+          endpoints.web:
+            exposure.include: '*'
+        server:
+          compression:
+            enabled: true
+            mime-types: text/html, text/xml, text/plain, text/css, text/javascript,
+              application/javascript, application/json
+            min-response-size: 4096
+          http2:
+            enabled: false
+          max-http-header-size: 512KB
         spinnaker:
           extensibility:
             deck-proxy:
               enabled: true
       terraformer:
         redis:
-          host: spin-redis
+          host: valkey
           port: 6379
     service-settings:
-      deck:
-        kubernetes:
-          useExecHealthCheck: false
       clouddriver:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=50.0
+            -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh
+            -javaagent:/opt/apmagent/javaagent.jar -Dcom.amazonaws.services.s3.enableV4=false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=50.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
-          useExecHealthCheck: false
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -645,20 +779,25 @@ spec:
             periodSeconds: 30
             successThreshold: 1
             timeoutSeconds: 5
+          useExecHealthCheck: false
           volumes:
           - id: shared-volume
             mountPath: /opt/apmagent
             type: emptyDir
+      deck:
+        kubernetes:
+          useExecHealthCheck: false
       dinghy:
         kubernetes:
           useExecHealthCheck: false
       echo:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=75.0
+            -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=echo-jasonmcintosh
+            -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=echo-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
-          useExecHealthCheck: false
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -687,17 +826,19 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
+          useExecHealthCheck: false
           volumes:
           - id: shared-volume
             mountPath: /opt/apmagent
             type: emptyDir
       fiat:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
+            -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=fiat-jasonmcintosh
+            -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=fiat-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
-          useExecHealthCheck: false
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -717,7 +858,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
           startupProbe:
-            failureThreshold: 30
+            failureThreshold: 230
             httpGet:
               path: /health
               port: 7003
@@ -726,15 +867,18 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
+          useExecHealthCheck: false
           volumes:
           - id: shared-volume
             mountPath: /opt/apmagent
             type: emptyDir
       front50:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
+            -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=front50-jasonmcintosh
+            -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=front50-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -771,11 +915,12 @@ spec:
             type: emptyDir
       gate:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: false
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
+            -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=gate-jasonmcintosh
+            -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=gate-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
-          useExecHealthCheck: false
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -804,15 +949,18 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
+          useExecHealthCheck: false
           volumes:
           - id: shared-volume
             mountPath: /opt/apmagent
             type: emptyDir
       igor:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
+            -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=igor-jasonmcintosh
+            -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=igor-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -842,18 +990,19 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
+          useExecHealthCheck: false
           volumes:
           - id: shared-volume
             mountPath: /opt/apmagent
             type: emptyDir
-          useExecHealthCheck: false
       kayenta:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
+            -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh
+            -javaagent:/opt/apmagent/javaagent.jar -Dcom.amazonaws.services.s3.enableV4=false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
-          useExecHealthCheck: false
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -882,15 +1031,18 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
+          useExecHealthCheck: false
           volumes:
           - id: shared-volume
             mountPath: /opt/apmagent
             type: emptyDir
       orca:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
+            -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=orca-jasonmcintosh
+            -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS:  -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=orca-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
           livenessProbe:
             failureThreshold: 3
@@ -925,11 +1077,15 @@ spec:
           - id: shared-volume
             mountPath: /opt/apmagent
             type: emptyDir
+      redis:
+        overrideBaseUrl: redis://valkey:6379
+        skipLifeCycleManagement: true
       rosco:
         env:
-          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
+          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions
+            -XX:+UseZGC  -Dotel.service.name=rosco-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
-          JAVA_OPTS: -XX:+UseTransparentHugePages -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=rosco-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
+          OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
           livenessProbe:
             failureThreshold: 3
