@@ -1,0 +1,7 @@
+controller:
+  dnsPolicy: ClusterFirstWithHostNet
+  replicas: 2
+  revisionHistoryLimit: 3
+node:
+  dnsPolicy: ClusterFirstWithHostNet
+kubeletDir: "/var/snap/microk8s/common/var/lib/kubelet"

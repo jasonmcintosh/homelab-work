@@ -1,0 +1,19 @@
+# Overrides for clouddriver default configuration:
+# https://github.com/spinnaker/clouddriver/blob/master/clouddriver-web/config/clouddriver.yml
+#
+proxmox:
+  enabled: true
+  accounts:
+  - name: jm-pve
+    userName: root@pam
+    password: encrypted:k8s!n:passwords!k:defaultPassword
+    server: 192.168.16.184
+    insecure: true
+haproxy:
+  enabled: true
+  accounts:
+  - name: ha-proxy
+    userName: admin
+    password: encrypted:k8s!n:passwords!k:defaultPassword
+    server: 192.168.19.157
+
