@@ -703,13 +703,13 @@ spec:
               enabled: true
               timeoutSeconds: 20
         artifact-store:
-          enabled: true
+          enabled: false
           helm:
             expandOverrides: true
           s3:
             accessKey: minio
             bucket: spinnaker
-            enabled: true
+            enabled: false
             region: us-east-1
             secretKey: secretKey
             url: https://truenas.mcintosh.farm:9000
@@ -747,7 +747,7 @@ spec:
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=50.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh
-            -javaagent:/opt/apmagent/javaagent.jar -Dcom.amazonaws.services.s3.enableV4=false
+            -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
@@ -999,7 +999,7 @@ spec:
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh
-            -javaagent:/opt/apmagent/javaagent.jar -Dcom.amazonaws.services.s3.enableV4=false
+            -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:

@@ -9,10 +9,10 @@ components:
 - overlays/config
 namespace: spinnaker
 images:
-- name: ghcr.io/spinnaker/clouddriver
-  newTag: main-latest
-- name: ghcr.io/spinnaker/deck
-  newTag: main-latest
+- name: mcintoshj/clouddriver
+  newTag: 20260718182248
+- name: mcintoshj/deck
+  newTag: 20260718182248
 - name: ghcr.io/spinnaker/echo
   newTag: main-latest
 - name: ghcr.io/spinnaker/fiat
@@ -27,10 +27,10 @@ images:
   newTag: main-latest
 - name: ghcr.io/spinnaker/keel
   newTag: main-latest
-- name: ghcr.io/spinnaker/orca
-  newTag: main-latest
-- name: ghcr.io/spinnaker/rosco
-  newTag: main-latest
+- name: mcintoshj/orca
+  newTag: 20260718182248
+- name: mcintoshj/rosco
+  newTag: 20260718182248
 labels:
 - includeSelectors: true
   pairs:
