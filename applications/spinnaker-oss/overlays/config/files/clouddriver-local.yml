@@ -17,3 +17,7 @@ haproxy:
     password: encrypted:k8s!n:passwords!k:defaultPassword
     server: 192.168.19.157
 
+spinnaker:
+  secrets:
+    kubernetes:
+      enabled: true
