@@ -14,3 +14,5 @@ window.spinnakerSettings.authEnabled = true;
 
 // Change this to whatever host your ingress is on
 // DO NOT add a trailing slash - this is a prefix and the trailing slash is added by deck's redirect
+window.spinnakerSettings.defaultProviders = ["proxmox","kubernetes"];
+window.spinnakerSettings.providers.proxmox = {};

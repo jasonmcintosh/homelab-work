@@ -7,12 +7,14 @@ components:
 - components/mariadb
 - components/redis
 - overlays/config
-namespace: spinnaker
+namespace: spinnaker-oss
 images:
-- name: mcintoshj/clouddriver
-  newTag: 20260718182248
-- name: mcintoshj/deck
-  newTag: 20260718182248
+- name: ghcr.io/spinnaker/clouddriver
+  newName: mcintoshj/clouddriver
+  newTag: "20260719233728"
+- name: ghcr.io/spinnaker/deck
+  newName: mcintoshj/deck
+  newTag: "20260719233728"
 - name: ghcr.io/spinnaker/echo
   newTag: main-latest
 - name: ghcr.io/spinnaker/fiat
@@ -27,10 +29,12 @@ images:
   newTag: main-latest
 - name: ghcr.io/spinnaker/keel
   newTag: main-latest
-- name: mcintoshj/orca
-  newTag: 20260718182248
-- name: mcintoshj/rosco
-  newTag: 20260718182248
+- name: ghcr.io/spinnaker/orca
+  newName: mcintoshj/orca
+  newTag: "20260719233728"
+- name: ghcr.io/spinnaker/rosco
+  newName: mcintoshj/rosco
+  newTag: "20260719233728"
 labels:
 - includeSelectors: true
   pairs:

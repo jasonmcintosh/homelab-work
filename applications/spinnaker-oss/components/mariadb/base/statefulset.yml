@@ -9,9 +9,9 @@ spec:
     spec:
       containers:
       - name: mariadb
-        image: mariadb:latest
+        image: mysql:8
         env:
-        - name: MARIADB_ROOT_PASSWORD
+        - name: MYSQL_ROOT_PASSWORD
           value: "testing123"
         - name: clouddriver
           value: "testing123"
@@ -30,9 +30,9 @@ spec:
         readinessProbe:
           exec:
             command:
-            - healthcheck.sh
-            - --connect
-            - --innodb_initialized
+            - bash
+            - -c
+            - mysql -h127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" -e 'SELECT 1'
           initialDelaySeconds: 20
         resources:
           requests:
@@ -42,7 +42,7 @@ spec:
           allowPrivilegeEscalation: false
         volumeMounts:
         - name: config
-          mountPath: /etc/mysql/mariadb.conf.d
+          mountPath: /etc/mysql/conf.d
         - name: init
           mountPath: /docker-entrypoint-initdb.d/init.sh
           subPath: init.sh

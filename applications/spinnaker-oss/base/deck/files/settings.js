@@ -118,6 +118,21 @@ window.spinnakerSettings = {
     templatesEnabled: templatesEnabled,
   },
   defaultInstancePort: 80,
+  defaultProviders: [
+    'appengine',
+    'aws',
+    'azure',
+    'cloudfoundry',
+    'cloudrun',
+    'dcos',
+    'ecs',
+    'gce',
+    'huaweicloud',
+    'kubernetes',
+    'oracle',
+    'proxmox',
+    'tencentcloud',
+  ],
   defaultTimeZone: timezone, // see http://momentjs.com/timezone/docs/#/data-utilities/
   feature: {
     canary: mineCanaryEnabled,
@@ -161,6 +176,7 @@ window.spinnakerSettings = {
     kubernetes: {},
     oracle: oracle,
     tencentcloud: tencentcloud,
+    proxmox: {},
   },
   version: version,
 };
