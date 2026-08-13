@@ -48,8 +48,13 @@ spec:
       labels:
         app: mysql
     spec:
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        fsGroupChangePolicy: "OnRootMismatch" # Only changes permissions if needed (speeds up boot)
       containers:
-      - image: mysql:9
+      - image: mysql:9.7
         name: mysql
         env:
         - name: MYSQL_LOG_BIN
