@@ -59,10 +59,9 @@ spec:
         serviceIntegrations:
         - accounts:
           - accessKeyId: minio
-            bucket: spinnaker
-            endpoint: https://truenas.mcintosh.farm:9000
+            bucket: canaries
+            endpoint: http://minio:9000
             name: minio
-            rootFolder: canaries
             secretAccessKey: secretKey
             supportedTypes:
             - OBJECT_STORE
@@ -316,7 +315,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.40.1
+      version: 2.40.3
       webhook:
         trust:
           enabled: false
@@ -358,12 +357,19 @@ spec:
             - spinnaker/kayenta
             - spinnaker/gate
             username: jasonmcintosh
+          - address: https://index.docker.io/
+            name: docker-mcintoshj-spinnaker
+            repositories:
+            - mcintoshj/clouddriver
+            - mcintoshj/deck
+            - mcintoshj/orca
+            - mcintoshj/rosco
+            - mcintoshj/gate
           enabled: true
         kubernetes:
           accounts:
           - cacheIntervalSeconds: 60
             kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-            kubectlExecutable: kubectl-1.29
             name: k8s-spinnaker-prod
             namespaces:
             - spinnaker
@@ -376,7 +382,6 @@ spec:
               - engineering-managed
           - cacheIntervalSeconds: 60
             kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-            kubectlExecutable: kubectl-1.29
             name: k8s-namespace-prod
             namespaces:
             - prod
@@ -388,7 +393,6 @@ spec:
               - engineering-managed
           - cacheIntervalSeconds: 60
             kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-            kubectlExecutable: kubectl-1.29
             name: k8s-namespace-dev
             namespaces:
             - dev
@@ -401,7 +405,6 @@ spec:
               - engineering-managed
           - cacheIntervalSeconds: 60
             kubeconfigFile: encryptedFile:k8s!n:kubeconfig!k:kubeconfig
-            kubernetesVersion: kubectl-1.29
             name: k8s-homelab
             permissions:
               READ:
@@ -703,16 +706,16 @@ spec:
               enabled: true
               timeoutSeconds: 20
         artifact-store:
-          enabled: false
+          enabled: true
           helm:
             expandOverrides: true
           s3:
             accessKey: minio
             bucket: spinnaker
-            enabled: false
+            enabled: true
             region: us-east-1
             secretKey: secretKey
-            url: https://truenas.mcintosh.farm:9000
+            url: http://minio:9000
           type: s3
         logging:
           level:
@@ -747,7 +750,7 @@ spec:
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=50.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh
-            -javaagent:/opt/apmagent/javaagent.jar
+            -javaagent:/opt/apmagent/javaagent.jar -Dcom.amazonaws.services.s3.enableV4=false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
@@ -999,7 +1002,7 @@ spec:
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh
-            -javaagent:/opt/apmagent/javaagent.jar
+            -javaagent:/opt/apmagent/javaagent.jar -Dcom.amazonaws.services.s3.enableV4=false
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
           OTEL_INSTRUMENTATION_MICROMETER_ENABLED: true
         kubernetes:
