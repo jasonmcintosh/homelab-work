@@ -466,6 +466,26 @@ spec:
           defaultLegacyUdf: false
           enabled: true
           udfRoot: /opt/spinnaker/config/udf
+        tasks:
+          clouddriver:
+            promoteManifestKatoOutputsTask:
+              excludeKeysFromOutputs:
+              - outputs.createdArtifacts
+              - outputs.manifests
+              - outputs.boundArtifacts
+            waitOnJobCompletionTask:
+              excludeKeysFromOutputs:
+              - jobStatus
+              - completionDetails
+            resolveDeploySourceManifestTask:
+              excludeKeysFromOutputs:
+              - manifests
+              - requiredArtifacts
+              - optionalArtifacts
+          core:
+            bindProducedArtifactsTask:
+              excludeKeysFromOutputs:
+              - artifacts
       deck:
         settings-local.js: |
           window.spinnakerSettings.feature.kubernetesRawResources = true;
