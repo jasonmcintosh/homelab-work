@@ -321,6 +321,9 @@ spec:
           enabled: false
     profiles:
       clouddriver:
+        artifact-store:
+          entities:
+            expand: true
         cache-sharding:
           enabled: true
           heartbeatIntervalSeconds: 30
@@ -466,26 +469,6 @@ spec:
           defaultLegacyUdf: false
           enabled: true
           udfRoot: /opt/spinnaker/config/udf
-        tasks:
-          clouddriver:
-            promoteManifestKatoOutputsTask:
-              excludeKeysFromOutputs:
-              - outputs.createdArtifacts
-              - outputs.manifests
-              - outputs.boundArtifacts
-            waitOnJobCompletionTask:
-              excludeKeysFromOutputs:
-              - jobStatus
-              - completionDetails
-            resolveDeploySourceManifestTask:
-              excludeKeysFromOutputs:
-              - manifests
-              - requiredArtifacts
-              - optionalArtifacts
-          core:
-            bindProducedArtifactsTask:
-              excludeKeysFromOutputs:
-              - artifacts
       deck:
         settings-local.js: |
           window.spinnakerSettings.feature.kubernetesRawResources = true;
@@ -689,6 +672,25 @@ spec:
             user: root
         tasks:
           useManagedServiceAccounts: true
+          clouddriver:
+            promoteManifestKatoOutputsTask:
+              excludeKeysFromOutputs:
+              - outputs.createdArtifacts
+              - outputs.manifests
+              - outputs.boundArtifacts
+            waitOnJobCompletionTask:
+              excludeKeysFromOutputs:
+              - jobStatus
+              - completionDetails
+            resolveDeploySourceManifestTask:
+              excludeKeysFromOutputs:
+              - manifests
+              - requiredArtifacts
+              - optionalArtifacts
+          core:
+            bindProducedArtifactsTask:
+              excludeKeysFromOutputs:
+              - artifacts
         webhook:
           preconfigured:
           - customHeaders:
@@ -726,16 +728,19 @@ spec:
               enabled: true
               timeoutSeconds: 20
         artifact-store:
+          applicationsRegex: .*
           enabled: true
+          entities:
+            enabled: true
           helm:
             expandOverrides: true
           s3:
             accessKey: minio
             bucket: spinnaker
             enabled: true
-            region: us-east-1
+            region: local
             secretKey: secretKey
-            url: http://minio:9000
+            url: https://truenas.mcintosh.farm:9000/
           type: s3
         logging:
           level:
@@ -768,6 +773,8 @@ spec:
     service-settings:
       clouddriver:
         env:
+          AWS_ACCESS_KEY_ID: minio
+          AWS_SECRET_ACCESS_KEY: secretKey clouddriver:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=50.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh
             -javaagent:/opt/apmagent/javaagent.jar -Dcom.amazonaws.services.s3.enableV4=false
@@ -1061,6 +1068,8 @@ spec:
             type: emptyDir
       orca:
         env:
+          AWS_ACCESS_KEY_ID: minio
+          AWS_SECRET_ACCESS_KEY: secretKey clouddriver:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=orca-jasonmcintosh
             -javaagent:/opt/apmagent/javaagent.jar
@@ -1105,6 +1114,8 @@ spec:
         skipLifeCycleManagement: true
       rosco:
         env:
+          AWS_ACCESS_KEY_ID: minio
+          AWS_SECRET_ACCESS_KEY: secretKey clouddriver:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions
             -XX:+UseZGC  -Dotel.service.name=rosco-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318

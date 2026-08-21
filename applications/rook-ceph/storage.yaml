@@ -6,7 +6,8 @@ metadata:
 spec:
   failureDomain: host
   replicated:
-    size: 2
+    size: 1
+    requireSafeReplicaSize: false
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
