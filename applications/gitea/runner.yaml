@@ -1,0 +1,113 @@
+# Holds the runner's working directory (/data): the .runner registration file
+# and, optionally, the config file.
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: runner-vol
+  namespace: gitea
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: rook-ceph-block
+---
+# Holds the Docker daemon's data root (/var/lib/docker), i.e. the images pulled
+# for jobs. Without it, the image cache is lost whenever the pod is recreated
+# and every job re-pulls its images. Size it for the images you expect to cache.
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: docker-vol
+  namespace: gitea
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: rook-ceph-block
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: act-runner-config
+  namespace: gitea
+data:
+  config.yaml: |
+    runner:
+      file: .runner
+      capacity: 2
+      envs: {}
+      timeout: 3h
+    container:
+      network: ""
+      # Enforce using the DinD sidecar socket rather than a host socket
+      docker_host: tcp://localhost:2376
+      # Path inside the runner container where DinD TLS certs are shared
+      docker_cert_path: /certs/client
+      docker_tls_verify: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: runner
+  name: runner
+  namespace: gitea
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: runner
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: runner
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 10800 # keep above runner.shutdown_timeout, see README
+      volumes:
+      - name: docker-socket
+        emptyDir: {}
+      - name: runner-data
+        persistentVolumeClaim:
+          claimName: runner-vol
+      - name: docker-data
+        persistentVolumeClaim:
+          claimName: docker-vol
+      initContainers:
+      - name: docker
+        image: docker:28.2.2-dind
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run
+        - name: docker-data
+          mountPath: /var/lib/docker
+        startupProbe:
+          exec:
+            command: ["/usr/bin/test", "-S", "/var/run/docker.sock"]
+        livenessProbe:
+          exec:
+            command: ["/usr/bin/test", "-S", "/var/run/docker.sock"]
+        restartPolicy: Always
+      containers:
+      - name: runner
+        image: gitea/runner:nightly
+        env:
+        - name: GITEA_INSTANCE_URL
+          value: https://gitea.mcintosh.farm
+        - name: GITEA_RUNNER_REGISTRATION_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: act-runner-secret
+              key: GITEA_RUNNER_REGISTRATION_TOKEN
+        volumeMounts:
+        - name: runner-data
+          mountPath: /data
+        - name: docker-socket
+          mountPath: /var/run
