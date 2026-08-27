@@ -17,6 +17,7 @@ spec:
   resources:
     requests:
       storage: 20Gi
+  storageClassName: rook-ceph-block
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -164,7 +165,7 @@ spec:
         - name: data
           mountPath: /data
       - name: dind
-        image: docker:24.0.3-dind
+        image: docker:29.7.2-dind
         command: ["dockerd", "--host", "tcp://127.0.0.1:2375"]
         lifecycle:
           postStart:
@@ -190,6 +191,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
+  storageClassName: rook-ceph-block
 ---
 apiVersion: v1
 kind: Service

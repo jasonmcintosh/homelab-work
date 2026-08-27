@@ -4223,29 +4223,3 @@ spec:
                 name: gitea-http
                 port:
                   number: 3000
----
-# Source: gitea/templates/tests/test-http-connection.yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: "gitea-test-connection"
-  namespace: gitea
-  labels:
-
-    helm.sh/chart: gitea-12.7.0
-    app: gitea
-    app.kubernetes.io/name: gitea
-    app.kubernetes.io/instance: gitea
-    app.kubernetes.io/version: "1.27.0"
-    version: "1.27.0"
-    app.kubernetes.io/managed-by: Helm
-  annotations:
-    "helm.sh/hook": test-success
-spec:
-  containers:
-    - name: wget
-      image: "busybox:latest"
-      command: ['wget']
-      args: ['gitea-http:3000']
-  restartPolicy: Never
-

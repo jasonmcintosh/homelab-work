@@ -1,67 +1,16 @@
-# Holds the runner's working directory (/data): the .runner registration file
-# and, optionally, the config file.
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: runner-vol
-  namespace: gitea
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: rook-ceph-block
----
-# Holds the Docker daemon's data root (/var/lib/docker), i.e. the images pulled
-# for jobs. Without it, the image cache is lost whenever the pod is recreated
-# and every job re-pulls its images. Size it for the images you expect to cache.
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: docker-vol
-  namespace: gitea
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi
-  storageClassName: rook-ceph-block
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: act-runner-config
-  namespace: gitea
-data:
-  config.yaml: |
-    runner:
-      file: .runner
-      capacity: 2
-      envs: {}
-      timeout: 3h
-    container:
-      network: ""
-      # Enforce using the DinD sidecar socket rather than a host socket
-      docker_host: tcp://localhost:2376
-      # Path inside the runner container where DinD TLS certs are shared
-      docker_cert_path: /certs/client
-      docker_tls_verify: true
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     app: runner
   name: runner
   namespace: gitea
 spec:
+  serviceName: runner
   replicas: 1
   selector:
     matchLabels:
       app: runner
-  strategy: {}
   template:
     metadata:
       labels:
@@ -72,12 +21,6 @@ spec:
       volumes:
       - name: docker-socket
         emptyDir: {}
-      - name: runner-data
-        persistentVolumeClaim:
-          claimName: runner-vol
-      - name: docker-data
-        persistentVolumeClaim:
-          claimName: docker-vol
       initContainers:
       - name: docker
         image: docker:28.2.2-dind
@@ -86,6 +29,8 @@ spec:
         volumeMounts:
         - name: docker-socket
           mountPath: /var/run
+        # Keeps the images pulled for jobs across restarts. Without this, the
+        # daemon's data root is ephemeral and every job re-pulls its images.
         - name: docker-data
           mountPath: /var/lib/docker
         startupProbe:
@@ -104,10 +49,33 @@ spec:
         - name: GITEA_RUNNER_REGISTRATION_TOKEN
           valueFrom:
             secretKeyRef:
-              name: act-runner-secret
-              key: GITEA_RUNNER_REGISTRATION_TOKEN
+              name: runner-secret
+              key: token
         volumeMounts:
         - name: runner-data
           mountPath: /data
         - name: docker-socket
           mountPath: /var/run
+  volumeClaimTemplates:
+  # The runner's working directory: the .runner registration file and, optionally,
+  # the config file.
+  - metadata:
+      name: runner-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: rook-ceph-block
+  # The Docker daemon's data root: the images pulled for jobs. Size it for the
+  # images you expect to cache.
+  - metadata:
+      name: docker-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: rook-ceph-block
