@@ -6,7 +6,10 @@ plugins {
 }
 
 group = 'io.armory.canary.demo'
-version = '0.0.9'
+
+import java.time.format.DateTimeFormatter
+String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd-HHmm"))
+version = timestamp
 
 repositories {
 	mavenCentral()
