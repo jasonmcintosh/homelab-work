@@ -114,6 +114,16 @@ spec:
         ports:
         - name: http
           containerPort: 8080
+        # The container also runs a separate Express API process on 8000 (see
+        # entry.prod.sh upstream). The app's own /api/[...all] proxy on 8080
+        # strips the "/api" prefix before forwarding internally, which breaks
+        # the newer /api/v2/* external API (registered upstream WITH the
+        # /api/v2 prefix included) - it arrives at the API process as /v2/...
+        # and 404s. The Terraform provider's clickstack_* resources need
+        # /api/v2 to reach the API process unmodified, so it's exposed here
+        # and routed to directly below, bypassing the frontend's proxy.
+        - name: api
+          containerPort: 8000
         resources:
           limits:
             cpu: 2000m
@@ -140,9 +150,14 @@ metadata:
   namespace: monitoring
 spec:
   ports:
-    - port: 8080
+    - name: http
+      port: 8080
       protocol: TCP
       targetPort: http
+    - name: api
+      port: 8000
+      protocol: TCP
+      targetPort: api
   selector:
     app: clickstack
 ---
@@ -162,6 +177,17 @@ spec:
   - host: clickstack.mcintosh.farm
     http:
       paths:
+      # More specific than the / rule below, so ingress-nginx matches it first:
+      # sends the Terraform provider's /api/v2/* calls straight to the API
+      # container port instead of through the frontend's path-stripping proxy
+      # on 8080 (see the container port comment above).
+      - backend:
+          service:
+            name: clickstack
+            port:
+              number: 8000
+        path: /api/v2
+        pathType: Prefix
       - backend:
           service:
             name: clickstack
