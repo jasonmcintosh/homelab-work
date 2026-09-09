@@ -315,7 +315,7 @@ spec:
         instanceId: e20da5f8-286e-46c2-8d79-4c131d0707c4
         readTimeoutMillis: 5000
       timezone: America/Chicago
-      version: 2.40.3
+      version: 2.40.4
       webhook:
         trust:
           enabled: false
@@ -583,6 +583,10 @@ spec:
             enabled: false
         default:
           apiPort: 8085
+        mcp:
+          server:
+            enabled: true
+            read-only: false
         proxies:
         - id: terraform
           methods:
@@ -590,13 +594,20 @@ spec:
           uri: http://spin-terraformer:7088
         saml:
           enabled: true
-          issuerId: spinnaker
-          metadataUrl: https://integrator-3395767.okta.com/app/exku1rxeyhJeP16iJ697/sso/saml/metadata
-          metadataUrlKeycloak: http://192.168.16.167:8080/realms/master/protocol/saml/descriptor
-          sign-requests: true
-          signing-credentials:
-          - certificate-location: encryptedFile:k8s!n:saml-signing-secret!k:certificate.pem
-            private-key-location: encryptedFile:k8s!n:saml-signing-secret!k:private_key.pem
+          login-processing-url: /saml/SSO
+        spring:
+          security:
+            saml2:
+              relyingparty:
+                registration:
+                  SSO:
+                    acs:
+                      location: '{baseUrl}/saml/SSO'
+                    assertingparty:
+                      metadata-uri: https://integrator-3395767.okta.com/app/exku1rxeyhJeP16iJ697/sso/saml/metadata
+                      singlesignon:
+                        sign-requests: false
+                    entity-id: spinnaker
         server:
           servlet:
             context-path: /api/v1
@@ -611,16 +622,10 @@ spec:
           extensibility:
             deck-proxy:
               enabled: true
-              plugins:
-                Armory.EvaluateArtifactsPlugin:
-                  enabled: true
-                  version: 0.1.1
             plugins:
               Armory.ArmoryHeader:
                 enabled: true
                 version: 0.2.2
-              Armory.InstanceRegistration:
-                enabled: false
               Armory.ObservabilityPlugin:
                 config.metrics:
                   prometheus:
@@ -761,7 +766,7 @@ spec:
             min-response-size: 4096
           http2:
             enabled: false
-          max-http-header-size: 512KB
+          max-http-request-header-size: 512000
         spinnaker:
           extensibility:
             deck-proxy:
@@ -772,9 +777,10 @@ spec:
           port: 6379
     service-settings:
       clouddriver:
+        artifactId: armory/clouddriver-armory:2026.09.07.16.16.24.main
         env:
           AWS_ACCESS_KEY_ID: minio
-          AWS_SECRET_ACCESS_KEY: secretKey clouddriver:
+          AWS_SECRET_ACCESS_KEY: secretKey
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=50.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Dotel.service.name=clouddriver-jasonmcintosh
             -javaagent:/opt/apmagent/javaagent.jar -Dcom.amazonaws.services.s3.enableV4=false
@@ -815,12 +821,14 @@ spec:
             mountPath: /opt/apmagent
             type: emptyDir
       deck:
+        artifactId: armory/deck-armory:2026.09.07.16.16.24.main
         kubernetes:
           useExecHealthCheck: false
       dinghy:
         kubernetes:
           useExecHealthCheck: false
       echo:
+        artifactId: armory/echo-armory:2026.09.07.16.16.24.main
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch  -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=echo-jasonmcintosh
@@ -862,6 +870,7 @@ spec:
             mountPath: /opt/apmagent
             type: emptyDir
       fiat:
+        artifactId: armory/fiat-armory:2026.09.07.16.16.24.main
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=fiat-jasonmcintosh
@@ -903,6 +912,7 @@ spec:
             mountPath: /opt/apmagent
             type: emptyDir
       front50:
+        artifactId: armory/front50-armory:2026.09.07.16.16.24.main
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=front50-jasonmcintosh
@@ -944,6 +954,7 @@ spec:
             mountPath: /opt/apmagent
             type: emptyDir
       gate:
+        artifactId: armory/gate-armory:2026.09.07.16.16.24.main
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=gate-jasonmcintosh
@@ -985,6 +996,7 @@ spec:
             mountPath: /opt/apmagent
             type: emptyDir
       igor:
+        artifactId: armory/igor-armory:2026.09.07.16.16.24.main
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=igor-jasonmcintosh
@@ -1026,6 +1038,7 @@ spec:
             mountPath: /opt/apmagent
             type: emptyDir
       kayenta:
+        artifactId: armory/kayenta-armory:2026.09.07.16.16.24.main
         env:
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=kayenta-jasonmcintosh
@@ -1067,9 +1080,10 @@ spec:
             mountPath: /opt/apmagent
             type: emptyDir
       orca:
+        artifactId: armory/orca-armory:2026.09.07.16.16.24.main
         env:
           AWS_ACCESS_KEY_ID: minio
-          AWS_SECRET_ACCESS_KEY: secretKey clouddriver:
+          AWS_SECRET_ACCESS_KEY: secretKey
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:+AlwaysPreTouch -XX:MaxRAMPercentage=75.0
             -XX:+UnlockExperimentalVMOptions -XX:+UseZGC  -Dotel.service.name=orca-jasonmcintosh
             -javaagent:/opt/apmagent/javaagent.jar
@@ -1113,9 +1127,10 @@ spec:
         overrideBaseUrl: redis://valkey:6379
         skipLifeCycleManagement: true
       rosco:
+        artifactId: armory/rosco-armory:2026.09.07.16.16.24.main
         env:
           AWS_ACCESS_KEY_ID: minio
-          AWS_SECRET_ACCESS_KEY: secretKey clouddriver:
+          AWS_SECRET_ACCESS_KEY: secretKey
           JAVA_OPTS: -XX:+UseTransparentHugePages -XX:MaxRAMPercentage=40.0 -XX:+UnlockExperimentalVMOptions
             -XX:+UseZGC  -Dotel.service.name=rosco-jasonmcintosh -javaagent:/opt/apmagent/javaagent.jar
           OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetrycollector:4318
