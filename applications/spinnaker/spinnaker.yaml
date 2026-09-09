@@ -481,6 +481,7 @@ spec:
           window.spinnakerSettings.feature.managedServiceAccounts = true;
           window.spinnakerSettings.defaultProviders = ["proxmox","kubernetes"];
           window.spinnakerSettings.providers.proxmox = {};
+          window.spinnakerSettings.feature.managedPipelineTemplatesV2UI = true;
       dinghy:
         Logging:
           Level: INFO
