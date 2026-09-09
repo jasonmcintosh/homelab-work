@@ -119,7 +119,7 @@ locals {
     kubenode3="192.168.16.50"
     kubenode4="192.168.19.6"
   }
-  nginx_fronted_services = toset([ "spinnaker","harness",  "git", "prometheus", "grafana", "splunK", "opencloud", "clickhouse" ])
+  nginx_fronted_services = toset([ "spinnaker","harness",  "git", "prometheus", "grafana", "splunK", "opencloud", "gitea", "clickhouse" ])
   traefik_fronted_services = toset(["demo", "argocd"])
 }
 
@@ -144,7 +144,7 @@ resource "cloudflare_record" "homebridge" {
 resource "cloudflare_record" "gitness-ssh" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "git-ssh"
-  content   = "192.168.19.202"
+  content   = "192.168.19.203"
   type    = "A"
   allow_overwrite = true
 }
