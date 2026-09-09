@@ -11,40 +11,33 @@ data:
           http:
             endpoint: 0.0.0.0:4318
     exporters:
-      otlphttp/newrelic:
-        endpoint: https://otlp.nr-data.net
-        headers:
-          api-key: "${env:NR_API_KEY}"
-      debug/noop:
-        verbosity: normal
-        sampling_initial: 0
-        sampling_thereafter: 0
-      prometheusremotewrite:
-        endpoint: https://prometheus.mcintosh.farm/api/v1/write
-      clickhouse:
-        endpoint: tcp://192.168.19.204:9000?dial_timeout=10s&compress=lz4
-        username: clickhouse
-        password: changeme
-        database: otel
-        async_insert: true
-        create_schema: true
+      # All forwarding destinations (ClickHouse, Prometheus, New Relic, Honeycomb) now live
+      # in exactly one place: otel-gateway's ConfigMap (applications/monitoring/collector-
+      # gateway.yaml). This collector only owns the OTLP receiver apps send to and the
+      # edge-side trace sampling below, and forwards everything over OTLP.
+      otlp:
+        endpoint: otel-gateway.monitoring:4317
+        tls:
+          insecure: true
     processors:
       ## Reduce data... we just have too much in spinnaker at thi stime.
       probabilistic_sampler/trace:
         sampling_percentage: 10 # Sample 10% of traces
-      #batch:
+      batch:
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [probabilistic_sampler/trace]
-          exporters: [debug/noop]
+          processors: [probabilistic_sampler/trace, batch]
+          exporters: [otlp]
         metrics:
           receivers: [otlp]
-          exporters: [prometheusremotewrite]
+          processors: [batch]
+          exporters: [otlp]
         logs:
           receivers: [otlp]
-          exporters: [debug/noop]
+          processors: [batch]
+          exporters: [otlp]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -66,10 +59,6 @@ spec:
         args:
         - --config=/conf/collector.yaml
         image: otel/opentelemetry-collector-contrib:0.145.0
-        envFrom:
-        - secretRef:
-            name: newrelic-api-key
-
         volumeMounts:
         - mountPath: /conf
           name: collector-config
@@ -92,7 +81,6 @@ spec:
     port: 4318
     protocol: TCP
     targetPort: 4318
-  selector:
   selector:
     app.kubernetes.io/name: opentelemetrycollector
   type: ClusterIP
