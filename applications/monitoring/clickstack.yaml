@@ -1,0 +1,171 @@
+# ClickStack evaluation: HyperDX UI only, connected to our existing ClickHouse
+# (clickhouse.monitoring:8123) - deliberately NOT deploying ClickStack's bundled OTel
+# collector, since otel-gateway (collector-gateway.yaml) already fills that role.
+# Deployed on its own ingress host so it can be compared side-by-side with Grafana.
+#
+# HyperDX only needs MongoDB for its own app-state store (dashboards/alerts/saved
+# searches/users - metadata only, telemetry itself stays in ClickHouse). Per ClickHouse's
+# own "HyperDX-only" deployment docs, the ClickHouse connection/source is configured
+# through the UI on first login (no env var for this in app-only mode) - see the one-time
+# setup step in README.md.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clickstack-mongo-pvc
+  namespace: monitoring
+spec:
+  # Explicit rook-ceph-block, not whatever the cluster default is: MongoDB's WiredTiger
+  # engine needs real file locking, which the NFS CSI storage class (now the cluster
+  # default) doesn't reliably provide.
+  storageClassName: rook-ceph-block
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickstack-mongo
+  namespace: monitoring
+  labels:
+    app: clickstack-mongo
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: clickstack-mongo
+  template:
+    metadata:
+      labels:
+        app: clickstack-mongo
+    spec:
+      containers:
+      - name: mongo
+        # MongoDB 5.0+ requires a CPU with AVX support (WiredTiger dropped non-AVX support
+        # in 5.0) - not available on this cluster's hardware. 4.4 is the last release line
+        # without that requirement.
+        image: mongo:4.4
+        ports:
+        - name: mongo
+          containerPort: 27017
+        volumeMounts:
+        - name: data
+          mountPath: /data/db
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: clickstack-mongo-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickstack-mongo
+  namespace: monitoring
+spec:
+  ports:
+  - port: 27017
+    targetPort: 27017
+  selector:
+    app: clickstack-mongo
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickstack
+  namespace: monitoring
+  labels:
+    app: clickstack
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: clickstack
+  template:
+    metadata:
+      labels:
+        app: clickstack
+    spec:
+      containers:
+      - name: hyperdx
+        image: docker.hyperdx.io/hyperdx/hyperdx:2
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: MONGO_URI
+            value: mongodb://clickstack-mongo.monitoring:27017/hyperdx
+          # Without this, the app's entrypoint defaults to FRONTEND_URL=http://localhost:8080
+          # (see docker/hyperdx/entry.prod.sh upstream), which is what was showing up in the
+          # UI/links instead of the real ingress host.
+          - name: FRONTEND_URL
+            value: https://clickstack.mcintosh.farm
+        ports:
+        - name: http
+          containerPort: 8080
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickstack
+  namespace: monitoring
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: http
+  selector:
+    app: clickstack
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-issuer
+  name: clickstack
+  namespace: monitoring
+spec:
+  tls:
+    - hosts:
+      - "*.mcintosh.farm"
+      secretName: mcintosh-farm
+  rules:
+  - host: clickstack.mcintosh.farm
+    http:
+      paths:
+      - backend:
+          service:
+            name: clickstack
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix

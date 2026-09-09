@@ -7,16 +7,57 @@ data:
   logging.xml: |
     <clickhouse>
         <asynchronous_metrics_update_period_s>30</asynchronous_metrics_update_period_s>
-    
+
         <listen_host>0.0.0.0</listen_host> <!-- For IPv4 -->
 
         <!-- Other configurations like http_port, tcp_port, etc. -->
         <http_port>8123</http_port>
         <tcp_port>9000</tcp_port>
         <!-- it's a lab... dear god these are CHATTY for a lab... -->
-        <asynchronous_metric_log remove="1"/>
-        <metric_log remove="1"/>
-        <query_thread_log remove="1" />  
+        <!-- asynchronous_metric_log kept enabled (unlike the rest below): it's a periodic
+             snapshot (one write per asynchronous_metrics_update_period_s = 30s, not per-query/
+             per-part like the others, so its volume is driven by ClickHouse's own collection
+             cadence, not by OTel ingestion load), and infra/self-monitoring dashboards -
+             including ClickHouse's own official one - query it directly for CPU/memory/uptime
+             time series. Without it they fail with "Table system.asynchronous_metric_log does
+             not exist" since system.asynchronous_metrics (still enabled) is a point-in-time
+             snapshot table with no history, not a substitute. System log tables have no
+             default TTL, so one is set explicitly here to match the 72h policy used for the
+             otel.* tables (see collector-gateway.yaml) - ttl_only_drop_parts keeps cleanup a
+             cheap partition drop, same as those tables. -->
+        <asynchronous_metric_log replace="1">
+            <database>system</database>
+            <table>asynchronous_metric_log</table>
+            <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+            <engine>
+                ENGINE = MergeTree
+                PARTITION BY event_date
+                ORDER BY (event_time)
+                TTL event_date + INTERVAL 3 DAY
+                SETTINGS ttl_only_drop_parts = 1
+            </engine>
+        </asynchronous_metric_log>
+        <!-- Same reasoning as asynchronous_metric_log above - infra dashboards DESCRIBE/query
+             this table too and fail without it. metric_log is heavier though: it's a WIDE
+             table (one column per ProfileEvent/CurrentMetric, ~300+ columns) collected once
+             per second by default, vs. asynchronous_metric_log's long/narrow format - so
+             collect_interval_milliseconds is raised from the 1000ms default to 5000ms (5x
+             less volume) in addition to the same 3-day TTL. Still decoupled from OTel
+             ingestion load either way - driven only by ClickHouse's own collection cadence. -->
+        <metric_log replace="1">
+            <database>system</database>
+            <table>metric_log</table>
+            <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+            <collect_interval_milliseconds>5000</collect_interval_milliseconds>
+            <engine>
+                ENGINE = MergeTree
+                PARTITION BY event_date
+                ORDER BY (event_time)
+                TTL event_date + INTERVAL 3 DAY
+                SETTINGS ttl_only_drop_parts = 1
+            </engine>
+        </metric_log>
+        <query_thread_log remove="1" />
         <query_log remove="1" />
         <query_views_log remove="1" />
         <part_log remove="1"/>
@@ -32,6 +73,46 @@ data:
         <log remove="remove"/>
         <errorlog remove="remove"/>
       </logger>
+    </clickhouse>
+  performance.xml: |
+    <clickhouse>
+      <!-- Server defaults assume a big multi-core box. On a 4-CPU-limit lab pod, oversized
+           background pools cause merge/insert contention instead of helping - this is the
+           single biggest "why does single-node ClickHouse feel slow" cause at this scale. -->
+      <background_pool_size>8</background_pool_size>
+      <background_merge_processing_pool_size>4</background_merge_processing_pool_size>
+      <background_schedule_pool_size>4</background_schedule_pool_size>
+      <background_common_pool_size>2</background_common_pool_size>
+
+      <!-- MergeTree validates three number_of_free_entries_in_pool_to_* settings against
+           background_pool_size * background_merges_mutations_concurrency_ratio (8*2=16 with
+           the shrunk pool above). Two of their defaults exceed that budget on a non-default
+           background_pool_size (execute_mutation: 20, execute_optimize_entire_partition: 25 -
+           only lower_max_size_of_merge's default of 8 already fits) and ClickHouse refuses to
+           start ("mutations cannot work with these settings") until both are lowered.
+           Server-wide default here, not per-table, since the otel exporter's auto-created
+           tables don't carry their own SETTINGS. -->
+      <merge_tree>
+        <number_of_free_entries_in_pool_to_execute_mutation>8</number_of_free_entries_in_pool_to_execute_mutation>
+        <number_of_free_entries_in_pool_to_execute_optimize_entire_partition>8</number_of_free_entries_in_pool_to_execute_optimize_entire_partition>
+      </merge_tree>
+
+      <!-- Sized down to fit the container memory limit rather than the ClickHouse defaults,
+           which assume much larger hosts. -->
+      <mark_cache_size>1073741824</mark_cache_size> <!-- 1GiB -->
+      <uncompressed_cache_size>1073741824</uncompressed_cache_size> <!-- 1GiB -->
+
+      <profiles>
+        <default>
+          <!-- Coalesce the many small OTel inserts (ilo, k8s events, spinnaker traces/metrics)
+               into fewer, larger parts server-side. This directly reduces merge pressure, which
+               matters more here than per-request insert latency. -->
+          <async_insert>1</async_insert>
+          <wait_for_async_insert>0</wait_for_async_insert>
+          <async_insert_busy_timeout_ms>1000</async_insert_busy_timeout_ms>
+          <async_insert_max_data_size>10485760</async_insert_max_data_size>
+        </default>
+      </profiles>
     </clickhouse>
 
 ---
@@ -74,12 +155,16 @@ spec:
         - name: data
           mountPath: /var/lib/clickhouse
         resources:
+          # Guaranteed QoS (requests == limits) instead of the previous 4x request/limit
+          # spread (2000m/4Gi -> 4000m/16Gi) - predictable CPU/memory instead of being
+          # throttled under load and only then bursting. Raise this once more cluster
+          # capacity is added.
           limits:
             cpu: 4000m
-            memory: 16Gi
+            memory: 8Gi
           requests:
-            cpu: 2000m
-            memory: 4Gi
+            cpu: 4000m
+            memory: 8Gi
       restartPolicy: Always
       securityContext:
         fsGroup: 2000
@@ -90,6 +175,28 @@ spec:
       - name: config-volume
         configMap:
           name: clickhouse-config
+      # -- Storage backend: rook-ceph (current/default) vs. ephemeral (evaluation option) --
+      # Kept on rook-ceph-block for now: durable across pod restarts, and this pool is
+      # already unreplicated (replicated.size: 1) so there's no extra network-replication
+      # overhead beyond RBD itself. To evaluate Kubernetes' native ephemeral storage instead
+      # (no rook-ceph dependency at all - data is wiped on every pod restart), comment out
+      # the persistentVolumeClaim block below and swap in:
+      #
+      #   - name: data
+      #     emptyDir:
+      #       sizeLimit: 40Gi
+      #
+      # and add to the container spec above:
+      #
+      #   resources:
+      #     requests:
+      #       ephemeral-storage: 40Gi
+      #     limits:
+      #       ephemeral-storage: 40Gi
+      #
+      # This *is* "Kubernetes ephemeral storage support" - it's native kubelet functionality
+      # (LocalStorageCapacityIsolation), already present in microk8s, requiring no addon.
+      # Confirm capacity reporting first: `kubectl describe node <node> | grep ephemeral-storage`.
       - name: data
         persistentVolumeClaim:
           claimName: clickhouse-storage
@@ -100,6 +207,10 @@ metadata:
   name: clickhouse-storage
   namespace: monitoring
 spec:
+  # Explicit rook-ceph-block: the cluster's default StorageClass is now nfs-csi-default
+  # (not rook-ceph-block), and NFS is a poor fit for ClickHouse's MergeTree I/O pattern.
+  # Pinning this avoids silently landing on NFS.
+  storageClassName: rook-ceph-block
   accessModes:
     - ReadWriteOnce
   resources:
@@ -148,4 +259,72 @@ spec:
               number: 8123
         path: /
         pathType: Prefix
+---
+# Space-based retention safety net. Every pipeline's clickhouse exporter sets a per-table
+# TTL (see the `ttl:` setting in collector-gateway.yaml) which drops old partitions on
+# ClickHouse's own merge schedule - cheap, but not instant if ingestion volume spikes.
+# ClickHouse has no `--storage.tsdb.retention.size` equivalent, so this CronJob checks
+# actual disk usage for the `otel` database hourly and drops the single oldest partition
+# per table if it's over the configured ceiling.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-retention-guard
+  namespace: monitoring
+data:
+  guard.sh: |
+    #!/bin/sh
+    set -eu
+    CH_URL="http://clickhouse.monitoring:8123"
+    AUTH="clickhouse:changeme"
+    MAX_BYTES=42949672960 # 40Gi ceiling on top of the per-table TTL
 
+    query() {
+      curl -sf -u "$AUTH" "$CH_URL/" --data-binary "$1"
+    }
+
+    total_bytes=$(query "SELECT sum(bytes_on_disk) FROM system.parts WHERE database='otel' AND active")
+    total_bytes=${total_bytes:-0}
+
+    if [ "$total_bytes" -le "$MAX_BYTES" ]; then
+      echo "otel database at ${total_bytes} bytes, under ${MAX_BYTES} ceiling - nothing to do"
+      exit 0
+    fi
+
+    echo "otel database at ${total_bytes} bytes, over ${MAX_BYTES} ceiling - dropping oldest partition per table"
+
+    query "SELECT table, partition FROM system.parts WHERE database='otel' AND active GROUP BY table, partition ORDER BY partition ASC LIMIT 1 BY table" | \
+    while IFS="	" read -r table partition; do
+      [ -z "$table" ] && continue
+      echo "dropping partition ${partition} from otel.${table}"
+      query "ALTER TABLE otel.\`${table}\` DROP PARTITION '${partition}'"
+    done
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: clickhouse-retention-guard
+  namespace: monitoring
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: retention-guard
+            image: curlimages/curl:8.11.1
+            command: ["/bin/sh", "/scripts/guard.sh"]
+            volumeMounts:
+            - name: guard-script
+              mountPath: /scripts
+          volumes:
+          - name: guard-script
+            configMap:
+              name: clickhouse-retention-guard
+              defaultMode: 0755

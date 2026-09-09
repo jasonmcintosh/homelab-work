@@ -41,8 +41,8 @@
                     "artifact": {
                         "artifactAccount": "github-files-jm",
                         "id": "876a8a96-c7c6-455b-bdbe-59cff9290495",
-                        "name": "applications/monitoring/collector-k8s-events.yml",
-                        "reference": "https://api.github.com/repos/jasonmcintosh/homelab-work/contents/applications/monitoring/collector-k8s-events.yml",
+                        "name": "applications/monitoring/examples/collector-k8s-events.yml",
+                        "reference": "https://api.github.com/repos/jasonmcintosh/homelab-work/contents/applications/monitoring/examples/collector-k8s-events.yml",
                         "type": "github/file",
                         "version": "main"
                     }

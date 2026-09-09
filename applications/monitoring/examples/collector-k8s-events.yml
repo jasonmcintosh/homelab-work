@@ -60,19 +60,19 @@ config:
             - set(severity_number, SEVERITY_NUMBER_WARN) where attributes["type"] == "Warning"
 
   exporters:
-    clickhouse:
-      endpoint: tcp://192.168.19.204:9000?dial_timeout=10s&compress=lz4
-      username: clickhouse
-      password: changeme
-      database: otel
-      async_insert: true
-      create_schema: true
+    # All forwarding destinations now live in exactly one place: otel-gateway's ConfigMap
+    # (collector-gateway.yaml, in applications/monitoring). This collector only owns the
+    # k8s_cluster/k8sobjects receivers and the events transform above, and forwards
+    # everything over OTLP.
+    otlp:
+      endpoint: otel-gateway.monitoring:4317
+      tls:
+        insecure: true
 
   service:
     pipelines:
       metrics:
-        exporters: [ clickhouse ]
-        #exporters: [ otlp/k8s-metrics ]
+        exporters: [ otlp ]
       logs:
         processors: [ memory_limiter, transform/events, batch ]
-        exporters: [clickhouse]
+        exporters: [otlp]

@@ -1,0 +1,163 @@
+# Centralized OTel Collector "gateway". This is the ONLY place that holds forwarding
+# credentials/endpoints (ClickHouse, Prometheus remote-write, New Relic, Honeycomb).
+# Every other collector in the cluster (ilo-collector, the k8s-events collector, the
+# spinnaker-facing collector) keeps its own receiver-side logic (scrape configs, k8s
+# object watching, edge sampling) but forwards everything here over OTLP instead of
+# exporting directly - so changing where data goes is a one-file change.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-gateway-config
+  namespace: monitoring
+data:
+  collector.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+      # Mirrors the `spring-boot-apps` job in prometheus.yaml so the same metrics (incl.
+      # clouddriver's controller_invocations_*/jvm_*/okhttp_* series) land in ClickHouse
+      # too, not just Prometheus - this is what the dashboards in dashboards/clickhouse/
+      # query against. Uses the same "default" ServiceAccount as prometheus.yaml, which
+      # already has the ClusterRole needed for pod discovery (prometheus-role-binding).
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: 'spring-boot-apps'
+            kubernetes_sd_configs:
+              - role: pod
+            metrics_path: /actuator/prometheus
+            relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_label_type]
+              regex: spring-boot-app
+              action: keep
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+              replacement: $1
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: kubernetes_namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: kubernetes_pod_name
+            - source_labels: [__meta_kubernetes_pod_ip]
+              action: replace
+              target_label: __address__
+              replacement: $1:8080
+    processors:
+      batch:
+      # Drops spans where start and end time are identical (0 duration) - a flood of these
+      # was overwhelming ClickHouse. Applied here (not at each edge collector) so it covers
+      # every trace source forwarding through the gateway, not just spinnaker's.
+      filter/drop_zero_length_spans:
+        error_mode: ignore
+        traces:
+          span:
+            - 'span.end_time_unix_nano == span.start_time_unix_nano'
+    exporters:
+      clickhouse:
+        endpoint: tcp://clickhouse.monitoring:9000?dial_timeout=10s&compress=lz4
+        username: clickhouse
+        password: changeme
+        database: otel
+        async_insert: true
+        create_schema: true
+        # Applied to every table this exporter creates - see the retention section in
+        # clickhouse.yaml for the space-based backstop on top of this.
+        ttl: 72h
+      prometheusremotewrite:
+        endpoint: https://prometheus.mcintosh.farm/api/v1/write
+      # Not in active use right now (kept for docs/trial purposes) - re-enable by uncommenting
+      # here, adding the exporter back into the relevant pipeline(s) below, and restoring the
+      # envFrom secretRefs on the Deployment.
+      #otlphttp/newrelic:
+      #  endpoint: https://otlp.nr-data.net
+      #  headers:
+      #    api-key: "${env:NR_API_KEY}"
+      #otlphttp/honeycomb:
+      #  endpoint: https://api.honeycomb.io
+      #  headers:
+      #    x-honeycomb-team: "${env:HONEYCOMB_API_KEY}"
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [filter/drop_zero_length_spans, batch]
+          exporters: [clickhouse]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [clickhouse, prometheusremotewrite]
+        # Separate pipeline, ClickHouse-only: prometheus.yaml's own `spring-boot-apps` job
+        # already scrapes these same pods directly into Prometheus, so forwarding this copy
+        # to prometheusremotewrite too would double-write/duplicate those series.
+        metrics/spring-boot-apps:
+          receivers: [prometheus]
+          processors: [batch]
+          exporters: [clickhouse]
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [clickhouse]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-gateway
+  namespace: monitoring
+  labels:
+    app: otel-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-gateway
+  template:
+    metadata:
+      labels:
+        app: otel-gateway
+    spec:
+      containers:
+      - name: otelcol
+        args:
+        - --config=/conf/collector.yaml
+        image: otel/opentelemetry-collector-contrib:0.138.0
+        # newrelic/honeycomb envFrom removed - those exporters are disabled for now (see
+        # collector.yaml above). Restore both secretRefs if re-enabling them.
+        ports:
+        - name: otlp-grpc
+          containerPort: 4317
+        - name: otlp-http
+          containerPort: 4318
+        volumeMounts:
+        - mountPath: /conf
+          name: otel-gateway-config
+      volumes:
+      - configMap:
+          items:
+          - key: collector.yaml
+            path: collector.yaml
+          name: otel-gateway-config
+        name: otel-gateway-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-gateway
+  namespace: monitoring
+spec:
+  ports:
+  - name: otlp-grpc
+    port: 4317
+    protocol: TCP
+    targetPort: 4317
+  - name: otlp-http
+    port: 4318
+    protocol: TCP
+    targetPort: 4318
+  selector:
+    app: otel-gateway
+  type: ClusterIP
