@@ -51,6 +51,34 @@ resource "clickhouse_clickstack_source" "metrics" {
 
 # Same 5 panels as dashboards/clickhouse/clouddriver.json.tpl, expressed as ClickStack's
 # metric-builder tiles instead of raw SQL.
+#
+# Grounded against real data (queried via the ClickHouse HTTP API with the connection's own
+# username/password), not assumed Prometheus-exporter names, after those assumptions turned
+# out wrong in three ways:
+#
+# 1. ServiceName is "clouddriver-jasonmcintosh", not "clouddriver" - Spinnaker's own
+#    hostname-suffixed instance name, not a clean service name. `where` filters below use
+#    the real value.
+# 2. Clouddriver exports metrics natively via OTLP (Micrometer's OTLP registry), which keeps
+#    Micrometer's dotted names as-is (e.g. "controller.invocations", "jvm.memory.used") -
+#    unlike the Prometheus-scraped services (in-house Spring Boot apps), which go through
+#    the OTel Collector's prometheus receiver and get Prometheus-convention
+#    underscore+unit names (e.g. "jvm_memory_used_bytes"). The two pipelines share this one
+#    ClickStack source/table set, so metric names must be checked per-service, not assumed
+#    from one convention. "controller_invocations_total" /
+#    "controller_invocations_seconds_{sum,count}" / "jvm_memory_used_bytes" /
+#    "jvm_gc_pause_seconds_{sum,count}" don't exist for clouddriver; the real names are used
+#    below.
+# 3. Micrometer's Timer meters (controller.invocations, jvm.gc.pause) land in the HISTOGRAM
+#    table with real Count/Sum columns (verified: sum(Count)=10,273,136,
+#    sum(Sum)=839,672s for controller.invocations at the time of writing) - the
+#    otel_metrics_sum rows under the same name are separately-reported percentile
+#    gauges (Attributes['statistic']='percentile'), not invocation counts. ClickStack's
+#    histogram select only supports aggFn "count" (rate of the cumulative Count field,
+#    delta-computed automatically - see translateHistogramCount in
+#    hyperdxio/hyperdx's packages/common-utils/src/core/histogram.ts) or "quantile"
+#    (needs a "level"); there's no sum/count-ratio "avg" option, so the former "avg
+#    latency" tile below is a p50 quantile instead.
 resource "clickhouse_clickstack_dashboard" "clouddriver" {
   provider = clickhouse.clickstack
   dashboard_json = jsonencode({
@@ -59,107 +87,97 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
     tiles = [
       {
         name = "Controller Invocation Rate by Method"
-        x = 0, y = 0, w = 6, h = 3
+        x = 0, y = 0, w = 12, h = 8
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          where         = "ServiceName:\"clouddriver\""
+          where         = "ServiceName:\"clouddriver-jasonmcintosh\""
           whereLanguage = "lucene"
           groupBy       = "Attributes['controller'],Attributes['method']"
           select = [{
-            aggFn           = "sum"
-            valueExpression = "Value"
-            metricType      = "sum"
-            metricName      = "controller_invocations_total"
-            alias           = "invocations"
+            aggFn      = "count"
+            metricType = "histogram"
+            metricName = "controller.invocations"
+            alias      = "invocations"
           }]
         }
       },
       {
         name = "5xx Error Rate by Controller"
-        x = 6, y = 0, w = 6, h = 3
+        x = 12, y = 0, w = 12, h = 8
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          where         = "ServiceName:\"clouddriver\" status:\"5xx\""
+          # Only "2xx"/"4xx" have been observed in Attributes['status'] so far - this is
+          # expected to render empty until clouddriver actually 5xxs, not a broken query.
+          where         = "ServiceName:\"clouddriver-jasonmcintosh\" status:\"5xx\""
           whereLanguage = "lucene"
           groupBy       = "Attributes['controller'],Attributes['method']"
           select = [{
-            aggFn           = "sum"
-            valueExpression = "Value"
-            metricType      = "sum"
-            metricName      = "controller_invocations_total"
-            alias           = "5xx errors"
+            aggFn      = "count"
+            metricType = "histogram"
+            metricName = "controller.invocations"
+            alias      = "5xx errors"
           }]
         }
       },
       {
-        name = "Controller Invocation Latency (avg) by Method"
-        x = 0, y = 3, w = 6, h = 3
+        name = "Controller Invocation Latency (p50) by Method"
+        x = 0, y = 8, w = 12, h = 8
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          where         = "ServiceName:\"clouddriver\""
+          where         = "ServiceName:\"clouddriver-jasonmcintosh\""
           whereLanguage = "lucene"
           groupBy       = "Attributes['controller'],Attributes['method']"
-          select = [
-            {
-              aggFn           = "sum"
-              valueExpression = "Value"
-              metricType      = "sum"
-              metricName      = "controller_invocations_seconds_sum"
-              alias           = "time_sum"
-            },
-            {
-              aggFn           = "sum"
-              valueExpression = "Value"
-              metricType      = "sum"
-              metricName      = "controller_invocations_seconds_count"
-              alias           = "time_count"
-            }
-          ]
+          select = [{
+            aggFn      = "quantile"
+            level      = 0.5
+            metricType = "histogram"
+            metricName = "controller.invocations"
+            alias      = "latency_p50_seconds"
+          }]
         }
       },
       {
         name = "JVM Heap Memory Used"
-        x = 6, y = 3, w = 6, h = 3
+        x = 12, y = 8, w = 12, h = 8
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          where         = "ServiceName:\"clouddriver\" area:\"heap\""
+          where         = "ServiceName:\"clouddriver-jasonmcintosh\" area:\"heap\""
           whereLanguage = "lucene"
           groupBy       = "Attributes['id']"
           select = [{
             aggFn           = "avg"
             valueExpression = "Value"
             metricType      = "gauge"
-            metricName      = "jvm_memory_used_bytes"
+            metricName      = "jvm.memory.used"
             alias           = "heap used"
           }]
         }
       },
       {
         name = "JVM GC Pause Rate"
-        x = 0, y = 6, w = 12, h = 3
+        x = 0, y = 16, w = 24, h = 8
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          where         = "ServiceName:\"clouddriver\""
+          where         = "ServiceName:\"clouddriver-jasonmcintosh\""
           whereLanguage = "lucene"
           select = [
             {
-              aggFn           = "sum"
-              valueExpression = "Value"
-              metricType      = "sum"
-              metricName      = "jvm_gc_pause_seconds_sum"
-              alias           = "pause_sum"
+              aggFn      = "count"
+              metricType = "histogram"
+              metricName = "jvm.gc.pause"
+              alias      = "pause_count"
             },
             {
-              aggFn           = "sum"
-              valueExpression = "Value"
-              metricType      = "sum"
-              metricName      = "jvm_gc_pause_seconds_count"
-              alias           = "pause_count"
+              aggFn      = "quantile"
+              level      = 0.5
+              metricType = "histogram"
+              metricName = "jvm.gc.pause"
+              alias      = "pause_p50_seconds"
             }
           ]
         }
@@ -194,7 +212,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
     tiles = [
       {
         name = "Power Draw (Watts)"
-        x = 0, y = 0, w = 12, h = 3
+        x = 0, y = 0, w = 24, h = 8
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
@@ -208,7 +226,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
       },
       {
         name = "Chassis Temperature"
-        x = 0, y = 3, w = 6, h = 3
+        x = 0, y = 8, w = 12, h = 8
         config = {
           displayType = "line"
           sourceId    = clickhouse_clickstack_source.metrics.id
@@ -218,7 +236,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
       },
       {
         name = "Fan Speed (%)"
-        x = 6, y = 3, w = 6, h = 3
+        x = 12, y = 8, w = 12, h = 8
         config = {
           displayType = "line"
           sourceId    = clickhouse_clickstack_source.metrics.id
@@ -228,7 +246,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
       },
       {
         name = "Component Health (1 = healthy, worst-case in window)"
-        x = 0, y = 6, w = 12, h = 3
+        x = 0, y = 16, w = 24, h = 8
         config = {
           displayType = "table"
           sourceId    = clickhouse_clickstack_source.metrics.id
