@@ -17,7 +17,7 @@
         {
           "refId": "A",
           "datasource": { "type": "grafana-clickhouse-datasource", "uid": "${ch_uid}" },
-          "format": "time_series",
+          "format": 0,
           "rawSql": "SELECT time, metric, greatest(value - lagInFrame(value) OVER (PARTITION BY metric ORDER BY time), 0) / 60 AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL 1 MINUTE) AS time, concat(Attributes['controller'], '.', Attributes['method']) AS metric, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'controller_invocations_total' AND ServiceName = 'clouddriver' AND $__timeFilter(TimeUnix) GROUP BY time, metric) ORDER BY time"
         }
       ]
@@ -33,7 +33,7 @@
         {
           "refId": "A",
           "datasource": { "type": "grafana-clickhouse-datasource", "uid": "${ch_uid}" },
-          "format": "time_series",
+          "format": 0,
           "rawSql": "SELECT time, metric, greatest(value - lagInFrame(value) OVER (PARTITION BY metric ORDER BY time), 0) / 60 AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL 1 MINUTE) AS time, concat(Attributes['controller'], '.', Attributes['method']) AS metric, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'controller_invocations_total' AND ServiceName = 'clouddriver' AND Attributes['status'] = '5xx' AND $__timeFilter(TimeUnix) GROUP BY time, metric) ORDER BY time"
         }
       ]
@@ -49,7 +49,7 @@
         {
           "refId": "A",
           "datasource": { "type": "grafana-clickhouse-datasource", "uid": "${ch_uid}" },
-          "format": "time_series",
+          "format": 0,
           "rawSql": "WITH sum_rate AS (SELECT time, metric, greatest(value - lagInFrame(value) OVER (PARTITION BY metric ORDER BY time), 0) AS delta FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL 1 MINUTE) AS time, concat(Attributes['controller'], '.', Attributes['method']) AS metric, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'controller_invocations_seconds_sum' AND ServiceName = 'clouddriver' AND $__timeFilter(TimeUnix) GROUP BY time, metric)), count_rate AS (SELECT time, metric, greatest(value - lagInFrame(value) OVER (PARTITION BY metric ORDER BY time), 0) AS delta FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL 1 MINUTE) AS time, concat(Attributes['controller'], '.', Attributes['method']) AS metric, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'controller_invocations_seconds_count' AND ServiceName = 'clouddriver' AND $__timeFilter(TimeUnix) GROUP BY time, metric)) SELECT s.time AS time, s.metric AS metric, s.delta / nullIf(c.delta, 0) AS value FROM sum_rate s INNER JOIN count_rate c ON s.time = c.time AND s.metric = c.metric ORDER BY time"
         }
       ]
@@ -65,7 +65,7 @@
         {
           "refId": "A",
           "datasource": { "type": "grafana-clickhouse-datasource", "uid": "${ch_uid}" },
-          "format": "time_series",
+          "format": 0,
           "rawSql": "SELECT toStartOfInterval(TimeUnix, INTERVAL 1 MINUTE) AS time, Attributes['id'] AS metric, avg(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'jvm_memory_used_bytes' AND ServiceName = 'clouddriver' AND Attributes['area'] = 'heap' AND $__timeFilter(TimeUnix) GROUP BY time, metric ORDER BY time"
         }
       ]
@@ -81,7 +81,7 @@
         {
           "refId": "A",
           "datasource": { "type": "grafana-clickhouse-datasource", "uid": "${ch_uid}" },
-          "format": "time_series",
+          "format": 0,
           "rawSql": "WITH sum_rate AS (SELECT time, metric, greatest(value - lagInFrame(value) OVER (PARTITION BY metric ORDER BY time), 0) AS delta FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL 1 MINUTE) AS time, ServiceName AS metric, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'jvm_gc_pause_seconds_sum' AND ServiceName = 'clouddriver' AND $__timeFilter(TimeUnix) GROUP BY time, metric)), count_rate AS (SELECT time, metric, greatest(value - lagInFrame(value) OVER (PARTITION BY metric ORDER BY time), 0) AS delta FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL 1 MINUTE) AS time, ServiceName AS metric, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'jvm_gc_pause_seconds_count' AND ServiceName = 'clouddriver' AND $__timeFilter(TimeUnix) GROUP BY time, metric)) SELECT s.time AS time, s.metric AS metric, s.delta / nullIf(c.delta, 0) AS value FROM sum_rate s INNER JOIN count_rate c ON s.time = c.time AND s.metric = c.metric ORDER BY time"
         }
       ]

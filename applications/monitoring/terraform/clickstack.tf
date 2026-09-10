@@ -172,6 +172,11 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
 # published MauveSoftware/ilo_exporter community Grafana dashboard (grafana.com/grafana/
 # dashboards/20212-ilo/) - verify the exact per-sensor label name (used here as "name") once
 # real data lands, same caveat as the Grafana version of this dashboard.
+# groupBy uses "service.instance.id", not the raw Prometheus "instance" label: the OTel
+# Collector's prometheus receiver (collector-and-ilo.yaml) renames the scrape target's
+# "instance"/"job" labels to the resource attributes "service.instance.id"/"service.name"
+# respectively before export, so "instance" itself doesn't exist as a column/attribute -
+# using it produced "Unknown expression identifier `instance`" from ClickHouse.
 resource "clickhouse_clickstack_dashboard" "ilo" {
   provider = clickhouse.clickstack
   dashboard_json = jsonencode({
@@ -184,7 +189,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          groupBy       = "instance"
+          groupBy       = "service.instance.id"
           select = [
             { aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "ilo_power_current_watt", alias = "current" },
             { aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "ilo_power_average_watt", alias = "average" },
@@ -198,7 +203,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
         config = {
           displayType = "line"
           sourceId    = clickhouse_clickstack_source.metrics.id
-          groupBy     = "instance,name"
+          groupBy     = "service.instance.id,name"
           select = [{ aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "ilo_chassis_temperature_current", alias = "temp" }]
         }
       },
@@ -208,7 +213,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
         config = {
           displayType = "line"
           sourceId    = clickhouse_clickstack_source.metrics.id
-          groupBy     = "instance,name"
+          groupBy     = "service.instance.id,name"
           select = [{ aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "ilo_chassis_fan_current_percent", alias = "fan" }]
         }
       },
@@ -218,7 +223,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
         config = {
           displayType = "table"
           sourceId    = clickhouse_clickstack_source.metrics.id
-          groupBy     = "instance"
+          groupBy     = "service.instance.id"
           select = [
             { aggFn = "min", valueExpression = "Value", metricType = "gauge", metricName = "ilo_processor_healthy", alias = "processor" },
             { aggFn = "min", valueExpression = "Value", metricType = "gauge", metricName = "ilo_power_supply_healthy", alias = "power_supply" },
