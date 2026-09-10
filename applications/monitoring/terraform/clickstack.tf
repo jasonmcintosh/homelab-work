@@ -78,7 +78,11 @@ resource "clickhouse_clickstack_source" "metrics" {
 #    delta-computed automatically - see translateHistogramCount in
 #    hyperdxio/hyperdx's packages/common-utils/src/core/histogram.ts) or "quantile"
 #    (needs a "level"); there's no sum/count-ratio "avg" option, so the former "avg
-#    latency" tile below is a p50 quantile instead.
+#    latency" tile below is a p50 quantile instead. The API's own validation requires
+#    valueExpression on every non-"count" select regardless of metric type ("Value
+#    expression is required for non-count aggregation functions"), even though
+#    translateHistogram never actually reads it for histograms - so the quantile
+#    selects below carry a placeholder "Value" to satisfy validation.
 resource "clickhouse_clickstack_dashboard" "clouddriver" {
   provider = clickhouse.clickstack
   dashboard_json = jsonencode({
@@ -131,11 +135,12 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
           whereLanguage = "lucene"
           groupBy       = "Attributes['controller'],Attributes['method']"
           select = [{
-            aggFn      = "quantile"
-            level      = 0.5
-            metricType = "histogram"
-            metricName = "controller.invocations"
-            alias      = "latency_p50_seconds"
+            aggFn           = "quantile"
+            level           = 0.5
+            valueExpression = "Value"
+            metricType      = "histogram"
+            metricName      = "controller.invocations"
+            alias           = "latency_p50_seconds"
           }]
         }
       },
@@ -173,11 +178,12 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
               alias      = "pause_count"
             },
             {
-              aggFn      = "quantile"
-              level      = 0.5
-              metricType = "histogram"
-              metricName = "jvm.gc.pause"
-              alias      = "pause_p50_seconds"
+              aggFn           = "quantile"
+              level           = 0.5
+              valueExpression = "Value"
+              metricType      = "histogram"
+              metricName      = "jvm.gc.pause"
+              alias           = "pause_p50_seconds"
             }
           ]
         }
@@ -186,10 +192,12 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
   })
 }
 
-# Same panels as dashboards/clickhouse/ilo.json.tpl. Metric names are grounded against the
-# published MauveSoftware/ilo_exporter community Grafana dashboard (grafana.com/grafana/
-# dashboards/20212-ilo/) - verify the exact per-sensor label name (used here as "name") once
-# real data lands, same caveat as the Grafana version of this dashboard.
+# Same panels as dashboards/clickhouse/ilo.json.tpl. Metric names and the "name" per-sensor
+# label are now confirmed against the exporter's own /metrics output (curled directly via a
+# throwaway pod) and against real rows in ClickHouse - both hosts in
+# collector-and-ilo.yaml's static_configs (192.168.19.60 full sensor set,
+# 192.168.18.128 power/system-info only, a real hardware/firmware difference) have reported
+# successfully.
 # groupBy is raw SQL, not a dimension name ClickStack resolves for you: a bare string
 # groupBy is injected verbatim (see UNSAFE_RAW_SQL in hyperdxio/hyperdx's
 # renderChartConfig.ts), so anything that isn't a real top-level column (ServiceName is)
@@ -266,6 +274,18 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
 # Same panels as dashboards/clickhouse/in-house.json.tpl - generic across any pod labeled
 # type=spring-boot-app (see collector-gateway.yaml's spring-boot-apps scrape job), grouped
 # by ServiceName instead of filtered to one service.
+#
+# "HTTP Request Rate" is a raw-SQL tile (configType = "sql"), not a metric-builder tile:
+# Micrometer's Prometheus registry exports http.server.requests as a Summary (no percentile
+# buckets configured), which the OTel Collector's prometheus receiver in turn reports as an
+# OTel Summary metric - a metric kind ClickStack's metric-builder tiles have no support for
+# (translateMetricChartConfig in hyperdxio/hyperdx's renderChartConfig.ts only handles
+# Gauge/Sum/Histogram/ExponentialHistogram). Summary data lives in otel_metrics_summary with
+# real Count/Sum columns (verified via the ClickHouse HTTP API), so this tile queries it
+# directly using ClickStack's SQL-tile time-range parameters ({startDateMilliseconds:Int64}
+# etc., ClickHouse's native `{name:Type}` query-param syntax - see
+# hyperdxio/hyperdx's packages/common-utils/src/rawSqlParams.ts) instead of the metric
+# builder's groupBy/select.
 resource "clickhouse_clickstack_dashboard" "in_house" {
   provider = clickhouse.clickstack
   dashboard_json = jsonencode({
@@ -274,17 +294,17 @@ resource "clickhouse_clickstack_dashboard" "in_house" {
     tiles = [
       {
         name = "HTTP Request Rate by Service/URI"
-        x = 0, y = 0, w = 12, h = 3
+        x = 0, y = 0, w = 24, h = 8
         config = {
-          displayType = "line"
-          sourceId    = clickhouse_clickstack_source.metrics.id
-          groupBy     = "ServiceName,Attributes['uri']"
-          select = [{ aggFn = "sum", valueExpression = "Value", metricType = "sum", metricName = "http_server_requests_seconds_count", alias = "requests" }]
+          configType   = "sql"
+          displayType  = "line"
+          connectionId = clickhouse_clickstack_connection.main.id
+          sqlTemplate  = "SELECT time, metric, greatest(value - lagInFrame(value) OVER (PARTITION BY metric ORDER BY time), 0) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL {intervalSeconds:Int64} second) AS time, concat(ServiceName, ' ', Attributes['uri'], ' ', Attributes['status']) AS metric, max(Count) AS value FROM otel.otel_metrics_summary WHERE MetricName = 'http_server_requests_seconds' AND TimeUnix >= fromUnixTimestamp64Milli({startDateMilliseconds:Int64}) AND TimeUnix <= fromUnixTimestamp64Milli({endDateMilliseconds:Int64}) GROUP BY time, metric) ORDER BY time"
         }
       },
       {
         name = "JVM Heap Memory Used"
-        x = 0, y = 3, w = 6, h = 3
+        x = 0, y = 8, w = 12, h = 8
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
@@ -296,7 +316,7 @@ resource "clickhouse_clickstack_dashboard" "in_house" {
       },
       {
         name = "Process CPU Usage"
-        x = 6, y = 3, w = 6, h = 3
+        x = 12, y = 8, w = 12, h = 8
         config = {
           displayType = "line"
           sourceId    = clickhouse_clickstack_source.metrics.id
