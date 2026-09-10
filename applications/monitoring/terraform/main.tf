@@ -55,9 +55,12 @@ provider "grafana" {
 resource "grafana_data_source" "clickhouse" {
   type = "grafana-clickhouse-datasource"
   name = "ClickHouse"
-  url  = "http://clickhouse.monitoring:8123"
 
+  # The plugin's backend reads jsonData.host directly (a bare hostname, no scheme/port) -
+  # it doesn't fall back to Grafana's generic top-level datasource `url` field, so without
+  # this it fails with "invalid server host. Either empty or not set".
   json_data_encoded = jsonencode({
+    host            = "clickhouse.monitoring"
     defaultDatabase = "otel"
     port            = 8123
     protocol        = "http"

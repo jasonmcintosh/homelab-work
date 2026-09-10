@@ -65,7 +65,7 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
           sourceId      = clickhouse_clickstack_source.metrics.id
           where         = "ServiceName:\"clouddriver\""
           whereLanguage = "lucene"
-          groupBy       = "controller,method"
+          groupBy       = "Attributes['controller'],Attributes['method']"
           select = [{
             aggFn           = "sum"
             valueExpression = "Value"
@@ -83,7 +83,7 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
           sourceId      = clickhouse_clickstack_source.metrics.id
           where         = "ServiceName:\"clouddriver\" status:\"5xx\""
           whereLanguage = "lucene"
-          groupBy       = "controller,method"
+          groupBy       = "Attributes['controller'],Attributes['method']"
           select = [{
             aggFn           = "sum"
             valueExpression = "Value"
@@ -101,7 +101,7 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
           sourceId      = clickhouse_clickstack_source.metrics.id
           where         = "ServiceName:\"clouddriver\""
           whereLanguage = "lucene"
-          groupBy       = "controller,method"
+          groupBy       = "Attributes['controller'],Attributes['method']"
           select = [
             {
               aggFn           = "sum"
@@ -128,7 +128,7 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
           sourceId      = clickhouse_clickstack_source.metrics.id
           where         = "ServiceName:\"clouddriver\" area:\"heap\""
           whereLanguage = "lucene"
-          groupBy       = "id"
+          groupBy       = "Attributes['id']"
           select = [{
             aggFn           = "avg"
             valueExpression = "Value"
@@ -172,11 +172,20 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
 # published MauveSoftware/ilo_exporter community Grafana dashboard (grafana.com/grafana/
 # dashboards/20212-ilo/) - verify the exact per-sensor label name (used here as "name") once
 # real data lands, same caveat as the Grafana version of this dashboard.
-# groupBy uses "service.instance.id", not the raw Prometheus "instance" label: the OTel
-# Collector's prometheus receiver (collector-and-ilo.yaml) renames the scrape target's
-# "instance"/"job" labels to the resource attributes "service.instance.id"/"service.name"
-# respectively before export, so "instance" itself doesn't exist as a column/attribute -
-# using it produced "Unknown expression identifier `instance`" from ClickHouse.
+# groupBy is raw SQL, not a dimension name ClickStack resolves for you: a bare string
+# groupBy is injected verbatim (see UNSAFE_RAW_SQL in hyperdxio/hyperdx's
+# renderChartConfig.ts), so anything that isn't a real top-level column (ServiceName is)
+# must be written as an explicit Attributes['key']/ResourceAttributes['key'] map access -
+# same convention HyperDX's own built-in dashboard templates use (e.g.
+# packages/app/src/dashboardTemplates/jvm-runtime-metrics.json's
+# "Attributes['jvm.memory.pool.name']"). A bare key name either 404s as an unknown
+# identifier (this dashboard's original "instance") or, worse, silently resolves to
+# nothing if ClickHouse happens to accept it as some other identifier.
+#
+# groupBy uses "service.instance.id" (as ResourceAttributes['service.instance.id']), not
+# the raw Prometheus "instance" label: the OTel Collector's prometheus receiver
+# (collector-and-ilo.yaml) renames the scrape target's "instance"/"job" labels to the
+# resource attributes "service.instance.id"/"service.name" respectively before export.
 resource "clickhouse_clickstack_dashboard" "ilo" {
   provider = clickhouse.clickstack
   dashboard_json = jsonencode({
@@ -189,7 +198,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          groupBy       = "service.instance.id"
+          groupBy       = "ResourceAttributes['service.instance.id']"
           select = [
             { aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "ilo_power_current_watt", alias = "current" },
             { aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "ilo_power_average_watt", alias = "average" },
@@ -203,7 +212,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
         config = {
           displayType = "line"
           sourceId    = clickhouse_clickstack_source.metrics.id
-          groupBy     = "service.instance.id,name"
+          groupBy     = "ResourceAttributes['service.instance.id'],Attributes['name']"
           select = [{ aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "ilo_chassis_temperature_current", alias = "temp" }]
         }
       },
@@ -213,7 +222,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
         config = {
           displayType = "line"
           sourceId    = clickhouse_clickstack_source.metrics.id
-          groupBy     = "service.instance.id,name"
+          groupBy     = "ResourceAttributes['service.instance.id'],Attributes['name']"
           select = [{ aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "ilo_chassis_fan_current_percent", alias = "fan" }]
         }
       },
@@ -223,7 +232,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
         config = {
           displayType = "table"
           sourceId    = clickhouse_clickstack_source.metrics.id
-          groupBy     = "service.instance.id"
+          groupBy     = "ResourceAttributes['service.instance.id']"
           select = [
             { aggFn = "min", valueExpression = "Value", metricType = "gauge", metricName = "ilo_processor_healthy", alias = "processor" },
             { aggFn = "min", valueExpression = "Value", metricType = "gauge", metricName = "ilo_power_supply_healthy", alias = "power_supply" },
@@ -251,7 +260,7 @@ resource "clickhouse_clickstack_dashboard" "in_house" {
         config = {
           displayType = "line"
           sourceId    = clickhouse_clickstack_source.metrics.id
-          groupBy     = "ServiceName,uri"
+          groupBy     = "ServiceName,Attributes['uri']"
           select = [{ aggFn = "sum", valueExpression = "Value", metricType = "sum", metricName = "http_server_requests_seconds_count", alias = "requests" }]
         }
       },
@@ -263,7 +272,7 @@ resource "clickhouse_clickstack_dashboard" "in_house" {
           sourceId      = clickhouse_clickstack_source.metrics.id
           where         = "area:\"heap\""
           whereLanguage = "lucene"
-          groupBy       = "ServiceName,id"
+          groupBy       = "ServiceName,Attributes['id']"
           select = [{ aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "jvm_memory_used_bytes", alias = "heap used" }]
         }
       },
