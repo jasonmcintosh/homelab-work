@@ -57,6 +57,7 @@
       "title": "JVM Heap Memory Used",
       "description": "jvm_memory_used_bytes{area=\"heap\"}, gauge, no rate needed.",
       "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "bytes" } },
       "datasource": { "type": "grafana-clickhouse-datasource", "uid": "${ch_uid}" },
       "targets": [
         {

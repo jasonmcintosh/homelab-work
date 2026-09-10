@@ -27,8 +27,7 @@ resource "clickhouse_clickstack_connection" "main" {
 }
 
 # One metric source covering all three metric tables the clickhouseexporter creates
-# (see collector-gateway.yaml). All 3 dashboards below are metrics-only, so no log/trace
-# source is needed yet.
+# (see collector-gateway.yaml).
 resource "clickhouse_clickstack_source" "metrics" {
   provider      = clickhouse.clickstack
   name          = "otel metrics"
@@ -47,6 +46,31 @@ resource "clickhouse_clickstack_source" "metrics" {
     sum       = "otel_metrics_sum"
     histogram = "otel_metrics_histogram"
   }
+}
+
+# Log source for the clouddriver dashboard's log panel below. Same otel_logs table the
+# otel-gateway clickhouseexporter writes to for every service; scoped to clouddriver by the
+# tile's own where filter, not by the source. Verified real data via the ClickHouse HTTP
+# API: 43,808 rows for ServiceName='clouddriver-jasonmcintosh' as of writing.
+resource "clickhouse_clickstack_source" "logs" {
+  provider      = clickhouse.clickstack
+  name          = "otel logs"
+  kind          = "log"
+  connection_id = clickhouse_clickstack_connection.main.id
+
+  from = {
+    database_name = "otel"
+    table_name    = "otel_logs"
+  }
+
+  timestamp_value_expression      = "Timestamp"
+  default_table_select_expression = "Timestamp, ServiceName, SeverityText, Body"
+
+  service_name_expression        = "ServiceName"
+  severity_text_expression       = "SeverityText"
+  body_expression                = "Body"
+  resource_attributes_expression = "ResourceAttributes"
+  event_attributes_expression    = "LogAttributes"
 }
 
 # Same 5 panels as dashboards/clickhouse/clouddriver.json.tpl, expressed as ClickStack's
@@ -114,7 +138,10 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
           sourceId      = clickhouse_clickstack_source.metrics.id
           # Only "2xx"/"4xx" have been observed in Attributes['status'] so far - this is
           # expected to render empty until clouddriver actually 5xxs, not a broken query.
-          where         = "ServiceName:\"clouddriver-jasonmcintosh\" status:\"5xx\""
+          # Explicit AND: Lucene's implicit operator between bare clauses is OR, not AND
+          # (via the @hyperdx/lucene parser) - without it this matched every clouddriver
+          # row (ServiceName:... OR status:"5xx"), not just 5xx ones.
+          where         = "ServiceName:\"clouddriver-jasonmcintosh\" AND status:\"5xx\""
           whereLanguage = "lucene"
           groupBy       = "Attributes['controller'],Attributes['method']"
           select = [{
@@ -150,7 +177,8 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          where         = "ServiceName:\"clouddriver-jasonmcintosh\" area:\"heap\""
+          # Explicit AND, same Lucene implicit-OR gotcha as the 5xx tile above.
+          where         = "ServiceName:\"clouddriver-jasonmcintosh\" AND area:\"heap\""
           whereLanguage = "lucene"
           groupBy       = "Attributes['id']"
           select = [{
@@ -186,6 +214,17 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
               alias           = "pause_p50_seconds"
             }
           ]
+        }
+      },
+      {
+        name = "Recent Logs"
+        x = 0, y = 24, w = 24, h = 8
+        config = {
+          displayType   = "search"
+          sourceId      = clickhouse_clickstack_source.logs.id
+          select        = "Timestamp, ServiceName, SeverityText, Body"
+          where         = "ServiceName:\"clouddriver-jasonmcintosh\""
+          whereLanguage = "lucene"
         }
       }
     ]

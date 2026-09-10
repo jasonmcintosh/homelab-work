@@ -60,6 +60,7 @@
       "title": "JVM Heap Memory Used",
       "description": "Hand-ported from 'JVM Memory Usage': sum(jvm_memory_used_bytes{area=\"heap\"}) by (id). Gauge metric, no rate needed. Real name is the dotted \"jvm.memory.used\" (clouddriver's native OTLP export keeps Micrometer's dotted names, unlike Prometheus-scraped services) and ServiceName is \"clouddriver-jasonmcintosh\".",
       "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "bytes" } },
       "datasource": { "type": "grafana-clickhouse-datasource", "uid": "${ch_uid}" },
       "targets": [
         {
