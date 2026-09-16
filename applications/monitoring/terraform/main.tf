@@ -20,7 +20,7 @@ terraform {
   required_providers {
     grafana = {
       source  = "grafana/grafana"
-      version = "~> 3.0"
+      version = "~> 4.46"
     }
     clickhouse = {
       source  = "ClickHouse/clickhouse"
