@@ -17,7 +17,11 @@ Regenerate (needs go-jsonnet and a grafonnet-lib checkout under `vendor/`):
     jsonnet -J vendor -J dashboards dashboards/<name>.jsonnet > out/<name>.json
     python3 adapt.py out dashboards/prometheus
 
-Not included (no data in this lab): `deck`, `spinnaker-aws-platform`, `spinnaker-google-platform`.
+Included but without data in this lab, kept so others can use them once they have the data:
+`deck` (Deck is a static Apache server and exports no metrics; these panels expect HTTP request
+metrics from an instrumented web server), `spinnaker-aws-platform` and `spinnaker-google-platform`
+(no AWS or Google cloud-provider traffic here). Their queries are the mixin's, only relabelled by
+`adapt.py`, and have not been checked against real series.
 
 Known gaps: the kubelet scrape only returns cAdvisor series for some pods, so the CPU/memory/network
 panels are empty for services whose pods aren't scraped; panels for 5xx/429 stay empty until those occur.

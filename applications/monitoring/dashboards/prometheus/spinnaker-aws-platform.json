@@ -1,0 +1,1117 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "hideControls": false,
+  "id": null,
+  "links": [],
+  "refresh": "1m",
+  "rows": [
+    {
+      "collapse": false,
+      "collapsed": false,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 2,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(sum(AWS_delay_sum{instance=~\"$Instance\", statusCode=\"-1\"}) by (serviceName)\n/\nsum(AWS_delay_count{instance=~\"$Instance\", statusCode=\"-1\"}) by (serviceName) , \"serviceName\", \"$1\", \"serviceName\", \"Amazon(.+)\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{serviceName}} / UNK",
+              "refId": "A"
+            },
+            {
+              "expr": "label_replace(sum(AWS_delay_sum{instance=~\"$Instance\", statusCode!=\"-1\"}) by (serviceName, statusCode)\n/\nsum(AWS_delay_count{instance=~\"$Instance\", statusCode!=\"-1\"}) by (serviceName, statusCode), \"serviceName\", \"$1\", \"serviceName\", \"Amazon(.+)\") ",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{serviceName}} / {{statusCode}}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS Delay by Service  (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 3,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(AWS_delay_sum{instance=~\"$Instance\", statusCode=\"-1\"}) by (requestType)\n/\nsum(AWS_delay_count{instance=~\"$Instance\", statusCode=\"-1\"}) by (requestType) ",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{requestType}} / UNK",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(AWS_delay_sum{instance=~\"$Instance\", statusCode!=\"-1\"}) by (requestType, statusCode)\n/\nsum(AWS_delay_count{instance=~\"$Instance\", statusCode!=\"-1\"}) by (requestType, statusCode) ",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{requestType}} / {{statusCode}}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS Delay by Request (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 4,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(sum(rate(aws_request_httpRequestTime_seconds_count{instance=~\"$Instance\",serviceEndpoint=~\".*$AwsRegion.*\",error=\"true\"}[$__rate_interval])) by (serviceEndpoint, statusCode), \"region\", \"$1\", \"serviceEndpoint\", \"[^\\\\.]+\\\\.([^\\\\.]+).*\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{region}} / {{statusCode}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS Errors by Region (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 5,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(label_replace(sum(rate(aws_request_httpRequestTime_seconds_count{instance=~\"$Instance\",serviceEndpoint=~\".*$AwsRegion.*\",error=\"true\"}[$__rate_interval])) by (requestType, serviceName, statusCode, AWSErrorCode), \"requestType\", \"$1\", \"requestType\", \"(.*)Request(.*)\"), \"serviceName\",  \"$1\", \"serviceName\", \"Amazon(.+)\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{statusCode}}/{{serviceName}}.{{requestType}}->{{AWSErrorCode}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS Errors in $AwsRegion (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 6,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(sum(rate(aws_request_httpRequestTime_seconds_count{instance=~\"$Instance\",serviceName=\"AmazonEC2\", error=\"false\"}[$__rate_interval])) by (serviceEndpoint), \"region\", \"$1\", \"serviceEndpoint\", \"[^\\\\.]+\\\\.([^\\\\.]+).*\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{region}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS EC2 Requests  by Region (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 7,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(sum(rate(aws_request_httpRequestTime_seconds_count{instance=~\"$Instance\",serviceEndpoint=~\".*$AwsRegion.*\",serviceName=\"AmazonEC2\", error=\"false\"}[$__rate_interval])) by (requestType, serviceName), \"requestType\", \"$1\", \"requestType\", \"(.*)Request\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{requestType}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS EC2 Requests in $AwsRegion (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 8,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(sum(rate(aws_request_httpRequestTime_seconds_sum{instance=~\"$Instance\",serviceEndpoint=~\".*$AwsRegion.*\",serviceName=\"AmazonEC2\"}[$__rate_interval])) by (serviceEndpoint, serviceName)\n/ sum(rate(aws_request_httpRequestTime_seconds_count{instance=~\"$Instance\",serviceName=\"AmazonEC2\", error=\"false\"}[$__rate_interval])) by (serviceEndpoint, serviceName), \"region\", \"$1\", \"serviceEndpoint\", \"[^\\\\.]+\\\\.([^\\\\.]+).*\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{region}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS EC2 Request Latency by Region  (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 9,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(aws_request_httpRequestTime_seconds_sum{instance=~\"$Instance\",serviceEndpoint=~\".*$AwsRegion.*\",serviceName=\"AmazonEC2\"}[$__rate_interval])) by (requestType, serviceName)\n/ sum(rate(aws_request_httpRequestTime_seconds_count{instance=~\"$Instance\",serviceName=\"AmazonEC2\", error=\"false\"}[$__rate_interval])) by (requestType, serviceName)",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{requestType}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS EC2 Request Latency in $AwsRegion  (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 10,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(sum(rate(aws_request_httpRequestTime_seconds_count{instance=~\"$Instance\",serviceEndpoint=~\".*$AwsRegion.*\",serviceName!=\"AmazonEC2\", error=\"false\"}[$__rate_interval])) by (serviceName, serviceEndpoint), \"region\", \"$1\", \"serviceEndpoint\", \"[^\\\\.]+\\\\.([^\\\\.]+).*\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{serviceName}} / {{region}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS Requests (non EC2) by Region (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 11,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(sum(rate(aws_request_httpRequestTime_seconds_count{instance=~\"$Instance\",serviceEndpoint=~\".*$AwsRegion.*\",serviceName!=\"AmazonEC2\", error=\"false\"}[$__rate_interval])) by (requestType, serviceName), \"serviceName\", \"$1\", \"serviceName\", \"Amazon(.+)\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{serviceName}}.{{requestType}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS Requests (non EC2) in $AwsRegion (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 12,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(label_replace(sum(rate(aws_request_httpRequestTime_seconds_sum{instance=~\"$Instance\",serviceEndpoint=~\".*$AwsRegion.*\",serviceName!=\"AmazonEC2\"}[$__rate_interval])) by (serviceEndpoint, serviceName)\n/ sum(rate(aws_request_httpRequestTime_seconds_count{serviceName!=\"AmazonEC2\", error=\"false\"}[$__rate_interval])) by (serviceEndpoint, serviceName), \"serviceName\", \"$1\", \"serviceName\", \"Amazon(.+)\"), \"region\", \"$1\", \"serviceEndpoint\", \"[^\\\\.]+\\\\.([^\\\\.]+).*\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{serviceName}} / {{region}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS Non-EC2 Request Latency by Region  (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {},
+          "id": 13,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "repeat": null,
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "label_replace(label_replace(sum(rate(aws_request_httpRequestTime_seconds_sum{instance=~\"$Instance\",serviceEndpoint=~\".*$AwsRegion.*\",serviceName!=\"AmazonEC2\"}[$__rate_interval])) by (requestType, serviceName)\n/\nsum(rate(aws_request_httpRequestTime_seconds_count{serviceName!=\"AmazonEC2\", error=\"false\"}[$__rate_interval])) by (requestType, serviceName), \"serviceName\", \"$1\", \"serviceName\", \"Amazon(.+)\"), \"requestType\", \"$1\", \"requestType\", \"(.*)Request\")",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "{{serviceName}}.{{requestType}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "AWS Non-EC2 Request Latency in $AwsRegion  (clouddriver, $Instance)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "dtdurations",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "AWS",
+      "titleSize": "h6",
+      "type": "row"
+    }
+  ],
+  "schemaVersion": 14,
+  "style": "dark",
+  "tags": [
+    "spinnaker"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "label": null,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "$datasource",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": false,
+        "name": "AwsRegion",
+        "options": [],
+        "query": "aws_request_httpRequestTime_seconds_count",
+        "refresh": 2,
+        "regex": "/.*serviceEndpoint=\"[^\\.]+\\.([^\\.]+).*/",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "$datasource",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": false,
+        "name": "Instance",
+        "options": [],
+        "query": "label_values(aws_request_httpRequestTime_seconds_count, instance)",
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Spinnaker AWS Platform",
+  "uid": "spinnaker-aws-platform",
+  "version": 0
+}
