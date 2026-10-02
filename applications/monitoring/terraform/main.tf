@@ -94,16 +94,16 @@ resource "grafana_dashboard" "in_house_clickhouse" {
   })
 }
 
-# Prometheus-backed Spinnaker dashboards (see dashboards/prometheus/README.md). They select the
+# Prometheus-backed Spinnaker dashboards (see dashboards/prometheus-spinnaker/README.md). They select the
 # Prometheus datasource through the dashboard's own $datasource variable, so no uid is hardcoded.
 resource "grafana_folder" "spinnaker" {
   title = "Spinnaker"
 }
 
 resource "grafana_dashboard" "spinnaker" {
-  for_each    = fileset("${path.module}/../dashboards/prometheus", "*.json")
+  for_each    = fileset("${path.module}/../dashboards/prometheus-spinnaker", "*.json")
   folder      = grafana_folder.spinnaker.uid
-  config_json = file("${path.module}/../dashboards/prometheus/${each.value}")
+  config_json = file("${path.module}/../dashboards/prometheus-spinnaker/${each.value}")
   # Some of these (e.g. spinnaker-clouddriver) were previously imported by hand.
   overwrite = true
 }

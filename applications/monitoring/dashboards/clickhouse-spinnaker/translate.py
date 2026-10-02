@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Translate the PromQL Spinnaker dashboards in ../prometheus into Grafana dashboards that query
+"""Translate the PromQL Spinnaker dashboards in ../prometheus-spinnaker into Grafana dashboards that query
 the ClickHouse OTel tables (otel.otel_metrics_{gauge,sum,histogram}) with the grafana-clickhouse
 datasource.
 
-    python3 translate.py ../prometheus .          # writes <name>.json.tpl (Terraform templatefile, ${ch_uid})
+    python3 translate.py ../prometheus-spinnaker .          # writes <name>.json.tpl (Terraform templatefile, ${ch_uid})
 
 Only the PromQL subset the mixin uses is supported: selectors, rate(), *_over_time(), sum/avg/min/
 max/count [by (...)], binary arithmetic, label_replace(). Anything else (or a metric with no

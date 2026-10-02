@@ -15,7 +15,7 @@ metrics over OTLP, so `adapt.py` rewrites the queries:
 Regenerate (needs go-jsonnet and a grafonnet-lib checkout under `vendor/`):
 
     jsonnet -J vendor -J dashboards dashboards/<name>.jsonnet > out/<name>.json
-    python3 adapt.py out dashboards/prometheus
+    python3 adapt.py out dashboards/prometheus-spinnaker
 
 Included but without data in this lab, kept so others can use them once they have the data:
 `deck` (Deck is a static Apache server and exports no metrics; these panels expect HTTP request

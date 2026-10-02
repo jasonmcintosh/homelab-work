@@ -67,8 +67,9 @@ data:
         <crash_log remove="1"/>
         <opentelemetry_span_log remove="1"/>
         <!-- Was the largest system table by far (1.8 GiB / 88M rows, 30d TTL - more than double the
-             whole otel database) and nothing here reads it. Removing it only stops new writes; the
-             existing table must be dropped by hand once: DROP TABLE system.processors_profile_log -->
+             whole otel database) and nothing here reads it. On startup ClickHouse drops a system log
+             table that is no longer configured (files are deleted ~8 min later, per
+             database_atomic_delay_before_drop_table_sec), so no manual DROP is needed. -->
         <processors_profile_log remove="1"/>
         <zookeeper_log remove="1"/>
 

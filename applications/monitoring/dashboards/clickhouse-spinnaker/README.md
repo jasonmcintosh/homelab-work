@@ -1,10 +1,10 @@
 # Spinnaker Grafana dashboards (ClickHouse)
 
-ClickHouse equivalents of `../prometheus/*.json`, so Spinnaker observability can move off Prometheus.
+ClickHouse equivalents of `../prometheus-spinnaker/*.json`, so Spinnaker observability can move off Prometheus.
 Generated, not hand-written:
 
     python3 -m venv .venv && .venv/bin/pip install promql-parser
-    .venv/bin/python translate.py ../prometheus .
+    .venv/bin/python translate.py ../prometheus-spinnaker .
 
 `translate.py` parses each PromQL query and compiles it to SQL over `otel.otel_metrics_{gauge,sum,
 histogram}` (the tables the otel-gateway's clickhouse exporter fills). `metrics.tsv` is the list of
