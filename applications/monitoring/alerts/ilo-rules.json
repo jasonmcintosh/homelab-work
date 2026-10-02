@@ -1,0 +1,124 @@
+{
+  "folder": "Hardware",
+  "group": "ilo-hardware",
+  "interval_seconds": 300,
+  "rules": [
+    {
+      "name": "ILODriveUnhealthy",
+      "sql": "SELECT max(TimeUnix) AS time, Attributes['host'] AS host, Attributes['location'] AS drive, Attributes['model'] AS model, argMax(Value, TimeUnix) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'ilo_storage_disk_healthy' AND TimeUnix > now() - INTERVAL 1 HOUR GROUP BY host, drive, model ORDER BY time",
+      "op": "lt",
+      "threshold": 1,
+      "summary": "iLO {{ $labels.host }}: drive {{ $labels.drive }} ({{ $labels.model }}) is unhealthy",
+      "description": "ilo_storage_disk_healthy is 0 for this drive. Check the array controller and replace the drive if it has failed.",
+      "labels": {
+        "hardware": "ilo",
+        "severity": "critical"
+      },
+      "for": "5m"
+    },
+    {
+      "name": "ILODriveFailurePredicted",
+      "sql": "SELECT max(TimeUnix) AS time, Attributes['host'] AS host, Attributes['location'] AS drive, Attributes['model'] AS model, argMax(Value, TimeUnix) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'ilo_storage_disk_failure_predicted' AND TimeUnix > now() - INTERVAL 1 HOUR GROUP BY host, drive, model ORDER BY time",
+      "op": "gt",
+      "threshold": 0,
+      "summary": "iLO {{ $labels.host }}: drive {{ $labels.drive }} ({{ $labels.model }}) predicts failure",
+      "description": "The drive reports a predicted failure. Replace it before it fails.",
+      "labels": {
+        "hardware": "ilo",
+        "severity": "warning"
+      },
+      "for": "5m"
+    },
+    {
+      "name": "ILOPowerSupplyUnhealthy",
+      "sql": "SELECT max(TimeUnix) AS time, Attributes['host'] AS host, Attributes['serial'] AS serial, argMax(Value, TimeUnix) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'ilo_power_supply_healthy' AND TimeUnix > now() - INTERVAL 1 HOUR GROUP BY host, serial ORDER BY time",
+      "op": "lt",
+      "threshold": 1,
+      "summary": "iLO {{ $labels.host }}: power supply {{ $labels.serial }} is unhealthy",
+      "description": "ilo_power_supply_healthy is 0; redundancy is lost or a PSU has failed.",
+      "labels": {
+        "hardware": "ilo",
+        "severity": "critical"
+      },
+      "for": "5m"
+    },
+    {
+      "name": "ILOMemoryUnhealthy",
+      "sql": "SELECT max(TimeUnix) AS time, Attributes['host'] AS host, Attributes['name'] AS dimm, argMax(Value, TimeUnix) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'ilo_memory_dimm_healthy' AND TimeUnix > now() - INTERVAL 1 HOUR GROUP BY host, dimm ORDER BY time",
+      "op": "lt",
+      "threshold": 1,
+      "summary": "iLO {{ $labels.host }}: memory {{ $labels.dimm }} is unhealthy",
+      "description": "ilo_memory_dimm_healthy is 0 for this DIMM.",
+      "labels": {
+        "hardware": "ilo",
+        "severity": "critical"
+      },
+      "for": "5m"
+    },
+    {
+      "name": "ILOProcessorUnhealthy",
+      "sql": "SELECT max(TimeUnix) AS time, Attributes['host'] AS host, Attributes['socket'] AS socket, argMax(Value, TimeUnix) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'ilo_processor_healthy' AND TimeUnix > now() - INTERVAL 1 HOUR GROUP BY host, socket ORDER BY time",
+      "op": "lt",
+      "threshold": 1,
+      "summary": "iLO {{ $labels.host }}: processor socket {{ $labels.socket }} is unhealthy",
+      "description": "ilo_processor_healthy is 0 for this CPU.",
+      "labels": {
+        "hardware": "ilo",
+        "severity": "critical"
+      },
+      "for": "5m"
+    },
+    {
+      "name": "ILOFanUnhealthy",
+      "sql": "SELECT max(TimeUnix) AS time, Attributes['host'] AS host, Attributes['name'] AS fan, argMax(Value, TimeUnix) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'ilo_chassis_fan_healthy' AND TimeUnix > now() - INTERVAL 1 HOUR GROUP BY host, fan ORDER BY time",
+      "op": "lt",
+      "threshold": 1,
+      "summary": "iLO {{ $labels.host }}: {{ $labels.fan }} is unhealthy",
+      "description": "ilo_chassis_fan_healthy is 0 for this fan.",
+      "labels": {
+        "hardware": "ilo",
+        "severity": "critical"
+      },
+      "for": "5m"
+    },
+    {
+      "name": "ILOTemperatureUnhealthy",
+      "sql": "SELECT max(TimeUnix) AS time, Attributes['host'] AS host, Attributes['name'] AS sensor, argMax(Value, TimeUnix) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'ilo_chassis_temperature_healthy' AND TimeUnix > now() - INTERVAL 1 HOUR GROUP BY host, sensor ORDER BY time",
+      "op": "lt",
+      "threshold": 1,
+      "summary": "iLO {{ $labels.host }}: temperature sensor {{ $labels.sensor }} is unhealthy",
+      "description": "ilo_chassis_temperature_healthy is 0 (sensor over its threshold).",
+      "labels": {
+        "hardware": "ilo",
+        "severity": "critical"
+      },
+      "for": "5m"
+    },
+    {
+      "name": "ILOServerDown",
+      "sql": "SELECT max(TimeUnix) AS time, Attributes['host'] AS host, argMax(Value, TimeUnix) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'ilo_power_up' AND TimeUnix > now() - INTERVAL 1 HOUR GROUP BY host ORDER BY time",
+      "op": "lt",
+      "threshold": 1,
+      "summary": "iLO {{ $labels.host }}: server is powered off or its iLO cannot be queried",
+      "description": "ilo_power_up is 0. The exporter either sees the server powered off or could not authenticate/reach the iLO (check the ilocredentials secret and ilo-prometheus logs).",
+      "labels": {
+        "hardware": "ilo",
+        "severity": "critical"
+      },
+      "for": "5m"
+    },
+    {
+      "name": "ILOMetricsMissing",
+      "sql": "SELECT max(TimeUnix) AS time, Attributes['host'] AS host, dateDiff('minute', max(TimeUnix), now()) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'ilo_power_up' AND TimeUnix > now() - INTERVAL 24 HOUR GROUP BY host ORDER BY time",
+      "op": "gt",
+      "threshold": 60,
+      "summary": "iLO {{ $labels.host }}: no metrics received for over an hour",
+      "description": "No ilo_power_up sample for this host in the last hour (scrape interval is 15m). Check ilo-collector, ilo-prometheus and otel-gateway.",
+      "labels": {
+        "hardware": "ilo",
+        "severity": "warning"
+      },
+      "for": "5m"
+    }
+  ]
+}
