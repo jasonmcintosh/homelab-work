@@ -73,7 +73,8 @@ resource "clickhouse_clickstack_source" "logs" {
   event_attributes_expression    = "LogAttributes"
 }
 
-# Same 5 panels as dashboards/clickhouse/clouddriver.json.tpl, expressed as ClickStack's
+# Hand-ported subset of the clouddriver dashboard (the full translated Grafana version is
+# dashboards/clickhouse-spinnaker/clouddriver.json.tpl), expressed as ClickStack's
 # metric-builder tiles instead of raw SQL.
 #
 # Grounded against real data (queried via the ClickHouse HTTP API with the connection's own
@@ -232,7 +233,7 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
   })
 }
 
-# Same panels as dashboards/clickhouse/ilo.json.tpl. Metric names and the "name" per-sensor
+# Same panels as dashboards/misc/ilo.json.tpl. Metric names and the "name" per-sensor
 # label are now confirmed against the exporter's own /metrics output (curled directly via a
 # throwaway pod) and against real rows in ClickHouse - both hosts in
 # collector-and-ilo.yaml's static_configs (192.168.19.60 full sensor set,
@@ -311,7 +312,7 @@ resource "clickhouse_clickstack_dashboard" "ilo" {
   })
 }
 
-# Same panels as dashboards/clickhouse/in-house.json.tpl - generic across any pod labeled
+# Same panels as dashboards/misc/in-house.json.tpl - generic across any pod labeled
 # type=spring-boot-app (see collector-gateway.yaml's spring-boot-apps scrape job), grouped
 # by ServiceName instead of filtered to one service.
 #

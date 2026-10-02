@@ -57,25 +57,22 @@ Grafana at `https://grafana.mcintosh.farm`, for a side-by-side evaluation.
 
 ### Dashboards as code
 
-`terraform/` manages both Grafana and ClickStack/HyperDX dashboards from the same
-hand-ported panel definitions (PromQL doesn't mechanically translate to ClickHouse SQL or
-ClickStack's metric-builder format, so each panel was ported by hand, not generated):
+`terraform/` manages Grafana and ClickStack/HyperDX dashboards:
 
-- **Grafana**: `grafana_dashboard` resources (official `grafana/grafana` provider) load
-  `dashboards/clickhouse/*.json.tpl` - raw SQL panels against the `grafana-clickhouse-
-  datasource` plugin (added to `grafana.yaml` via `GF_INSTALL_PLUGINS`).
-- **ClickStack**: `clickstack.tf` manages `clickhouse_clickstack_dashboard` resources
-  directly in HCL, using the same panels expressed as ClickStack's metric-builder tiles.
-  This uses the official `ClickHouse/clickhouse` Terraform provider's self-hosted-ClickStack
-  support (`clickstack_endpoint` + `clickstack_api_key`, no ClickHouse Cloud account
-  involved) - there's no need for a hand-rolled API script.
-
-Three dashboards are ported: Spinnaker/clouddriver (`controller_invocations_*`, JVM metrics),
-iLO (`ilo_*` gauges from MauveSoftware/ilo_exporter), and a generic in-house Spring Boot
-dashboard (standard Actuator metrics, works for any pod labeled `type=spring-boot-app`, not
-just clouddriver). These are a representative starting subset, not a full 1:1 port of every
-panel in the original `dashboards/clouddriver.json` (60+ panels) - extend using the same
-sum/count-delta-join pattern (see the panel `description` fields) as needed.
+- **`dashboards/prometheus-spinnaker/`** - the [uneeq-oss/spinnaker-mixin](https://github.com/uneeq-oss/spinnaker-mixin)
+  Spinnaker dashboards (PromQL), adapted to this lab's metric names. See its README.
+- **`dashboards/clickhouse-spinnaker/`** - ClickHouse (SQL) equivalents of those, generated from them by
+  `translate.py` so Spinnaker observability can move off Prometheus. See its README.
+- **`dashboards/clickhouse-infra/`** - ClickHouse's own health (the Grafana ClickHouse plugin's bundled
+  Advanced ClickHouse Monitoring Dashboard, reading `system.metric_log`/`asynchronous_metric_log`).
+- **`dashboards/misc/`** - hand-written ClickHouse SQL dashboards that aren't part of the Spinnaker set: iLO
+  (`ilo_*` gauges from MauveSoftware/ilo_exporter) and a generic in-house Spring Boot dashboard (standard
+  Actuator metrics, works for any pod labeled `type=spring-boot-app`).
+- **ClickStack**: `clickstack.tf` manages `clickhouse_clickstack_dashboard` resources directly in HCL
+  (clouddriver, iLO, in-house), as ClickStack metric-builder tiles. This uses the official
+  `ClickHouse/clickhouse` Terraform provider's self-hosted-ClickStack support (`clickstack_endpoint` +
+  `clickstack_api_key`, no ClickHouse Cloud account involved).
+- **`alerts/`** - Grafana alert rules for iLO hardware, routed to Slack. See its README.
 
 **One-time manual bootstrap** before `terraform apply` (same pattern as the kubeconfig/
 oauth2 secrets in `applications/spinnaker/README.md`):

@@ -20,7 +20,7 @@ data:
             endpoint: 0.0.0.0:4318
       # Mirrors the `spring-boot-apps` job in prometheus.yaml so the same metrics (incl.
       # clouddriver's controller_invocations_*/jvm_*/okhttp_* series) land in ClickHouse
-      # too, not just Prometheus - this is what the dashboards in dashboards/clickhouse/
+      # too, not just Prometheus - this is what the dashboards in dashboards/misc/
       # query against. Uses the same "default" ServiceAccount as prometheus.yaml, which
       # already has the ClusterRole needed for pod discovery (prometheus-role-binding).
       prometheus:

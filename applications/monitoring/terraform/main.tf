@@ -73,13 +73,7 @@ resource "grafana_data_source" "clickhouse" {
 }
 
 locals {
-  dashboards_dir = "${path.module}/../dashboards/clickhouse"
-}
-
-resource "grafana_dashboard" "clouddriver_clickhouse" {
-  config_json = templatefile("${local.dashboards_dir}/clouddriver.json.tpl", {
-    ch_uid = grafana_data_source.clickhouse.uid
-  })
+  dashboards_dir = "${path.module}/../dashboards/misc"
 }
 
 resource "grafana_dashboard" "ilo_clickhouse" {
