@@ -136,13 +136,13 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          # Only "2xx"/"4xx" have been observed in Attributes['status'] so far - this is
-          # expected to render empty until clouddriver actually 5xxs, not a broken query.
-          # Explicit AND: Lucene's implicit operator between bare clauses is OR, not AND
-          # (via the @hyperdx/lucene parser) - without it this matched every clouddriver
-          # row (ServiceName:... OR status:"5xx"), not just 5xx ones.
-          where         = "ServiceName:\"clouddriver-jasonmcintosh\" AND status:\"5xx\""
-          whereLanguage = "lucene"
+          # Only "2xx" has been observed in Attributes['status'] so far - this is expected
+          # to render empty until clouddriver actually 5xxs, not a broken query.
+          # SQL, not Lucene: "status" is a key in the Attributes map, not a column, so the
+          # Lucene clause `status:"5xx"` didn't bind to it and every controller response
+          # was counted. The explicit map lookup matches the Grafana panel's filter.
+          where         = "ServiceName = 'clouddriver-jasonmcintosh' AND Attributes['status'] = '5xx'"
+          whereLanguage = "sql"
           groupBy       = "Attributes['controller'],Attributes['method']"
           select = [{
             aggFn      = "count"
