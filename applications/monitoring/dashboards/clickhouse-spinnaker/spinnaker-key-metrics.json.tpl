@@ -70,7 +70,7 @@
           },
           "format": 0,
           "queryType": "timeseries",
-          "rawSql": "SELECT time, 'triggers/s' AS metric, value FROM (SELECT time, sum(value) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, avg(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'echo.triggers.count' AND $__timeFilter(TimeUnix) GROUP BY time, series) GROUP BY time) ORDER BY time"
+          "rawSql": "SELECT time, 'triggers/s' AS metric, value FROM (SELECT time, sum(value) AS value FROM (SELECT time, d / dt AS value FROM (SELECT time, greatest(value - lagInFrame(toNullable(value), 1, NULL) OVER (PARTITION BY series ORDER BY time), 0) AS d, dateDiff('second', lagInFrame(toNullable(time), 1, NULL) OVER (PARTITION BY series ORDER BY time), time) AS dt FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, max(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'echo.triggers.count' AND $__timeFilter(TimeUnix) GROUP BY time, series)) WHERE d IS NOT NULL AND dt > 0) GROUP BY time) ORDER BY time"
         },
         {
           "refId": "B",

@@ -407,7 +407,7 @@
           },
           "format": 0,
           "queryType": "timeseries",
-          "rawSql": "SELECT time, concat('', '-', `name`) AS metric, value FROM (SELECT time, `name`, `job`, sum(value) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, ServiceName AS `job`, Attributes['name'] AS `name`, avg(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'resilience4j.circuitbreaker.failure.rate' AND $__timeFilter(TimeUnix) GROUP BY time, series, `job`, `name`) GROUP BY time, `name`, `job`) ORDER BY time"
+          "rawSql": "SELECT time, concat('', '-', `name`) AS metric, value FROM (SELECT time, `name`, `job`, sum(value) AS value FROM (SELECT time, `job`, `name`, d / dt AS value FROM (SELECT time, `job`, `name`, greatest(value - lagInFrame(toNullable(value), 1, NULL) OVER (PARTITION BY series ORDER BY time), 0) AS d, dateDiff('second', lagInFrame(toNullable(time), 1, NULL) OVER (PARTITION BY series ORDER BY time), time) AS dt FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, ServiceName AS `job`, Attributes['name'] AS `name`, max(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'resilience4j.circuitbreaker.failure.rate' AND $__timeFilter(TimeUnix) GROUP BY time, series, `job`, `name`)) WHERE d IS NOT NULL AND dt > 0) GROUP BY time, `name`, `job`) ORDER BY time"
         }
       ],
       "fieldConfig": {

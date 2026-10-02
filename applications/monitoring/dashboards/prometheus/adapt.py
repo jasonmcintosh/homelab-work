@@ -3,19 +3,27 @@
 The mixin assumes the Armory observability plugin's series. This lab's Spinnaker sends Micrometer
 metrics over OTLP -> otel-gateway -> prometheus remote-write, which differ in a few ways:
   * no `spinSvc` label; the service is the scrape `job` (e.g. orca-jasonmcintosh)
-  * no `container` label on app series; cAdvisor series only carry `pod` (spin-<svc>-<hash>)
+  * no `container` label on app series (the service is the scrape `job`)
   * `controller_invocations_total` only holds Spinnaker's percentile gauges (statistic="percentile");
     request counts live in `controller_invocations_seconds_count`
 """
 import json,re,sys,glob,os
+SEL = re.compile(r'([A-Za-z_:][\w:]*)\{([^}]*)\}')
+def fix_selector(m):
+    name, body = m.group(1), m.group(2)
+    if name.startswith(('container_', 'kube_')):
+        # cAdvisor/kube-state series do carry a container label (the Spinnaker container is named
+        # after the service); only the network panels' pod regex lacks the "spin-" pod prefix.
+        body = body.replace('pod=~"$spinSvc', 'pod=~"spin-$spinSvc')
+    else:
+        # app series: service is identified by job, not spinSvc/container
+        body = re.sub(r'\bcontainer="([a-z0-9]+)"', r'job=~"\1.*"', body)
+    return name + '{' + body + '}'
 def fix(e):
-    e=re.sub(r'\bspinSvc\b(?=\s*(?:=|!=|=~|!~|,|\)|}))','job',e)
     e=e.replace('controller_invocations_total','controller_invocations_seconds_count')
-    # cAdvisor series: container label is absent, match the pod instead
-    e=re.sub(r'(container_[a-z_]+\{)([^}]*)\}',lambda m:m.group(1)+re.sub(r'container(=~?)"\$job"|container(=~?)"([^"]*)"',lambda k:'pod=~"spin-%s.*"'%(k.group(3) or '$spinSvc').replace('.*',''),m.group(2))+'}',e)
-    # app series: service is identified by job
-    e=re.sub(r'\bcontainer="([a-z0-9]+)"',r'job=~"\1.*"',e)
-    return e
+    e=SEL.sub(fix_selector,e)
+    # remaining spinSvc label uses (grouping clauses etc.)
+    return re.sub(r'\bspinSvc\b(?=\s*(?:=|!=|=~|!~|,|\)|}))','job',e)
 def walk(o):
     if isinstance(o,dict):
         for k,v in o.items():

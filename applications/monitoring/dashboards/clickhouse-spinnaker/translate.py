@@ -44,18 +44,13 @@ def build_map():
             m.setdefault(base + "_sum", ("histogram", name, "Sum"))
     return m
 MAP = build_map()
-# Pod-level kubelet series. cAdvisor/kube-state series don't exist in ClickHouse; these are the OTel
-# kubeletstats receiver equivalents (not collected yet - see README).
-KUBELET = {
-    "container_memory_working_set_bytes": ("gauge", "k8s.pod.memory.working_set", "Value"),
-    "container_cpu_usage_seconds_total": ("gauge", "k8s.pod.cpu.usage", "Value"),   # already a rate (cores)
-}
 UNMAPPED = []   # (prom metric) with no known ClickHouse metric; guessed
 
 def resolve(name):
     if name in MAP: return MAP[name]
-    if name in KUBELET: return KUBELET[name]
-    if name.startswith(("container_", "kube_", "up")) and name != "up_time":
+    if name.startswith("container_"):   # kubelet cAdvisor, scraped by otel-gateway (prometheus/cadvisor); names kept verbatim
+        return ("sum", name, "Value") if name.endswith("_total") else ("gauge", name, "Value")
+    if name.startswith(("kube_", "up")) and name != "up_time":
         raise Unsupported(f"`{name}` is a cAdvisor/kube-state/scrape series with no ClickHouse equivalent")
     # unknown (e.g. AWS/Google-only metrics not emitted here): invert the Prometheus naming best-effort
     UNMAPPED.append(name)
@@ -66,8 +61,6 @@ def resolve(name):
 
 # ---- label -> column expression ----
 def lab(name):
-    if name == "pod": return "ResourceAttributes['k8s.pod.name']"
-    if name == "namespace": return "ResourceAttributes['k8s.namespace.name']"
     if name == "job": return "ServiceName"
     if name == "instance": return "ResourceAttributes['service.instance.id']"
     return f"Attributes['{name}']"
@@ -129,8 +122,6 @@ def compile_(n, need):
         if f == "rate" or f == "increase" or f == "irate":
             sel = n.args[0]
             if type(sel).__name__ != "MatrixSelector": raise Unsupported(f)
-            if resolve(sel.vector_selector.name)[0] == "gauge":
-                return leaf(sel.vector_selector, need, "avg_over_time")
             return to_rate(leaf(sel.vector_selector, need, "rate"))
         if f in ("max_over_time", "min_over_time", "avg_over_time"):
             sel = n.args[0]
@@ -160,7 +151,7 @@ def compile_(n, need):
             by = list(mod.labels) if mod is not None else []
         if by is None:
             # without(): group by every label the parents need (we cannot enumerate the rest)
-            by = sorted(need)
+            by = sorted(set(need) | {"pod"})   # cAdvisor: sum the per-interface series within each pod
         inner = compile_(n.expr, set(by))
         lc = "".join(f", {bt(l)}" for l in by)
         return Rel(f"SELECT time{lc}, {fnm}(value) AS value FROM ({inner.sql}) GROUP BY time{lc}", by)

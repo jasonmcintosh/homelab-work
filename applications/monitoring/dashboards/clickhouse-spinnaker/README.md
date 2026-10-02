@@ -24,9 +24,9 @@ Semantics worth knowing:
 
 Known gaps:
 
-- cAdvisor and kube-state series (`container_*`, `kube_*`: CPU throttling, network, limits) have no
-  ClickHouse equivalent, so those panels are text panels or partial. CPU and memory use the OTel
-  `kubeletstats` names (`k8s.pod.cpu.usage`, `k8s.pod.memory.working_set`), which are only populated once
-  a kubeletstats receiver is added to a collector.
+- Container CPU/memory/network/throttling panels read `container_*` series that the otel-gateway scrapes
+  from each node's kubelet cAdvisor endpoint (`prometheus/cadvisor` in `collector-gateway.yaml`), stored
+  under their original Prometheus names. The `kube_pod_container_resource_*` limit/request lines need
+  kube-state-metrics, which this lab doesn't run, so those lines are missing from the CPU/Memory panels.
 - `deck`, AWS and Google platform dashboards use metric names this lab never emits, so their ClickHouse
   metric names are inferred from the Prometheus ones and unverified.

@@ -47,6 +47,38 @@ data:
               action: replace
               target_label: __address__
               replacement: $1:8080
+      # Kubelet cAdvisor container metrics (container_cpu_*, container_memory_*, container_network_*),
+      # same series Prometheus's "Kubelet" job collects, so the ClickHouse Spinnaker dashboards
+      # (dashboards/clickhouse-spinnaker) can show CPU/memory/network/throttling. Uses node discovery
+      # rather than a static node list so every node (and any added later) is covered. Needs the
+      # "nodes/metrics" permission, which the "prometheus" ClusterRole bound to this ServiceAccount has.
+      prometheus/cadvisor:
+        config:
+          scrape_configs:
+          - job_name: 'kubelet-cadvisor'
+            scheme: https
+            metrics_path: /metrics/cadvisor
+            scrape_interval: 60s
+            scrape_timeout: 30s
+            honor_timestamps: true
+            authorization:
+              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            tls_config:
+              insecure_skip_verify: true
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+            - source_labels: [__meta_kubernetes_node_name]
+              target_label: node
+            # Keep only what the dashboards use, and only pod-level series: cAdvisor also exposes
+            # cgroup roots/system slices (no pod label) and many per-interface host series.
+            metric_relabel_configs:
+            - source_labels: [__name__]
+              regex: 'container_(cpu_usage_seconds_total|cpu_cfs_periods_total|cpu_cfs_throttled_periods_total|memory_working_set_bytes|network_(receive|transmit)_bytes_total)'
+              action: keep
+            - source_labels: [pod]
+              regex: ''
+              action: drop
     processors:
       batch:
       # Drops spans where start and end time are identical (0 duration) - a flood of these
@@ -96,6 +128,11 @@ data:
         # to prometheusremotewrite too would double-write/duplicate those series.
         metrics/spring-boot-apps:
           receivers: [prometheus]
+          processors: [batch]
+          exporters: [clickhouse]
+        # Prometheus's own "Kubelet" job already collects cAdvisor, so this is ClickHouse-only.
+        metrics/cadvisor:
+          receivers: [prometheus/cadvisor]
           processors: [batch]
           exporters: [clickhouse]
         logs:

@@ -2572,7 +2572,7 @@
           },
           "format": 0,
           "queryType": "timeseries",
-          "rawSql": "SELECT time, `clientType` AS metric, value FROM (SELECT time, `clientType`, avg(value) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, Attributes['clientType'] AS `clientType`, avg(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'amazonClientProvider.rateLimitDelayMil' AND $__timeFilter(TimeUnix) GROUP BY time, series, `clientType`) GROUP BY time, `clientType`) ORDER BY time"
+          "rawSql": "SELECT time, `clientType` AS metric, value FROM (SELECT time, `clientType`, avg(value) AS value FROM (SELECT time, `clientType`, d / dt AS value FROM (SELECT time, `clientType`, greatest(value - lagInFrame(toNullable(value), 1, NULL) OVER (PARTITION BY series ORDER BY time), 0) AS d, dateDiff('second', lagInFrame(toNullable(time), 1, NULL) OVER (PARTITION BY series ORDER BY time), time) AS dt FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, Attributes['clientType'] AS `clientType`, max(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'amazonClientProvider.rateLimitDelayMil' AND $__timeFilter(TimeUnix) GROUP BY time, series, `clientType`)) WHERE d IS NOT NULL AND dt > 0) GROUP BY time, `clientType`) ORDER BY time"
         }
       ],
       "fieldConfig": {
@@ -3291,7 +3291,7 @@
           },
           "format": 0,
           "queryType": "timeseries",
-          "rawSql": "SELECT time, 'avg' AS metric, value FROM (SELECT time, avg(value) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, avg(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'k8s.pod.cpu.usage' AND $__timeFilter(TimeUnix) AND arrayExists(x -> match(ResourceAttributes['k8s.pod.name'], concat('^(?:spin-', x, '.*)$')), [$spinSvc]) GROUP BY time, series) GROUP BY time) ORDER BY time"
+          "rawSql": "SELECT time, 'avg' AS metric, value FROM (SELECT time, avg(value) AS value FROM (SELECT time, d / dt AS value FROM (SELECT time, greatest(value - lagInFrame(toNullable(value), 1, NULL) OVER (PARTITION BY series ORDER BY time), 0) AS d, dateDiff('second', lagInFrame(toNullable(time), 1, NULL) OVER (PARTITION BY series ORDER BY time), time) AS dt FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'container_cpu_usage_seconds_total' AND $__timeFilter(TimeUnix) AND Attributes['container'] IN ($spinSvc) GROUP BY time, series)) WHERE d IS NOT NULL AND dt > 0) GROUP BY time) ORDER BY time"
         },
         {
           "refId": "B",
@@ -3301,7 +3301,7 @@
           },
           "format": 0,
           "queryType": "timeseries",
-          "rawSql": "SELECT time, 'max' AS metric, value FROM (SELECT time, max(value) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, avg(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'k8s.pod.cpu.usage' AND $__timeFilter(TimeUnix) AND arrayExists(x -> match(ResourceAttributes['k8s.pod.name'], concat('^(?:spin-', x, '.*)$')), [$spinSvc]) GROUP BY time, series) GROUP BY time) ORDER BY time"
+          "rawSql": "SELECT time, 'max' AS metric, value FROM (SELECT time, max(value) AS value FROM (SELECT time, d / dt AS value FROM (SELECT time, greatest(value - lagInFrame(toNullable(value), 1, NULL) OVER (PARTITION BY series ORDER BY time), 0) AS d, dateDiff('second', lagInFrame(toNullable(time), 1, NULL) OVER (PARTITION BY series ORDER BY time), time) AS dt FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'container_cpu_usage_seconds_total' AND $__timeFilter(TimeUnix) AND Attributes['container'] IN ($spinSvc) GROUP BY time, series)) WHERE d IS NOT NULL AND dt > 0) GROUP BY time) ORDER BY time"
         }
       ],
       "fieldConfig": {
@@ -3333,17 +3333,57 @@
     },
     {
       "id": 65,
-      "type": "text",
+      "type": "timeseries",
       "title": "CPU Throttling",
+      "description": "Percent of the time that the CPU is being throttled. Application may be getting throttled during bursty tasks but overall be well below its CPU limit. Throttling may significantly impact application performance.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "${ch_uid}"
+      },
       "gridPos": {
         "x": 6,
         "y": 138,
         "w": 6,
         "h": 8
       },
+      "interval": "1m",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "${ch_uid}"
+          },
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT time, `pod` AS metric, value FROM (SELECT time, `pod`, a.value / nullIf(b.value, 0) AS value FROM (SELECT time, `pod`, sum(value) AS value FROM (SELECT time, `pod`, d / dt AS value FROM (SELECT time, `pod`, greatest(value - lagInFrame(toNullable(value), 1, NULL) OVER (PARTITION BY series ORDER BY time), 0) AS d, dateDiff('second', lagInFrame(toNullable(time), 1, NULL) OVER (PARTITION BY series ORDER BY time), time) AS dt FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, Attributes['pod'] AS `pod`, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'container_cpu_cfs_throttled_periods_total' AND $__timeFilter(TimeUnix) AND Attributes['container'] IN ($spinSvc) GROUP BY time, series, `pod`)) WHERE d IS NOT NULL AND dt > 0) GROUP BY time, `pod`) AS a ALL INNER JOIN (SELECT time, `pod`, sum(value) AS value FROM (SELECT time, `pod`, d / dt AS value FROM (SELECT time, `pod`, greatest(value - lagInFrame(toNullable(value), 1, NULL) OVER (PARTITION BY series ORDER BY time), 0) AS d, dateDiff('second', lagInFrame(toNullable(time), 1, NULL) OVER (PARTITION BY series ORDER BY time), time) AS dt FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, Attributes['pod'] AS `pod`, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'container_cpu_cfs_periods_total' AND $__timeFilter(TimeUnix) AND Attributes['container'] IN ($spinSvc) GROUP BY time, series, `pod`)) WHERE d IS NOT NULL AND dt > 0) GROUP BY time, `pod`) AS b USING (time, `pod`)) ORDER BY time"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "none"
+            },
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
       "options": {
-        "mode": "markdown",
-        "content": "Not available from ClickHouse.\n\n- A: `container_cpu_cfs_throttled_periods_total` is a cAdvisor/kube-state/scrape series with no ClickHouse equivalent\n\nPrometheus original: `rate(container_cpu_cfs_throttled_periods_total{pod=~\"spin-$spinSvc.*\"}[$__rate_interval])\n/\nrate(container_cpu_cfs_periods_total{pod=~\"spin-$spinSvc.*\"}[$__rate_interval])`"
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     },
     {
@@ -3371,7 +3411,7 @@
           },
           "format": 0,
           "queryType": "timeseries",
-          "rawSql": "SELECT time, 'avg' AS metric, value FROM (SELECT time, avg(value) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, avg(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'k8s.pod.memory.working_set' AND $__timeFilter(TimeUnix) AND arrayExists(x -> match(ResourceAttributes['k8s.pod.name'], concat('^(?:spin-', x, '.*)$')), [$spinSvc]) GROUP BY time, series) GROUP BY time) ORDER BY time"
+          "rawSql": "SELECT time, 'avg' AS metric, value FROM (SELECT time, avg(value) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, avg(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'container_memory_working_set_bytes' AND $__timeFilter(TimeUnix) AND Attributes['container'] IN ($spinSvc) GROUP BY time, series) GROUP BY time) ORDER BY time"
         },
         {
           "refId": "B",
@@ -3381,7 +3421,7 @@
           },
           "format": 0,
           "queryType": "timeseries",
-          "rawSql": "SELECT time, 'max' AS metric, value FROM (SELECT time, max(value) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, max(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'k8s.pod.memory.working_set' AND $__timeFilter(TimeUnix) AND arrayExists(x -> match(ResourceAttributes['k8s.pod.name'], concat('^(?:spin-', x, '.*)$')), [$spinSvc]) GROUP BY time, series) GROUP BY time) ORDER BY time"
+          "rawSql": "SELECT time, 'max' AS metric, value FROM (SELECT time, max(value) AS value FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, max(Value) AS value FROM otel.otel_metrics_gauge WHERE MetricName = 'container_memory_working_set_bytes' AND $__timeFilter(TimeUnix) AND Attributes['container'] IN ($spinSvc) GROUP BY time, series) GROUP BY time) ORDER BY time"
         }
       ],
       "fieldConfig": {
@@ -3413,17 +3453,67 @@
     },
     {
       "id": 67,
-      "type": "text",
+      "type": "timeseries",
       "title": "Network",
+      "description": "Average network ingress/egress for the $spinSvc pods.",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "${ch_uid}"
+      },
       "gridPos": {
         "x": 18,
         "y": 138,
         "w": 6,
         "h": 8
       },
+      "interval": "1m",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "${ch_uid}"
+          },
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT time, 'receive' AS metric, value FROM (SELECT time, avg(value) AS value FROM (SELECT time, `pod`, sum(value) AS value FROM (SELECT time, `pod`, d / dt AS value FROM (SELECT time, `pod`, greatest(value - lagInFrame(toNullable(value), 1, NULL) OVER (PARTITION BY series ORDER BY time), 0) AS d, dateDiff('second', lagInFrame(toNullable(time), 1, NULL) OVER (PARTITION BY series ORDER BY time), time) AS dt FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, Attributes['pod'] AS `pod`, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'container_network_receive_bytes_total' AND $__timeFilter(TimeUnix) AND arrayExists(x -> match(Attributes['pod'], concat('^(?:spin-', x, '.*)$')), [$spinSvc]) GROUP BY time, series, `pod`)) WHERE d IS NOT NULL AND dt > 0) GROUP BY time, `pod`) GROUP BY time) ORDER BY time"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "${ch_uid}"
+          },
+          "format": 0,
+          "queryType": "timeseries",
+          "rawSql": "SELECT time, 'transmit' AS metric, value FROM (SELECT time, avg(value) AS value FROM (SELECT time, `pod`, sum(value) AS value FROM (SELECT time, `pod`, d / dt AS value FROM (SELECT time, `pod`, greatest(value - lagInFrame(toNullable(value), 1, NULL) OVER (PARTITION BY series ORDER BY time), 0) AS d, dateDiff('second', lagInFrame(toNullable(time), 1, NULL) OVER (PARTITION BY series ORDER BY time), time) AS dt FROM (SELECT toStartOfInterval(TimeUnix, INTERVAL $__interval_s second) AS time, cityHash64(ServiceName, toString(Attributes), ResourceAttributes['service.instance.id']) AS series, Attributes['pod'] AS `pod`, max(Value) AS value FROM otel.otel_metrics_sum WHERE MetricName = 'container_network_transmit_bytes_total' AND $__timeFilter(TimeUnix) AND arrayExists(x -> match(Attributes['pod'], concat('^(?:spin-', x, '.*)$')), [$spinSvc]) GROUP BY time, series, `pod`)) WHERE d IS NOT NULL AND dt > 0) GROUP BY time, `pod`) GROUP BY time) ORDER BY time"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "none"
+            },
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
       "options": {
-        "mode": "markdown",
-        "content": "Not available from ClickHouse.\n\n- A: `container_network_receive_bytes_total` is a cAdvisor/kube-state/scrape series with no ClickHouse equivalent\n- B: `container_network_transmit_bytes_total` is a cAdvisor/kube-state/scrape series with no ClickHouse equivalent\n\nPrometheus original: `avg(\n  sum without (interface) (\n    rate(container_network_receive_bytes_total{pod=~\"$spinSvc.*\"}[$__rate_interval])\n  )\n)`"
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       }
     }
   ]
