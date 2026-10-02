@@ -3,7 +3,7 @@
 `ilo-rules.json` defines the iLO hardware alerts; `terraform/alerts.tf` turns them into Grafana-managed
 alert rules (folder "Hardware", group `ilo-hardware`, evaluated every 5m, `for: 5m`) and routes anything
 labelled `hardware=ilo` to Slack `#alerts` via the bot token in `spinnaker/notification-secrets`
-(`slack-bot-token`). Everything else keeps going to the default email receiver. The bot only has
+(`slack-bot-token`), once per incident (repeat interval ~1 year; you also get a resolved message). Everything else keeps going to the default email receiver. The bot only has
 `chat:write`, so it must be invited to the channel.
 
 | Alert | Fires when |

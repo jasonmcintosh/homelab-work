@@ -38,11 +38,14 @@ resource "grafana_notification_policy" "main" {
       match = "="
       value = "ilo"
     }
-    contact_point   = grafana_contact_point.slack_alerts.name
-    group_by        = ["grafana_folder", "alertname", "host"]
-    group_wait      = "30s"
-    group_interval  = "5m"
-    repeat_interval = "4h"
+    contact_point  = grafana_contact_point.slack_alerts.name
+    group_by       = ["grafana_folder", "alertname", "host"]
+    group_wait     = "30s"
+    group_interval = "5m"
+    # Notify once per incident: a firing alert is only re-sent after this long (about a year), so it
+    # posts when it starts and again when it resolves. A different alert joining the group (e.g. a
+    # second failed drive on the same host) or one that resolves and fires again still notifies.
+    repeat_interval = "8760h"
   }
 }
 
