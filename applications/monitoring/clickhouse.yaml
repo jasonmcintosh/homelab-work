@@ -66,6 +66,10 @@ data:
         <trace_log remove="1"/>
         <crash_log remove="1"/>
         <opentelemetry_span_log remove="1"/>
+        <!-- Was the largest system table by far (1.8 GiB / 88M rows, 30d TTL - more than double the
+             whole otel database) and nothing here reads it. Removing it only stops new writes; the
+             existing table must be dropped by hand once: DROP TABLE system.processors_profile_log -->
+        <processors_profile_log remove="1"/>
         <zookeeper_log remove="1"/>
 
       <logger>

@@ -124,3 +124,17 @@ resource "grafana_dashboard" "spinnaker_clickhouse" {
   overwrite = true
 }
 
+# ClickHouse's own health (the plugin's bundled "Advanced ClickHouse Monitoring Dashboard", reading
+# system.metric_log / system.asynchronous_metric_log - see the log settings in clickhouse.yaml).
+resource "grafana_folder" "infrastructure" {
+  title = "Infrastructure"
+}
+
+resource "grafana_dashboard" "clickhouse_advanced" {
+  folder = grafana_folder.infrastructure.uid
+  config_json = templatefile("${path.module}/../dashboards/clickhouse-infra/advanced.json.tpl", {
+    the_datasource = grafana_data_source.clickhouse.uid
+  })
+  overwrite = true
+}
+
