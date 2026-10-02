@@ -177,9 +177,10 @@ resource "clickhouse_clickstack_dashboard" "clouddriver" {
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          # Explicit AND, same Lucene implicit-OR gotcha as the 5xx tile above.
-          where         = "ServiceName:\"clouddriver-jasonmcintosh\" AND area:\"heap\""
-          whereLanguage = "lucene"
+          # SQL map lookup, same reason as the 5xx tile above: "area" is an Attributes key,
+          # not a column, so the Lucene clause didn't bind and nonheap pools were included.
+          where         = "ServiceName = 'clouddriver-jasonmcintosh' AND Attributes['area'] = 'heap'"
+          whereLanguage = "sql"
           groupBy       = "Attributes['id']"
           select = [{
             aggFn           = "avg"
@@ -347,8 +348,8 @@ resource "clickhouse_clickstack_dashboard" "in_house" {
         config = {
           displayType   = "line"
           sourceId      = clickhouse_clickstack_source.metrics.id
-          where         = "area:\"heap\""
-          whereLanguage = "lucene"
+          where         = "Attributes['area'] = 'heap'"
+          whereLanguage = "sql"
           groupBy       = "ServiceName,Attributes['id']"
           select = [{ aggFn = "avg", valueExpression = "Value", metricType = "gauge", metricName = "jvm_memory_used_bytes", alias = "heap used" }]
         }
