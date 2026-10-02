@@ -93,3 +93,17 @@ resource "grafana_dashboard" "in_house_clickhouse" {
     ch_uid = grafana_data_source.clickhouse.uid
   })
 }
+
+# Prometheus-backed Spinnaker dashboards (see dashboards/prometheus/README.md). They select the
+# Prometheus datasource through the dashboard's own $datasource variable, so no uid is hardcoded.
+resource "grafana_folder" "spinnaker" {
+  title = "Spinnaker"
+}
+
+resource "grafana_dashboard" "spinnaker" {
+  for_each    = fileset("${path.module}/../dashboards/prometheus", "*.json")
+  folder      = grafana_folder.spinnaker.uid
+  config_json = file("${path.module}/../dashboards/prometheus/${each.value}")
+  # Some of these (e.g. spinnaker-clouddriver) were previously imported by hand.
+  overwrite = true
+}
