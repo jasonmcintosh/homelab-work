@@ -107,3 +107,20 @@ resource "grafana_dashboard" "spinnaker" {
   # Some of these (e.g. spinnaker-clouddriver) were previously imported by hand.
   overwrite = true
 }
+
+# ClickHouse-backed equivalents of the Prometheus Spinnaker dashboards above, generated from them by
+# dashboards/clickhouse-spinnaker/translate.py. Kept in their own folder so Prometheus can be retired
+# once these are trusted.
+resource "grafana_folder" "spinnaker_clickhouse" {
+  title = "Spinnaker (ClickHouse)"
+}
+
+resource "grafana_dashboard" "spinnaker_clickhouse" {
+  for_each = fileset("${path.module}/../dashboards/clickhouse-spinnaker", "*.json.tpl")
+  folder   = grafana_folder.spinnaker_clickhouse.uid
+  config_json = templatefile("${path.module}/../dashboards/clickhouse-spinnaker/${each.value}", {
+    ch_uid = grafana_data_source.clickhouse.uid
+  })
+  overwrite = true
+}
+

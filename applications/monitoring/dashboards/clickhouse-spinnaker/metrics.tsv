@@ -1,0 +1,440 @@
+gauge	application.ready.time	seconds	47976
+gauge	application.started.time	seconds	47976
+gauge	bakesActive		4361
+gauge	cats.pubsub.agents.state		52350
+gauge	cats.pubsub.execution.duration.max	s	104647
+gauge	cats.pubsub.execution.size.max		104647
+gauge	cats.pubsub.execution.storagetime.max	s	104647
+gauge	cats.pubsub.execution.totaltime.max	s	148205
+gauge	cats.pubsub.queue.latency.max	s	148217
+gauge	cats.pubsub.schedule.lateness.max	s	8724
+gauge	cats.pubsub.scheduler.cycle.duration.max	s	8725
+gauge	cats.pubsub.stream.consumers		8725
+gauge	cats.pubsub.stream.depth		8725
+gauge	cats.pubsub.stream.pending		8725
+gauge	cats.sqlCache.cleanedStaleOnDemandKeys.count		1
+gauge	cats.sqlCache.cleanedStaleOnDemandKeys.time		1
+gauge	controller.invocations.contentLength.max		559644
+gauge	controller.invocations.max	s	559644
+gauge	disk.free	bytes	47976
+gauge	disk.total	bytes	47976
+gauge	echo.events.count		13085
+gauge	echo.events.duration.max	s	13085
+gauge	echo.events.error		4363
+gauge	echo.triggers.count		1
+gauge	echo.triggers.sync.addCount		1
+gauge	echo.triggers.sync.executionTimeMillis.max	s	4361
+gauge	echo.triggers.sync.failedUpdateCount		1
+gauge	echo.triggers.sync.removeCount		1
+gauge	echo.triggers.sync.removeFailCount		1
+gauge	executionTime.max	s	174159
+gauge	executions.active		17442
+gauge	executions.totalTime.max	s	4361
+gauge	executor.active	threads	117748
+gauge	executor.pool.core	threads	117748
+gauge	executor.pool.max	threads	117748
+gauge	executor.pool.size	threads	117748
+gauge	executor.queue.remaining	tasks	117748
+gauge	executor.queued	tasks	117748
+gauge	fiat.enabled		34896
+gauge	fiat.granted-authorities.enabled		34896
+gauge	fiat.legacyFallback.enabled		34896
+gauge	fiat.permissionsCache.loads.max	s	34896
+gauge	fiat.userRoles.syncAnonymous.max	s	4361
+gauge	fiat.userRoles.syncCount		4361
+gauge	fiat.userRoles.syncTime.max	s	4361
+gauge	fiat.userRoles.syncUsers.max	s	4361
+gauge	front50.lastPoll		4363
+gauge	grpc.server.processing.duration.max	s	26175
+gauge	health.docker.errors		8725
+gauge	health.echo.errors		4361
+gauge	health.kubernetes.errors		8725
+gauge	http.server.requests.max	s	668045
+gauge	ipc.client.call.max	s	43322
+gauge	ipc.client.inflight.max		13011
+gauge	jvm.buffer.count	buffers	143928
+gauge	jvm.buffer.memory.used	bytes	143928
+gauge	jvm.buffer.memoryUsed		3
+gauge	jvm.buffer.total.capacity	bytes	143928
+gauge	jvm.classes.loaded	classes	47976
+gauge	jvm.cpu.recent_utilization	1	47972
+gauge	jvm.gc.concurrent.phase.time.max	s	56689
+gauge	jvm.gc.concurrentPhaseTime.max	s	56735
+gauge	jvm.gc.live.data.size	bytes	47976
+gauge	jvm.gc.liveDataSize		47976
+gauge	jvm.gc.max.data.size	bytes	47976
+gauge	jvm.gc.maxDataSize		47976
+gauge	jvm.gc.overhead		47976
+gauge	jvm.gc.pause.max	s	113424
+gauge	jvm.info		47976
+gauge	jvm.memory.committed	bytes	287862
+gauge	jvm.memory.max	bytes	287862
+gauge	jvm.memory.usage.after.gc		47891
+gauge	jvm.memory.used	bytes	287862
+gauge	jvm.thread.threadCount		95952
+gauge	jvm.threads.daemon	threads	47976
+gauge	jvm.threads.live	threads	47976
+gauge	jvm.threads.peak	threads	47976
+gauge	jvm.threads.states	threads	287856
+gauge	kork.lock.acquire.duration		43610
+gauge	kubernetes.api.max	s	4694897
+gauge	lettuce.command.completion.max	s	100295
+gauge	lettuce.command.firstresponse.max	s	100295
+gauge	okhttp.requests.max	s	157083
+gauge	operations.max	s	30277
+gauge	orchestrations.max	s	8650
+gauge	permissionsRepository.get1.timing.max	s	4361
+gauge	permissionsRepository.getAllById.timing.max	s	4361
+gauge	permissionsRepository.put1.timing.max	s	4361
+gauge	permissionsRepository.putAllById1.timing.max	s	4361
+gauge	plugins.deckCache.downloadDuration.max	s	4363
+gauge	plugins.deckCache.refreshDuration.max	s	4363
+gauge	pollers.OldPipelineCleanupPollingNotificationAgent.timing		8722
+gauge	pollingMonitor.docker.retrieveImagesByAccount.max	s	13083
+gauge	pollingMonitor.itemsOverThreshold		17444
+gauge	pollingMonitor.newItems		17444
+gauge	pollingMonitor.pollTiming.max	s	8722
+gauge	process.cpu.usage		47976
+gauge	process.files.max	files	47976
+gauge	process.files.open	files	47976
+gauge	process.start.time	seconds	47976
+gauge	process.uptime	seconds	47976
+gauge	prometheus.fetchTime.max	s	4360
+gauge	qos.buffering		4361
+gauge	queue.depth		8721
+gauge	queue.last.poll.age		8721
+gauge	queue.last.retry.check.age		8721
+gauge	queue.message.lag.max	s	8721
+gauge	queue.orphaned.messages		8721
+gauge	queue.ready.depth		8721
+gauge	queue.unacked.depth		8721
+gauge	queueSize	1	95957
+gauge	redis.connectionPool.maxIdle		13081
+gauge	redis.connectionPool.minIdle		13081
+gauge	redis.connectionPool.numActive		13081
+gauge	redis.connectionPool.numIdle		13081
+gauge	redis.connectionPool.numWaiters		13081
+gauge	redis.executionRepository.retrievePipelinesForPipelineConfigId2.timing.max	s	4360
+gauge	redis.executionRepository.store1.timing.max	s	4360
+gauge	redis.executionRepository.storeStage1.timing.max	s	4360
+gauge	redis.executionRepository.updateStatus1.timing.max	s	4360
+gauge	resilience4j.circuitbreaker.buffered.calls		122112
+gauge	resilience4j.circuitbreaker.calls.max	s	183168
+gauge	resilience4j.circuitbreaker.failure.rate		61056
+gauge	resilience4j.circuitbreaker.slow.call.rate		61056
+gauge	resilience4j.circuitbreaker.slow.calls		122112
+gauge	resilience4j.circuitbreaker.state		366336
+gauge	retrieveById.redis.executionRepository.timing.max	s	4360
+gauge	retrieveById.sql.executions.timing.max	s	4361
+gauge	spring.security.authorizations.max	s	103333
+gauge	spring.security.filterchains.max	s	182524
+gauge	spring.security.http.secured.requests.max	s	47976
+gauge	spring.security.http.unsecured.requests.max	s	4361
+gauge	sql.eventCleanupAgent.timing.max	s	8723
+gauge	sql.executions.addStage1.timing.max	s	4361
+gauge	sql.executions.countActiveExecutions.timing.max	s	4361
+gauge	sql.executions.delete2.timing.max	s	4361
+gauge	sql.executions.retrieve3.timing.max	s	8722
+gauge	sql.executions.retrieveOrchestrationsForApplication3.timing.max	s	4361
+gauge	sql.executions.retrievePipelinesForPipelineConfigId2.timing.max	s	4361
+gauge	sql.executions.store1.timing.max	s	4361
+gauge	sql.executions.storeStage1.timing.max	s	4361
+gauge	sql.executions.updateStatus1.timing.max	s	4361
+gauge	sql.pool.default.active		30531
+gauge	sql.pool.default.blocked		30531
+gauge	sql.pool.default.connectionAcquiredTiming.max	s	30532
+gauge	sql.pool.default.connectionUsageTiming.max	s	30532
+gauge	sql.pool.default.idle		30531
+gauge	sql.pool.default.total		30531
+gauge	sql.taskCleanupAgent.timing.max	s	8650
+gauge	stage.invocations.duration.max	s	65411
+gauge	storageServiceSupport.autoRefreshTime.max	s	113386
+gauge	storageServiceSupport.cacheAge		113386
+gauge	storageServiceSupport.cacheRefreshTime.max	s	113386
+gauge	storageServiceSupport.cacheSize		113386
+gauge	storageServiceSupport.scheduledRefreshTime.max	s	113386
+gauge	system.cpu.count		47976
+gauge	system.cpu.usage		47976
+gauge	system.load.average.1m		47976
+gauge	task.completions.duration.max	s	34887
+gauge	task.completions.duration.withType.max	s	165714
+gauge	task.invocations.duration.max	s	52331
+gauge	task.invocations.duration.withType.max	s	200602
+gauge	tasks.scheduled.execution.max	s	327290
+gauge	threadpool.activeCount		56686
+gauge	threadpool.blockingQueueSize		56686
+gauge	threadpool.corePoolSize		56686
+gauge	threadpool.maximumPoolSize		56686
+gauge	threadpool.poolSize		56686
+gauge	tomcat.sessions.active.current	sessions	47976
+gauge	tomcat.sessions.active.max	sessions	47976
+gauge	tomcat.sessions.alive.max	seconds	47976
+histogram	cats.pubsub.execution.duration	s	106159
+histogram	cats.pubsub.execution.size		106159
+histogram	cats.pubsub.execution.storagetime	s	106159
+histogram	cats.pubsub.execution.totaltime	s	150347
+histogram	cats.pubsub.queue.latency	s	150359
+histogram	cats.pubsub.schedule.lateness	s	8850
+histogram	cats.pubsub.scheduler.cycle.duration	s	8851
+histogram	controller.invocations	s	569182
+histogram	controller.invocations.contentLength		62055
+histogram	db.client.connections.create_time	ms	30976
+histogram	db.client.connections.use_time	ms	30975
+histogram	db.client.connections.wait_time	ms	30975
+histogram	echo.events.duration	s	11472
+histogram	echo.triggers.sync.executionTimeMillis	s	4425
+histogram	executionTime	s	176679
+histogram	executions.totalTime	s	4424
+histogram	fiat.permissionsCache.loads	s	29152
+histogram	fiat.userRoles.syncAnonymous	s	4424
+histogram	fiat.userRoles.syncTime	s	4424
+histogram	fiat.userRoles.syncUsers	s	4424
+histogram	http.client.request.duration	s	471892
+histogram	http.server.request.duration	s	681214
+histogram	http.server.requests	s	679415
+histogram	ipc.client.call	s	43952
+histogram	ipc.client.inflight		13200
+histogram	jvm.gc.concurrent.phase.time	s	57511
+histogram	jvm.gc.concurrentPhaseTime	s	57557
+histogram	jvm.gc.duration	s	97352
+histogram	jvm.gc.pause	s	115068
+histogram	kubernetes.api	s	4762748
+histogram	lettuce.command.completion	s	101744
+histogram	lettuce.command.firstresponse	s	101744
+histogram	okhttp.requests	s	159484
+histogram	operations	s	30718
+histogram	orchestrations	s	8776
+histogram	otel.sdk.metric_reader.collection.duration	s	48668
+histogram	permissionsRepository.get1.timing	s	4424
+histogram	permissionsRepository.getAllById.timing	s	4424
+histogram	permissionsRepository.put1.timing	s	4424
+histogram	permissionsRepository.putAllById1.timing	s	4424
+histogram	plugins.deckCache.downloadDuration	s	4426
+histogram	plugins.deckCache.refreshDuration	s	4426
+histogram	pollingMonitor.docker.retrieveImagesByAccount	s	13272
+histogram	pollingMonitor.pollTiming	s	8848
+histogram	prometheus.fetchTime	s	4424
+histogram	queue.message.lag	s	8848
+histogram	redis.executionRepository.retrievePipelinesForPipelineConfigId2.timing	s	4424
+histogram	redis.executionRepository.store1.timing	s	4424
+histogram	redis.executionRepository.storeStage1.timing	s	4424
+histogram	redis.executionRepository.updateStatus1.timing	s	4424
+histogram	resilience4j.circuitbreaker.calls	s	57517
+histogram	retrieveById.redis.executionRepository.timing	s	4424
+histogram	retrieveById.sql.executions.timing	s	4424
+histogram	spring.security.authorizations	s	104850
+histogram	spring.security.filterchains	s	185306
+histogram	spring.security.http.secured.requests	s	48672
+histogram	spring.security.http.unsecured.requests	s	4424
+histogram	sql.eventCleanupAgent.timing	s	8849
+histogram	sql.executions.addStage1.timing	s	4424
+histogram	sql.executions.countActiveExecutions.timing	s	4424
+histogram	sql.executions.delete2.timing	s	4424
+histogram	sql.executions.retrieve3.timing	s	8848
+histogram	sql.executions.retrieveOrchestrationsForApplication3.timing	s	4424
+histogram	sql.executions.retrievePipelinesForPipelineConfigId2.timing	s	4424
+histogram	sql.executions.store1.timing	s	4424
+histogram	sql.executions.storeStage1.timing	s	4424
+histogram	sql.executions.updateStatus1.timing	s	4424
+histogram	sql.pool.default.connectionAcquiredTiming	s	30975
+histogram	sql.pool.default.connectionUsageTiming	s	30975
+histogram	sql.taskCleanupAgent.timing	s	8776
+histogram	stage.invocations.duration	s	66360
+histogram	storageServiceSupport.autoRefreshTime	s	8849
+histogram	storageServiceSupport.cacheRefreshTime	s	115037
+histogram	storageServiceSupport.scheduledRefreshTime	s	115037
+histogram	task.completions.duration	s	35392
+histogram	task.completions.duration.withType	s	168112
+histogram	task.invocations.duration	s	53088
+histogram	task.invocations.duration.withType	s	203504
+histogram	tasks.scheduled.execution	s	332094
+sum	authorization		31502
+sum	canary.pipelines.initiated		4537
+sum	canary.telemetry.query		4537
+sum	cats.pubsub.agents.processed		135851
+sum	cats.pubsub.scheduler.queued		18074
+sum	cats.pubsub.stream.reclaimed		4498
+sum	cats.sqlCache.evict.deleteOperations		54136
+sum	cats.sqlCache.evict.itemCount		54136
+sum	cats.sqlCache.evict.itemsDeleted		54136
+sum	cats.sqlCache.get.itemCount		117442
+sum	cats.sqlCache.get.relationshipsRequested		117442
+sum	cats.sqlCache.get.requestedSize		117442
+sum	cats.sqlCache.get.selectOperations		117442
+sum	cats.sqlCache.merge.deleteOperations		136080
+sum	cats.sqlCache.merge.duplicates		136080
+sum	cats.sqlCache.merge.itemCount		136080
+sum	cats.sqlCache.merge.itemsStored		136080
+sum	cats.sqlCache.merge.relationshipCount		136080
+sum	cats.sqlCache.merge.relationshipsStored		136080
+sum	cats.sqlCache.merge.selectOperations		136080
+sum	cats.sqlCache.merge.writeOperations		136080
+sum	controller.invocations		5989217
+sum	controller.invocations.contentLength		268110
+sum	db.client.connections.idle.min	{connections}	31759
+sum	db.client.connections.max	{connections}	31759
+sum	db.client.connections.pending_requests	{requests}	31759
+sum	db.client.connections.usage	{connections}	63518
+sum	echo.events.count		11808
+sum	echo.events.duration		132482
+sum	echo.events.processed		4537
+sum	executions.completed		31766
+sum	executions.started		27217
+sum	executor.completed	tasks	122488
+sum	fiat.getPermission		57137
+sum	fiat.getUserPermission		4536
+sum	fiat.permissionsCache.evictions		27198
+sum	fiat.permissionsCache.evictions-weight		27198
+sum	fiat.permissionsCache.hits		27202
+sum	fiat.permissionsCache.loads-success		29935
+sum	fiat.permissionsCache.misses		29935
+sum	front50.requests		4539
+sum	gate.requests		33565
+sum	http.server.requests.active.active	{tasks}	102445
+sum	http.server.requests.active.duration	s	102445
+sum	ipc.client.call		94714
+sum	jvm.class.count	{class}	49900
+sum	jvm.class.loaded	{class}	49900
+sum	jvm.class.unloaded	{class}	49900
+sum	jvm.classes.unloaded	classes	49904
+sum	jvm.classloading.classesLoaded		49904
+sum	jvm.classloading.classesUnloaded		49902
+sum	jvm.compilation.compilationTime		49904
+sum	jvm.compilation.time	ms	49904
+sum	jvm.cpu.count	{cpu}	49900
+sum	jvm.cpu.time	s	49900
+sum	jvm.gc.allocationRate		49904
+sum	jvm.gc.memory.allocated	bytes	49904
+sum	jvm.gc.promotionRate		3430
+sum	jvm.memory.committed	By	299400
+sum	jvm.memory.limit	By	249500
+sum	jvm.memory.used	By	299400
+sum	jvm.memory.used_after_last_gc	By	49900
+sum	jvm.thread.count	{thread}	299415
+sum	jvm.thread.threadsStarted		49904
+sum	jvm.threads.started	threads	49904
+sum	kork.lock.acquire		27216
+sum	kork.lock.heartbeat		22680
+sum	kork.lock.release		36288
+sum	logback.events	events	147832
+sum	mpt.requests		4536
+sum	orca.requests		4494
+sum	orca.task.result		136084
+sum	orca.trigger.success		9960
+sum	otlp.exporter.exported		149713
+sum	otlp.exporter.seen		149713
+sum	permissionsRepository.get1.invocations		4536
+sum	permissionsRepository.get1.timing		89119
+sum	permissionsRepository.getAllById.invocations		4536
+sum	permissionsRepository.getAllById.timing		68040
+sum	permissionsRepository.put1.invocations		4536
+sum	permissionsRepository.put1.timing		63504
+sum	permissionsRepository.putAllById1.invocations		4536
+sum	permissionsRepository.putAllById1.timing		57918
+sum	pipelines.triggered		5480
+sum	plugins.deckAssets.hits		2754
+sum	plugins.deckCache.hits		4536
+sum	plugins.deckCache.misses		4538
+sum	plugins.deckCache.versions		4538
+sum	pollers.OldPipelineCleanupPollingNotificationAgent.deleted		18144
+sum	process.cpu.time	ns	49904
+sum	processedLogs	1	49907
+sum	processedSpans	1	49906
+sum	queue.acknowledged.messages		9073
+sum	queue.duplicate.messages		9072
+sum	queue.pushed.messages		9073
+sum	quietPeriod.tests		4510
+sum	redis.executionRepository.retrievePipelinesForPipelineConfigId2.invocations		4537
+sum	redis.executionRepository.retrievePipelinesForPipelineConfigId2.timing		4537
+sum	redis.executionRepository.store1.invocations		4537
+sum	redis.executionRepository.store1.timing		9074
+sum	redis.executionRepository.storeStage1.invocations		4537
+sum	redis.executionRepository.storeStage1.timing		40833
+sum	redis.executionRepository.updateStatus1.invocations		4537
+sum	redis.executionRepository.updateStatus1.timing		9074
+sum	resilience4j.retry.calls		181464
+sum	retrieveById.redis.executionRepository.invocations		4537
+sum	retrieveById.redis.executionRepository.timing		31759
+sum	retrieveById.sql.executions.invocations		4536
+sum	retrieveById.sql.executions.timing		54432
+sum	spring.security.authorizations.active.active	{tasks}	72586
+sum	spring.security.authorizations.active.duration	s	72586
+sum	spring.security.filterchains.ApiTokenAuthenticationFilter.after		4533
+sum	spring.security.filterchains.ApiTokenAuthenticationFilter.before		4533
+sum	spring.security.filterchains.DefaultResourcesFilter.after		3216
+sum	spring.security.filterchains.DefaultResourcesFilter.before		3216
+sum	spring.security.filterchains.FiatAuthenticationFilter.after		31755
+sum	spring.security.filterchains.FiatAuthenticationFilter.before		31755
+sum	spring.security.filterchains.FiatSessionFilter.after		4533
+sum	spring.security.filterchains.FiatSessionFilter.before		4533
+sum	spring.security.filterchains.access.exceptions.after		49904
+sum	spring.security.filterchains.access.exceptions.before		49904
+sum	spring.security.filterchains.active.active	{tasks}	99808
+sum	spring.security.filterchains.active.duration	s	99808
+sum	spring.security.filterchains.authentication.anonymous.after		49904
+sum	spring.security.filterchains.authentication.anonymous.before		49904
+sum	spring.security.filterchains.authorization.after		49904
+sum	spring.security.filterchains.authorization.before		49904
+sum	spring.security.filterchains.context.async.after		49904
+sum	spring.security.filterchains.context.async.before		49904
+sum	spring.security.filterchains.context.holder.after		49904
+sum	spring.security.filterchains.context.holder.before		49904
+sum	spring.security.filterchains.context.servlet.after		49904
+sum	spring.security.filterchains.context.servlet.before		49904
+sum	spring.security.filterchains.csrf.after		45367
+sum	spring.security.filterchains.csrf.before		45367
+sum	spring.security.filterchains.header.after		49904
+sum	spring.security.filterchains.header.before		49904
+sum	spring.security.filterchains.logout.after		49904
+sum	spring.security.filterchains.logout.before		49904
+sum	spring.security.filterchains.page.login.after		3216
+sum	spring.security.filterchains.page.login.before		3216
+sum	spring.security.filterchains.page.logout.after		3216
+sum	spring.security.filterchains.page.logout.before		3216
+sum	spring.security.filterchains.requestcache.after		49904
+sum	spring.security.filterchains.requestcache.before		49904
+sum	spring.security.filterchains.saml2.authentication.after		3216
+sum	spring.security.filterchains.saml2.authentication.before		3216
+sum	spring.security.filterchains.saml2.authnrequest.after		3216
+sum	spring.security.filterchains.saml2.authnrequest.before		3216
+sum	spring.security.filterchains.session.management.after		4533
+sum	spring.security.filterchains.session.management.before		4533
+sum	spring.security.filterchains.session.urlencoding.after		49904
+sum	spring.security.filterchains.session.urlencoding.before		49904
+sum	spring.security.http.secured.requests.active.active	{tasks}	49904
+sum	spring.security.http.secured.requests.active.duration	s	49904
+sum	spring.security.http.unsecured.requests.active.active	{tasks}	4536
+sum	spring.security.http.unsecured.requests.active.duration	s	4536
+sum	sql.eventCleanupAgent.deleted		9073
+sum	sql.executions.addStage1.invocations		4536
+sum	sql.executions.addStage1.timing		13608
+sum	sql.executions.countActiveExecutions.invocations		4536
+sum	sql.executions.countActiveExecutions.timing		89881
+sum	sql.executions.delete2.invocations		4536
+sum	sql.executions.delete2.timing		49896
+sum	sql.executions.retrieve3.invocations		9072
+sum	sql.executions.retrieve3.timing		45382
+sum	sql.executions.retrieveOrchestrationsForApplication3.invocations		4536
+sum	sql.executions.retrieveOrchestrationsForApplication3.timing		63504
+sum	sql.executions.retrievePipelinesForPipelineConfigId2.invocations		4536
+sum	sql.executions.retrievePipelinesForPipelineConfigId2.timing		95256
+sum	sql.executions.store1.invocations		4536
+sum	sql.executions.store1.timing		45360
+sum	sql.executions.storeStage1.invocations		4536
+sum	sql.executions.storeStage1.timing		75801
+sum	sql.executions.updateStatus1.invocations		4536
+sum	sql.executions.updateStatus1.timing		54432
+sum	sql.healthProvider.invocations		63514
+sum	sql.queueActivator.invocations		9072
+sum	sql.taskCleanupAgent.deleted		9000
+sum	stage.invocations		72580
+sum	stage.invocations.duration		161943
+sum	storageServiceSupport.numAdded		117936
+sum	storageServiceSupport.numRemoved		117936
+sum	storageServiceSupport.numUpdated		117936
+sum	tasks		9000
+sum	tasks.scheduled.execution.active.active	{tasks}	326650
+sum	tasks.scheduled.execution.active.duration	s	326650
+sum	tomcat.sessions.created	sessions	49904
+sum	tomcat.sessions.expired	sessions	49904
+sum	tomcat.sessions.rejected	sessions	49904
