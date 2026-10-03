@@ -56,20 +56,51 @@ databases opt in with a `storageClassName`.
 7. **Backups.** With snapshots available, schedule CSI snapshots for the migrated databases and rely on ZFS
    snapshots/replication on TrueNAS. This is the answer to Rook `size: 1` having no redundancy.
 
-## Risks and decisions
+## Decisions (from the owner, 2026-10-03)
+
+- **One driver for everything.** Use the TrueNAS CSI driver for both iSCSI (RWO block) and NFS (RWX), and retire
+  `csi-driver-nfs` once the existing NFS volumes have moved. Decision gate in phase 5: the smoke test must include a
+  non-root pod writing to an NFS and an iSCSI volume, because the driver docs show per-volume NFS shares with a
+  `nfs.hosts` allow-list and `nfs.rootSquash`, but say nothing about dataset ownership/mode. If permissions are not
+  better than today's `mountPermissions: 0777` approach, keep `csi-driver-nfs` for RWX.
+- **Network is 1 GbE between the nodes and TrueNAS today; 10 GbE is planned.** See "Network" below.
+- **The RAID controller battery is of unknown health** (used hardware). See "Cache safety" below.
+
+## Network (1 GbE)
+
+- A 1 GbE link tops out near 110 MB/s, shared by every NFS and iSCSI volume plus other node traffic. Database
+  workloads are latency-bound (8,000 4k IOPS is only ~32 MB/s), so they fit; bulk copies and big sequential writes
+  will saturate it.
+- Moving the 200 Gi harness volumes is best-case ~35 minutes each at line rate, realistically 1-2 hours and slower
+  while other traffic runs. Prefer the application's own replication (MongoDB replica set) to rebuild one member at a
+  time online, and do the large copies in a maintenance window.
+- When 10 GbE arrives, nothing in the driver config changes (same portal address); expect the NFS sequential-write
+  tail latency to improve. Enabling jumbo frames end to end would help but is optional.
+- Consider a separate VLAN/interface for storage traffic if the Proxmox bridge shares one NIC with everything else.
+
+## Cache safety (RAID battery of unknown health)
+
+- NFS fsync measured ~0.7 ms on spinning RAID6, which means the controller is acknowledging from write-back cache
+  right now. That is safe only if the cache is protected. A controller normally falls back to write-through
+  (slow, safe) when the battery is bad, unless it is set to "force write-back", which is the unsafe case.
+- Before putting databases on this pool: check the controller's battery/capacitor status and cache policy in its
+  management tool (or the server's BMC/iLO), confirm the policy is "write-back with BBU" and not "always/force
+  write-back", and replace the battery if it is degraded. Add a battery-status alert when practical.
+- If the battery cannot be trusted, the safe options are write-through (expect fsync latency to rise toward Rook's),
+  a small SSD SLOG for the pool, or a replacement battery/controller.
+- Either way, database volumes get scheduled CSI snapshots plus ZFS replication (phase 7); snapshots do not protect
+  against a controller losing cached writes, so keep an off-box backup of anything irreplaceable.
+
+## Other risks
 
 - TrueNAS becomes a single point of failure for every database that moves: pods hang if it is down or rebooting.
   (Rook `size: 1` has the same property per node/OSD.) Schedule TrueNAS maintenance accordingly.
-- The RAID controller cache must be battery/flash backed for `sync=standard` acknowledgements to be safe.
 - ZFS sits on one hardware volume: it detects corruption but cannot self-heal; RAID6 provides redundancy. For
   irreplaceable datasets consider `copies=2`.
-- Network speed between the nodes and TrueNAS bounds throughput (NFS sequential writes measured 44 MB/s with a
-  484 ms tail, which looks network- or array-limited); iSCSI will share that link.
 - IPv4 portals only (driver limitation); fine for this network.
 - The driver creates UUID-named datasets/targets; do not edit them by hand.
 
 ## Open questions
 
-1. Link speed between the nodes and TrueNAS (1 GbE vs 10 GbE)?
-2. Is the RAID controller cache battery/flash backed?
-3. One driver for both NFS and iSCSI (replace `csi-driver-nfs`), or keep the NFS driver as is?
+1. Controller battery/cache-policy status (see "Cache safety").
+2. TrueNAS version actually reached after the upgrade (needs 25.10.0 or newer).
