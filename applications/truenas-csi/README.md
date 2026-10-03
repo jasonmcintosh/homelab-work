@@ -21,6 +21,13 @@ helm repo add truenas-csi https://raw.githubusercontent.com/truenas/truenas-csi/
 helm template truenas-csi truenas-csi/truenas-csi --version 1.3.0 -n kube-system -f values.yaml > truenas-csi.yaml
 ```
 
+## Gotchas (found installing it)
+
+- `truenas.iscsiPortal` must be an IP (`192.168.17.150:3260`), not the hostname; see `PLAN.md` for the evidence. If
+  TrueNAS's IP changes, update it in `values.yaml`, re-render, apply, and restart the driver pods.
+- NFS subnets belong in the `nfs.networks` StorageClass parameter; `nfs.hosts` is for single hosts. StorageClass
+  parameters are immutable, so changing them means deleting and recreating the class (nothing breaks if no PVs use it).
+
 ## Smoke test
 
 ```

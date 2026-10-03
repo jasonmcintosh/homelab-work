@@ -50,7 +50,7 @@ data:
   truenasURL: "wss://truenas.mcintosh.farm"
   defaultPool: "Main"
   nfsServer: ""
-  iscsiPortal: ""
+  iscsiPortal: "192.168.17.150:3260"
   nvmeofPortal: ""
   iscsiIQNBase: "iqn.2005-10.org.freenas.ctl"
   truenasInsecure: "true"
@@ -106,8 +106,8 @@ allowVolumeExpansion: true
 parameters:
   compression: "LZ4"
   datasetPath: "k8s/nfs"
-  nfs.hosts: "192.168.16.0/24,192.168.18.0/24,192.168.19.0/24"
   nfs.mountOptions: "hard,nfsvers=4.1"
+  nfs.networks: "192.168.16.0/24,192.168.18.0/24,192.168.19.0/24"
   nfs.rootSquash: "false"
   pool: "Main"
   protocol: "nfs"

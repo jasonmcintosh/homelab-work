@@ -1,9 +1,8 @@
 # Plan: TrueNAS CSI driver (iSCSI + NFS) on the cluster
 
-Status: **ready to install, nothing deployed yet.** TrueNAS is on 25.10.7, the iSCSI and NFS services run and start at
-boot, the API key authenticates over the WebSocket API (checked), and `values.yaml` + the rendered `truenas-csi.yaml`
-pass a server-side dry-run. Phases 0-1 are done except creating the parent datasets if the driver needs them (see
-README); next is phase 3 (apply) and phase 5 (smoke test + benchmark).
+Status: **installed and smoke-tested (2026-10-03); no workloads migrated yet.** TrueNAS is on 25.10.7. The driver is
+running in `kube-system`; `truenas-iscsi` and `truenas-nfs` both provision, mount across nodes, and accept non-root
+writes. The benchmark gate (phase 5) passed (below). Remaining: snapshot controller (phase 2), then migrate (phase 6).
 
 Driver: [truenas/truenas-csi](https://github.com/truenas/truenas-csi) (official, GPL-3.0). Talks to TrueNAS over the
 WebSocket API (`wss://<host>/api/current`), so it is not affected by the REST API deprecation that breaks
@@ -58,6 +57,41 @@ databases opt in with a `storageClassName`.
    depends on the network), 5) leave ClickHouse/Prometheus on Rook unless they show slow merges/compaction.
 7. **Backups.** With snapshots available, schedule CSI snapshots for the migrated databases and rely on ZFS
    snapshots/replication on TrueNAS. This is the answer to Rook `size: 1` having no redundancy.
+
+## Results (2026-10-03)
+
+Same fio workloads as the Rook/NFS comparison, run back to back on kubenode4 against fresh 5 Gi volumes:
+
+| Workload | Rook (size 1) | TrueNAS iSCSI | TrueNAS NFS (new driver) |
+|---|---|---|---|
+| 4k write + fsync, qd1 | 69 IOPS, sync p50 13.3 ms, p99 28 ms | 510 IOPS, sync p50 1.74 ms, p99 3.3 ms | 1,407 IOPS, sync p50 0.59 ms, p99 1.2 ms |
+| 4k random write, qd16 | 2,253 IOPS, p99 24.5 ms | 28,484 IOPS, p99 1.2 ms | 7,144 IOPS, p99 4.1 ms |
+| 70/30 mixed 4k (write IOPS / read p99) | 562 / 20.6 ms | 7,260 / 0.59 ms | 2,810 / 0.59 ms |
+| 1 MiB sequential write | 96 MB/s | 602 MB/s | 161 MB/s (p99 426 ms) |
+
+iSCSI is about 8x lower fsync latency and 12-13x the random-write IOPS of Rook. 602 MB/s sequential is more than a
+1 GbE link can carry (about 117 MB/s), so either the path from kubenode4 to TrueNAS is faster than 1 GbE or a cache is
+absorbing writes; do not read the sequential figure as sustained disk throughput.
+
+## What the install taught us
+
+- **The iSCSI portal must be the IP, not the DNS name.** With `truenas.iscsiPortal` empty (derived from the URL's
+  hostname) a fresh volume fails to stage with "failed to find device path ... sendtargets ... exit status 15" even
+  though TrueNAS has created the target and the node is logged in; the kernel names the device
+  `/dev/disk/by-path/ip-<ip>:3260-iscsi-...` and the driver looks it up by the name it was given. Verified as an A/B on
+  the same node: hostname fails, IP works. The API URL (`wss://truenas.mcintosh.farm`) and NFS server keep using the DNS
+  name. The IP is TrueNAS's, so it is the same for every node (checked by mounting one volume from kubenode4 and kubenode1);
+  node IPs never appear. If TrueNAS's address changes (for example the 10 GbE move) update `iscsiPortal`, re-render, and
+  restart the driver pods; volumes already attached keep the old portal until they are re-attached.
+- **NFS subnets go in `nfs.networks`, not `nfs.hosts`.** TrueNAS rejects CIDRs in `hosts`.
+- **No initiator group was needed.** The driver created targets on the existing `default-portal` with no initiator group;
+  TrueNAS allows any initiator.
+- **NFS permissions are better than before.** With `nfs.rootSquash: "false"` and the driver's `fsGroupPolicy: File`, a
+  non-root pod got a group-owned setgid directory and could write; no world-writable `0777` needed.
+- The driver created `Main/k8s`, `Main/k8s/iscsi` and `Main/k8s/nfs` itself, and deleting a PVC removed its zvol,
+  extent and target. A failed first attempt can leave a stale initiator session on a node (log it out with `iscsiadm`).
+- `iscsi_tcp` loaded on demand on the nodes tested; to make that deterministic, add it to `/etc/modules-load.d/` in the
+  node image (like `nfs-common`).
 
 ## Decisions (from the owner, 2026-10-03)
 

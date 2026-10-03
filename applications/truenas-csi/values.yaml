@@ -7,6 +7,10 @@ truenas:
   defaultPool: Main
   # The appliance's own basename wins if this differs; set to match it anyway.
   iscsiIQNBase: iqn.2005-10.org.freenas.ctl
+  # Must be an IP, not the hostname: the kernel names the device /dev/disk/by-path/ip-<ip>:3260-iscsi-<iqn>-lun-0,
+  # and with a hostname here the node plugin never finds the disk it just attached ("failed to find device
+  # path"). The hostname currently resolves to this address.
+  iscsiPortal: "192.168.17.150:3260"
   # TrueNAS ships a self-signed certificate; with this false the pods stay un-Ready.
   insecureSkipTLS: true
   # The API key Secret is created by hand (not in git), in the same namespace the driver is installed into.
@@ -39,8 +43,11 @@ storageClasses:
       pool: Main
       datasetPath: k8s/nfs
       compression: LZ4
-      nfs.hosts: "192.168.16.0/24,192.168.18.0/24,192.168.19.0/24"   # the nodes' networks
+      # TrueNAS "hosts" takes single hostnames/IPs and rejects CIDRs; subnets go in "networks".
+      nfs.networks: "192.168.16.0/24,192.168.18.0/24,192.168.19.0/24"   # the nodes' networks
       nfs.mountOptions: "hard,nfsvers=4.1"
+      # false lets the kubelet chown the volume root to the pod's fsGroup (the driver sets fsGroupPolicy: File),
+      # so non-root workloads work without world-writable permissions.
       nfs.rootSquash: "false"
 
 # Enable once the external-snapshotter CRDs and snapshot-controller are installed (PLAN.md phase 2).
