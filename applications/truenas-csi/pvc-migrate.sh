@@ -80,10 +80,12 @@ spec:
         persistentVolumeClaim: {claimName: $TMP}
 EOF
 k -n "$NS" wait --for=condition=complete "job/$JOB" --timeout=3600s
-k -n "$NS" logs "job/$JOB" | tail -25
-k -n "$NS" logs "job/$JOB" | grep -q COPY_DONE || { echo "copy did not finish"; exit 1; }
+# Read the log once: piping "kubectl logs" into "grep -q" breaks the pipe on large logs and fails under pipefail
+LOG=$(k -n "$NS" logs "job/$JOB")
+printf '%s\n' "$LOG" | tail -25
+grep -q COPY_DONE <<<"$LOG" || { echo "copy did not finish"; exit 1; }
 # grep -v exits 1 when it filters every line (the good case), so guard it against set -e/pipefail
-leftover=$(k -n "$NS" logs "job/$JOB" | sed -n '/--- verify/,/VERIFY_DONE/p' | { grep -v -- '--- verify\|VERIFY_DONE' || true; } | wc -l | tr -d ' ')
+leftover=$(sed -n '/--- verify/,/VERIFY_DONE/p' <<<"$LOG" | { grep -v -- '--- verify\|VERIFY_DONE' || true; } | wc -l | tr -d ' ')
 [ "$leftover" = 0 ] || { echo "verify found $leftover differing entries; stopping (old volume untouched, $TMP kept)"; exit 1; }
 
 say "3. detach new PV from $TMP"

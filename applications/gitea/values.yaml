@@ -10,7 +10,7 @@ ingress:
       secretName: mcintosh-farm
 postgresql-ha:
   persistence:
-    storageClass: rook-ceph-block
+    storageClass: truenas-iscsi
 resources:
   limits:
     cpu: 2000m

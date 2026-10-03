@@ -215,7 +215,7 @@ spec:
   # Explicit rook-ceph-block: the cluster's default StorageClass is now nfs-csi-default
   # (not rook-ceph-block), and NFS is a poor fit for ClickHouse's MergeTree I/O pattern.
   # Pinning this avoids silently landing on NFS.
-  storageClassName: rook-ceph-block
+  storageClassName: truenas-iscsi
   accessModes:
     - ReadWriteOnce
   resources:

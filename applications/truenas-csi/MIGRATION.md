@@ -58,9 +58,12 @@ existing PVCs by name. Locate each chart's values in git first (not yet done).
    for weeks (it dials that service), not because of the volume. Manifests that named `rook-ceph-block` now name
    `truenas-iscsi` (clickstack, gitea runner, gitness); the live `runner` StatefulSet template still names the old
    class, so applying `gitea/runner.yaml` needs `kubectl delete sts runner -n gitea --cascade=orphan` first.
-3. **Observability:** prometheus (19 GiB) and clickhouse (10 GiB); brief telemetry gap while each is down. Prometheus
-   data is only 36 h of history, so it could also be recreated empty.
-4. **Helm StatefulSets:** gitea first (postgres-ha x3, valkey x3, shared storage), then harness (low priority: barely used).
+3. **Observability: done 2026-10-03.** Prometheus (kept 38 h of history, 130k series, all targets up) and ClickHouse
+   (row count intact, ingestion caught up within minutes; the gateway's retry queue drained the gap).
+4. **Helm StatefulSets: done 2026-10-03.** Gitea (postgres-ha x3, valkey x3, shared storage, runner) and harness (postgres,
+   mongodb x3, redis-sentinel x3, minio). Each StatefulSet was recreated (`--cascade=orphan`) with `truenas-iscsi` in its
+   volume template; `gitea/values.yaml` and `gitea/gitea.yaml` now name `truenas-iscsi`. Harness is not defined in this
+   repo, so its templates were fixed in the cluster only. All 27 PVCs are on `truenas-iscsi`; nothing Bound is on Rook or NFS.
 5. **Remove Rook-Ceph** (below).
 
 ## Removing Rook-Ceph (point of no return)
@@ -71,6 +74,20 @@ soak. Known snag: the Rook operator has been crash-looping for ~23 days (the `Ce
 not installed), so it will not process a normal teardown. Expect to remove the CephCluster/CephBlockPool finalizers by
 hand, then delete the operator, CRDs and namespace, `rm -rf /var/lib/rook` on each node, and reclaim the OSD disks in
 Proxmox. Also retire `csi-driver-nfs` and the two `nfs-csi-*` classes once the last NFS volume has moved.
+
+## Things found during the migration
+
+- **Ownership that NFS hid.** Gitea's shared storage was owned by uid 3000 but the pod runs as uid 1000; the old NFS export
+  mapped every client to one identity, so `chmod` by uid 1000 worked. On ext4 the init container failed with `chmod:
+  Operation not permitted` until the volume was `chown -R 1000:1000`. Expect the same class of problem for any app that
+  was quietly relying on NFS's permissive mapping.
+- **A 29-day-old wedged pod sandbox** (`runc ... mkdir /sys/fs/cgroup/... cannot allocate memory`) was why
+  `gitea-postgresql-ha-pgpool` crash-looped for 5,000+ restarts; deleting the pod fixed it, and Gitea's database path
+  works again. Not storage related.
+- **Script fixes:** verify ignores `lost+found`; the copy-finished check no longer breaks on large logs (`grep -q` under
+  `pipefail`).
+- Old volumes were left as `Retain`ed PVs for rollback (Rook and two NFS ones); the NFS ones also leave directories on
+  TrueNAS under `Main/K8sData`.
 
 ## Risks
 

@@ -3995,7 +3995,7 @@ spec:
         resources:
           requests:
             storage: "10Gi"
-        storageClassName: rook-ceph-block
+        storageClassName: truenas-iscsi
 
 ---
 # Source: gitea/charts/valkey-cluster/templates/valkey-statefulset.yaml
