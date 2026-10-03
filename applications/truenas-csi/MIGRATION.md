@@ -85,13 +85,18 @@ provisioner finalizer cleared). On `kubenode1`-`3`: the BlueStore signature and 
 two stale kubelet plugin directories were removed. `applications/rook-ceph/` was deleted from git and stale comments fixed.
 A final sweep found no rook/ceph object in the API.
 
-Loose ends, none urgent:
-- `xvda4` on kubenode1-3 (1.2-1.3 TB each) is now blank unallocated space inside the same virtual disk as the OS. The root
-  LV is only ~250 GB and kubenode2's root is 82% full, so the cheapest use is to delete the partition and extend the
-  `ubuntu` volume group/root LV into it. That edits a live root disk's partition table, so it was left alone.
-- `kubenode1` still has `/etc/modules-load.d/rbd.conf` (loads the `rbd` module at boot); harmless, can be deleted.
-- 9 retained NFS PVs (rollback copies of the migrated NFS volumes) and their data directories under `Main/K8sData` on TrueNAS
-  remain; `csi-driver-nfs` and the `nfs-csi-*` classes are still installed (retirement is a separate decision).
+Loose ends, all closed the same day:
+- `xvda4` (1.2 TB, blank) on **kubenode2** was added to the `ubuntu` volume group as a second physical volume and the root LV
+  and ext4 filesystem were grown online: `/` went from 246 GB at 82% to 1.5 TB at 14%. This leaves the partition table
+  untouched (LVM metadata only). One caveat: the first run's pod was deleted while `resize2fs` was still running, which left the
+  LV grown but the filesystem not; re-running `resize2fs` (idempotent) finished it cleanly. Nodes 1 and 3 still have their blank
+  `xvda4` (kubenode2's root was the one that was full).
+- `/etc/modules-load.d/rbd.conf` on kubenode1 removed (`iscsi_tcp.conf` is already present there).
+- **NFS retired:** the 9 retained NFS PVs, `csi-driver-nfs` (controller, node DaemonSet, CSIDriver, RBAC), the `nfs-csi-default` and
+  `nfs-csi-nolock` classes, and `applications/nfs-provisioner/` in git are gone. On TrueNAS the 13 old directories under
+  `Main/K8sData` (the 9 rollback copies and 4 `archived-*` leftovers from `spin-workshop`/`spinnaker-oss`), the `K8sData` NFS
+  share and the `Main/K8sData` dataset were deleted. The only inline NFS user, the `prod` demo app's `test-volume`, was removed
+  from the live Deployment (git's `k8s.yml` never had it). `truenas-nfs` (this driver) remains as an opt-in RWX class.
 
 ## Things found during the migration
 

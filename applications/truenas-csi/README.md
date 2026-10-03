@@ -14,7 +14,7 @@ kubectl apply -f truenas-csi.yaml
 kubectl -n kube-system rollout status deploy/truenas-csi-controller ds/truenas-csi-node
 ```
 
-Re-render after changing `values.yaml` (same pattern as `../nfs-provisioner`):
+Re-render after changing `values.yaml` (values here, rendered manifest committed alongside):
 
 ```
 helm repo add truenas-csi https://raw.githubusercontent.com/truenas/truenas-csi/master/charts
@@ -52,4 +52,4 @@ what it was missing. Likewise an iSCSI portal/initiator group may need to exist 
 
 - `VolumeSnapshotClass`/snapshot support: install the external-snapshotter CRDs and snapshot-controller, then set
   `volumeSnapshotClass.enabled: true` and re-render.
-- Retiring `csi-driver-nfs` (only after the permissions test in `PLAN.md`).
+- Nothing outstanding. `csi-driver-nfs` and its classes were retired on 2026-10-03 (this driver's `truenas-nfs` class replaces them).
