@@ -4,6 +4,7 @@ metadata:
   name: mysql-pv-spinnaker
   namespace: spinnaker
 spec:
+  storageClassName: truenas-iscsi
   accessModes:
     - ReadWriteOnce
   resources:

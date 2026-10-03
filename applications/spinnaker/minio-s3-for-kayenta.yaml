@@ -4,6 +4,7 @@ metadata:
   name: minio-pv-claim
   namespace: spinnaker
 spec:
+  storageClassName: truenas-iscsi
   accessModes:
     - ReadWriteOnce
   resources:

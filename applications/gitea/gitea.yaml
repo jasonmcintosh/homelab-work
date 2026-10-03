@@ -3101,7 +3101,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   volumeMode: Filesystem
-  
+  storageClassName: truenas-iscsi
   resources:
     requests:
       storage: 10Gi
@@ -4187,7 +4187,7 @@ spec:
         resources:
           requests:
             storage: "8Gi"
-        
+        storageClassName: truenas-iscsi
 
 ---
 # Source: gitea/templates/gitea/ingress.yaml

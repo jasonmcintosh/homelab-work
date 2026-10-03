@@ -186,6 +186,7 @@ metadata:
   name: prometheus-storage
   namespace: monitoring
 spec:
+  storageClassName: truenas-iscsi
   accessModes:
     - ReadWriteOnce
   resources:

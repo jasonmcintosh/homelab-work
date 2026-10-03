@@ -4,6 +4,7 @@ metadata:
   name: grafana-pvc
   namespace: monitoring
 spec:
+  storageClassName: truenas-iscsi
   accessModes:
     - ReadWriteOnce
   resources:
