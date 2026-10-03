@@ -86,11 +86,13 @@ two stale kubelet plugin directories were removed. `applications/rook-ceph/` was
 A final sweep found no rook/ceph object in the API.
 
 Loose ends, all closed the same day:
-- `xvda4` (1.2 TB, blank) on **kubenode2** was added to the `ubuntu` volume group as a second physical volume and the root LV
-  and ext4 filesystem were grown online: `/` went from 246 GB at 82% to 1.5 TB at 14%. This leaves the partition table
-  untouched (LVM metadata only). One caveat: the first run's pod was deleted while `resize2fs` was still running, which left the
-  LV grown but the filesystem not; re-running `resize2fs` (idempotent) finished it cleanly. Nodes 1 and 3 still have their blank
-  `xvda4` (kubenode2's root was the one that was full).
+- The blank `xvda4` (1.2-1.3 TB) on **kubenode1, kubenode2 and kubenode3** was added to each node's `ubuntu` volume group as a
+  second physical volume and the root LV and ext4 filesystem were grown online: `/` is now 1.5 TB (12-14% used) on each, up from
+  246 GB (72-82%). The partition table was never touched (LVM metadata only). Gotcha, hit on kubenode1 and kubenode2: running
+  `lvextend -r` inside a privileged pod extends the LV, then hangs forever in `do_semtimedop` waiting for udev to acknowledge the
+  device-mapper event (udev is not reachable from the container), so the filesystem never grows. The LV is already extended at
+  that point; kill the pod and run `resize2fs <root device>` (online, takes seconds). On kubenode3 this was avoided with
+  `lvextend --noudevsync -l +100%FREE` followed by a separate `resize2fs`, which completed in one run.
 - `/etc/modules-load.d/rbd.conf` on kubenode1 removed (`iscsi_tcp.conf` is already present there).
 - **NFS retired:** the 9 retained NFS PVs, `csi-driver-nfs` (controller, node DaemonSet, CSIDriver, RBAC), the `nfs-csi-default` and
   `nfs-csi-nolock` classes, and `applications/nfs-provisioner/` in git are gone. On TrueNAS the 13 old directories under
