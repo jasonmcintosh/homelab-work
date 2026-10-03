@@ -67,7 +67,7 @@ spec:
       resources:
         requests:
           storage: 1Gi
-      storageClassName: rook-ceph-block
+      storageClassName: truenas-iscsi
   # The Docker daemon's data root: the images pulled for jobs. Size it for the
   # images you expect to cache.
   - metadata:
@@ -78,4 +78,4 @@ spec:
       resources:
         requests:
           storage: 20Gi
-      storageClassName: rook-ceph-block
+      storageClassName: truenas-iscsi

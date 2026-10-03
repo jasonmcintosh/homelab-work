@@ -17,7 +17,7 @@ spec:
   resources:
     requests:
       storage: 20Gi
-  storageClassName: rook-ceph-block
+  storageClassName: truenas-iscsi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -191,7 +191,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: rook-ceph-block
+  storageClassName: truenas-iscsi
 ---
 apiVersion: v1
 kind: Service

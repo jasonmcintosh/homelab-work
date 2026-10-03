@@ -5,7 +5,7 @@ Companion to `PLAN.md`. Nothing here has been run against a real workload yet; `
 
 ## Size of the job
 
-30 PVCs at the start (21 on Rook, 9 on NFS); 27 after the unused ones were deleted (18 Rook, 9 NFS). Provisioned ~1.2 TiB but **only ~58 GiB is real data** (Prometheus 19, ClickHouse 10,
+30 PVCs at the start (21 on Rook, 9 on NFS); 27 after the unused ones were deleted (18 Rook, 9 NFS); after wave 2: 10 Rook, 7 NFS, 10 iSCSI. Provisioned ~1.2 TiB but **only ~58 GiB is real data** (Prometheus 19, ClickHouse 10,
 Gitea runner Docker cache 8, the rest 4 GiB or less), and TrueNAS thin-provisions, so capacity is a non-issue (31 TiB pool)
 and copies take minutes, not hours.
 
@@ -26,7 +26,8 @@ PV, delete the temporary claim, clear the new PV's `claimRef`; delete the old cl
 
 Tested 2026-10-03 on a 2 Gi Rook volume with 50 MB of random data, three owners, mode 640 and a symlink: checksums, uids,
 modes and the symlink all matched, the volume is ext4 on iSCSI, and the old Rook volume stayed as a `Released` rollback.
-Two bugs found and fixed while testing (YAML escape; `grep -v` under `pipefail`).
+Bugs found and fixed while testing (YAML escape; `grep -v` under `pipefail`) and while migrating MySQL (the verify
+must ignore `lost+found`, which every new ext4 volume has and an NFS source does not).
 
 **Rollback for any volume:** the old PV still holds the data until you delete it. Clear its `claimRef` and create a PVC
 with `volumeName: <old-pv>` on the old class.
@@ -50,8 +51,13 @@ existing PVCs by name. Locate each chart's values in git first (not yet done).
    Owner decision: this is a lab, very little data matters long term, so no ZFS snapshot task, backups or copies.
 1. **Unused volumes: done 2026-10-03.** `dev/repo-workspace`, `spinnaker/repo-workspace` and `harness/tiemscaledb` were
    checked (no pod, no workload spec references them, not defined in git) and deleted.
-2. **Small standalone services:** grafana, clickstack-mongo, spinnaker minio, mysql (NFS), valkey (NFS), gitness x2,
-   harness timescaledb, gitea runner x2.
+2. **Small standalone services: done 2026-10-03.** grafana, clickstack-mongo, spinnaker minio, mysql (NFS), valkey (NFS),
+   gitness x2, harness timescaledb, gitea runner x2, each scaled to 0, migrated, scaled back up and checked (Grafana kept
+   its 34 dashboards; Valkey kept its 5,784 keys; MySQL came back clean with all five Spinnaker schemas and the services
+   reconnected). The Gitea runner is crash-looping, but because `gitea-postgresql-ha-pgpool` has been in CrashLoopBackOff
+   for weeks (it dials that service), not because of the volume. Manifests that named `rook-ceph-block` now name
+   `truenas-iscsi` (clickstack, gitea runner, gitness); the live `runner` StatefulSet template still names the old
+   class, so applying `gitea/runner.yaml` needs `kubectl delete sts runner -n gitea --cascade=orphan` first.
 3. **Observability:** prometheus (19 GiB) and clickhouse (10 GiB); brief telemetry gap while each is down. Prometheus
    data is only 36 h of history, so it could also be recreated empty.
 4. **Helm StatefulSets:** gitea first (postgres-ha x3, valkey x3, shared storage), then harness (low priority: barely used).

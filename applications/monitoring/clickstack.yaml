@@ -17,7 +17,7 @@ spec:
   # Explicit rook-ceph-block, not whatever the cluster default is: MongoDB's WiredTiger
   # engine needs real file locking, which the NFS CSI storage class (now the cluster
   # default) doesn't reliably provide.
-  storageClassName: rook-ceph-block
+  storageClassName: truenas-iscsi
   accessModes:
     - ReadWriteOnce
   resources:

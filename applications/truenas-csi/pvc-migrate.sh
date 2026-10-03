@@ -71,7 +71,7 @@ spec:
       containers:
       - name: copy
         image: alpine:3.20
-        command: ["sh","-c","apk add --no-cache rsync >/dev/null && rsync -aHAXx --numeric-ids --info=stats1 /src/ /dst/ && echo COPY_DONE && sync && echo '--- verify (dry run; no lines below means identical)' && rsync -aHAXxn --numeric-ids --itemize-changes --delete /src/ /dst/ | grep -v '^[.]d' ; echo VERIFY_DONE"]
+        command: ["sh","-c","apk add --no-cache rsync >/dev/null && rsync -aHAXx --numeric-ids --info=stats1 /src/ /dst/ && echo COPY_DONE && sync && echo '--- verify (dry run; no lines below means identical)' && rsync -aHAXxn --numeric-ids --itemize-changes --delete /src/ /dst/ | grep -v -e '^[.]d' -e 'lost[+]found' ; echo VERIFY_DONE"]
         volumeMounts: [{name: src, mountPath: /src, readOnly: true}, {name: dst, mountPath: /dst}]
       volumes:
       - name: src
