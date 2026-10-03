@@ -1046,7 +1046,7 @@
         "multi": false,
         "name": "AwsRegion",
         "options": [],
-        "query": "aws_request_httpRequestTime_seconds_count",
+        "query": "label_values(aws_request_httpRequestTime_seconds_count, region)",
         "refresh": 2,
         "regex": "/.*serviceEndpoint=\"[^\\.]+\\.([^\\.]+).*/",
         "sort": 1,

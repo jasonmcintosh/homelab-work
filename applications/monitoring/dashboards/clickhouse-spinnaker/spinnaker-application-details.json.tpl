@@ -23,9 +23,9 @@
           "type": "grafana-clickhouse-datasource",
           "uid": "${ch_uid}"
         },
-        "definition": "SELECT DISTINCT Attributes['application'] FROM otel.otel_metrics_sum WHERE MetricName = 'stage.invocations' AND Attributes['spinSvc'] = '.*orca.*' AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1",
+        "definition": "SELECT DISTINCT Attributes['application'] FROM otel.otel_metrics_sum WHERE MetricName = 'stage.invocations' AND match(ServiceName, '^(?:.*orca.*)$') AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1",
         "query": {
-          "rawSql": "SELECT DISTINCT Attributes['application'] FROM otel.otel_metrics_sum WHERE MetricName = 'stage.invocations' AND Attributes['spinSvc'] = '.*orca.*' AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1"
+          "rawSql": "SELECT DISTINCT Attributes['application'] FROM otel.otel_metrics_sum WHERE MetricName = 'stage.invocations' AND match(ServiceName, '^(?:.*orca.*)$') AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1"
         },
         "refresh": 2,
         "multi": true,

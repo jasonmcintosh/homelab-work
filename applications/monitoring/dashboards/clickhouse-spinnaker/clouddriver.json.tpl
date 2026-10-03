@@ -54,9 +54,9 @@
           "type": "grafana-clickhouse-datasource",
           "uid": "${ch_uid}"
         },
-        "definition": "SELECT DISTINCT ServiceName FROM otel.otel_metrics_gauge WHERE match(ServiceName, '^(?:.*clouddriver.*)$') AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1",
+        "definition": "SELECT DISTINCT ServiceName FROM otel.otel_metrics_gauge WHERE MetricName = 'jvm.memory.used' AND match(ServiceName, '^(?:.*clouddriver.*)$') AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1",
         "query": {
-          "rawSql": "SELECT DISTINCT ServiceName FROM otel.otel_metrics_gauge WHERE match(ServiceName, '^(?:.*clouddriver.*)$') AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1"
+          "rawSql": "SELECT DISTINCT ServiceName FROM otel.otel_metrics_gauge WHERE MetricName = 'jvm.memory.used' AND match(ServiceName, '^(?:.*clouddriver.*)$') AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1"
         },
         "refresh": 2,
         "multi": true,
@@ -77,9 +77,9 @@
           "type": "grafana-clickhouse-datasource",
           "uid": "${ch_uid}"
         },
-        "definition": "SELECT DISTINCT ResourceAttributes['service.instance.id'] FROM otel.otel_metrics_gauge WHERE ServiceName IN ($job) AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1",
+        "definition": "SELECT DISTINCT ResourceAttributes['service.instance.id'] FROM otel.otel_metrics_gauge WHERE MetricName = 'jvm.memory.used' AND ServiceName IN ($job) AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1",
         "query": {
-          "rawSql": "SELECT DISTINCT ResourceAttributes['service.instance.id'] FROM otel.otel_metrics_gauge WHERE ServiceName IN ($job) AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1"
+          "rawSql": "SELECT DISTINCT ResourceAttributes['service.instance.id'] FROM otel.otel_metrics_gauge WHERE MetricName = 'jvm.memory.used' AND ServiceName IN ($job) AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1"
         },
         "refresh": 2,
         "multi": true,
@@ -100,9 +100,9 @@
           "type": "grafana-clickhouse-datasource",
           "uid": "${ch_uid}"
         },
-        "definition": "SELECT DISTINCT Attributes['account'] FROM otel.otel_metrics_sum WHERE MetricName = 'controller.invocations' AND ServiceName IN ($job) AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1",
+        "definition": "SELECT DISTINCT Attributes['account'] FROM otel.otel_metrics_histogram WHERE MetricName = 'controller.invocations' AND ServiceName IN ($job) AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1",
         "query": {
-          "rawSql": "SELECT DISTINCT Attributes['account'] FROM otel.otel_metrics_sum WHERE MetricName = 'controller.invocations' AND ServiceName IN ($job) AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1"
+          "rawSql": "SELECT DISTINCT Attributes['account'] FROM otel.otel_metrics_histogram WHERE MetricName = 'controller.invocations' AND ServiceName IN ($job) AND TimeUnix > now() - INTERVAL 6 HOUR ORDER BY 1"
         },
         "refresh": 2,
         "multi": true,

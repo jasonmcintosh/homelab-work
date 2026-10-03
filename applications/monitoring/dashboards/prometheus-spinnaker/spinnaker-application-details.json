@@ -715,7 +715,7 @@
         "multi": true,
         "name": "Application",
         "options": [],
-        "query": "label_values(stage_invocations_total{spinSvc=\".*orca.*\"}, application)",
+        "query": "label_values(stage_invocations_total{job=~\".*orca.*\"}, application)",
         "refresh": 2,
         "regex": "",
         "sort": 1,

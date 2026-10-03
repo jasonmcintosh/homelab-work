@@ -1440,7 +1440,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max by (instance) (jvm_gc_pause_seconds_max{job=~\"$job\", instance=~\"$Instance\"})",
+              "expr": "max by (instance) (jvm_gc_pause_max_seconds{job=~\"$job\", instance=~\"$Instance\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{instance}}",
@@ -1521,7 +1521,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max_over_time(jvm_threads_live_threads{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval])",
+              "expr": "max_over_time(jvm_threads_live{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval])",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 2,
@@ -2051,8 +2051,8 @@
         "multi": false,
         "name": "job",
         "options": [],
-        "query": "label_values(up{job=~\".*$spinSvc.*\"}, job)",
-        "refresh": 1,
+        "query": "label_values(jvm_memory_used_bytes{job=~\".*$spinSvc.*\"}, job)",
+        "refresh": 2,
         "regex": "",
         "sort": 0,
         "tagValuesQuery": "",
@@ -2074,8 +2074,8 @@
         "multi": true,
         "name": "Instance",
         "options": [],
-        "query": "label_values(up{job=~\"$job\"}, instance)",
-        "refresh": 1,
+        "query": "label_values(jvm_memory_used_bytes{job=~\"$job\"}, instance)",
+        "refresh": 2,
         "regex": "",
         "sort": 1,
         "tagValuesQuery": "",

@@ -55,6 +55,9 @@ provider "grafana" {
 resource "grafana_data_source" "clickhouse" {
   type = "grafana-clickhouse-datasource"
   name = "ClickHouse"
+  # The plugin reads jsonData.host below, not this, but the live datasource has it set; matching it keeps
+  # plans free of a perpetual no-op diff.
+  url = "http://clickhouse.monitoring:8123"
 
   # The plugin's backend reads jsonData.host directly (a bare hostname, no scheme/port) -
   # it doesn't fall back to Grafana's generic top-level datasource `url` field, so without
@@ -69,6 +72,26 @@ resource "grafana_data_source" "clickhouse" {
 
   secure_json_data_encoded = jsonencode({
     password = "changeme"
+  })
+}
+
+# The default Prometheus datasource was created by hand; adopt it so its settings are code. Spinnaker's
+# metrics arrive by OTLP export every 60s, not by a 15s scrape, so tell Grafana the real interval: its
+# default 15s makes $__rate_interval 1m, and rate() over a 1m window of 60s-spaced samples returns nothing,
+# which left every rate() panel in the Spinnaker dashboards empty. 60s gives a 4m $__rate_interval.
+import {
+  to = grafana_data_source.prometheus
+  id = "1:cfii04md7bfuob"
+}
+
+resource "grafana_data_source" "prometheus" {
+  type       = "prometheus"
+  name       = "prometheus"
+  url        = "https://prometheus.mcintosh.farm/"
+  is_default = true
+
+  json_data_encoded = jsonencode({
+    timeInterval = "60s"
   })
 }
 

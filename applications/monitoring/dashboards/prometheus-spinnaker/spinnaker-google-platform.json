@@ -2756,7 +2756,7 @@
         "multi": false,
         "name": "GcpRegion",
         "options": [],
-        "query": "clouddriver:google:api__count",
+        "query": "label_values(clouddriver:google:api__count, region)",
         "refresh": 2,
         "regex": "/.*region=\"([^\"]+).*/",
         "sort": 1,

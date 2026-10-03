@@ -34,6 +34,9 @@ def build_map():
         base = re.sub(r"[^a-zA-Z0-9_]", "_", name) + us
         if t == "gauge" and name.endswith(".max") and us:   # Prometheus also spells these <name>_<unit>_max
             m.setdefault(re.sub(r"[^a-zA-Z0-9_]", "_", name[:-4]) + us + "_max", ("gauge", name, "Value"))
+        plain = re.sub(r"[^a-zA-Z0-9_]", "_", name)
+        if us and t == "gauge":   # the OTel->Prometheus path drops some unit suffixes (e.g. jvm_threads_live)
+            m.setdefault(plain, ("gauge", name, "Value"))
         if t == "gauge":
             m.setdefault(base, ("gauge", name, "Value"))
         elif t == "sum":

@@ -54,7 +54,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",exported_namespace=~\"$KubernetesNamespace\",account=~\"$KubernetesAccount\",success=\"true\"}[$__rate_interval])) by (action)",
+              "expr": "sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",namespace=~\"$KubernetesNamespace\",account=~\"$KubernetesAccount\",success=\"true\"}[$__rate_interval])) by (action)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{action}}",
@@ -135,7 +135,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kubernetes_api_seconds_sum{instance=~\"$Instance\",exported_namespace=~\"$KubernetesNamespace\",success=\"true\",account=~\"$KubernetesAccount\"}[$__rate_interval])) by (action)\n/\nsum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",exported_namespace=~\"$KubernetesNamespace\",account=~\"$KubernetesAccount\",success=\"true\"}[$__rate_interval])) by (action)",
+              "expr": "sum(rate(kubernetes_api_seconds_sum{instance=~\"$Instance\",namespace=~\"$KubernetesNamespace\",success=\"true\",account=~\"$KubernetesAccount\"}[$__rate_interval])) by (action)\n/\nsum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",namespace=~\"$KubernetesNamespace\",account=~\"$KubernetesAccount\",success=\"true\"}[$__rate_interval])) by (action)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{action}}",
@@ -216,7 +216,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",exported_namespace=~\"$KubernetesNamespace\",account=~\"$KubernetesAccount\",success!=\"true\"}[$__rate_interval])) by (action, reason)",
+              "expr": "sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",namespace=~\"$KubernetesNamespace\",account=~\"$KubernetesAccount\",success!=\"true\"}[$__rate_interval])) by (action, reason)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{action}}/{{reason}}",
@@ -297,7 +297,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kubernetes_api_seconds_sum{instance=~\"$Instance\",exported_namespace=~\"$KubernetesNamespace\",success!=\"true\",account=~\"$KubernetesAccount\"}[$__rate_interval])) by (action, reason)\n/\nsum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",exported_namespace=~\"$KubernetesNamespace\",account=~\"$KubernetesAccount\",success!=\"true\"}[$__rate_interval])) by (action)",
+              "expr": "sum(rate(kubernetes_api_seconds_sum{instance=~\"$Instance\",namespace=~\"$KubernetesNamespace\",success!=\"true\",account=~\"$KubernetesAccount\"}[$__rate_interval])) by (action, reason)\n/\nsum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",namespace=~\"$KubernetesNamespace\",account=~\"$KubernetesAccount\",success!=\"true\"}[$__rate_interval])) by (action)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{action}}",
@@ -540,7 +540,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",success=\"true\"}[$__rate_interval])) by (exported_namespace)",
+              "expr": "sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",success=\"true\"}[$__rate_interval])) by (namespace)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{exported_namespace}} ",
@@ -783,7 +783,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kubernetes_api_seconds_sum{instance=~\"$Instance\",success=\"true\"}[$__rate_interval])) by (exported_namespace) / sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",success=\"true\"}[$__rate_interval])) by (exported_namespace)",
+              "expr": "sum(rate(kubernetes_api_seconds_sum{instance=~\"$Instance\",success=\"true\"}[$__rate_interval])) by (namespace) / sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",success=\"true\"}[$__rate_interval])) by (namespace)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{exported_namespace}}",
@@ -1026,7 +1026,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",success!=\"true\"}[$__rate_interval])) by (exported_namespace)",
+              "expr": "sum(rate(kubernetes_api_seconds_count{instance=~\"$Instance\",success!=\"true\"}[$__rate_interval])) by (namespace)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{exported_namespace}} ",
@@ -1134,8 +1134,8 @@
         "multi": false,
         "name": "job",
         "options": [],
-        "query": "label_values(up{job=~\".*$spinSvc.*\"}, job)",
-        "refresh": 1,
+        "query": "label_values(jvm_memory_used_bytes{job=~\".*$spinSvc.*\"}, job)",
+        "refresh": 2,
         "regex": "",
         "sort": 0,
         "tagValuesQuery": "",
@@ -1157,8 +1157,8 @@
         "multi": true,
         "name": "Instance",
         "options": [],
-        "query": "label_values(up{job=~\"$job\"}, instance)",
-        "refresh": 1,
+        "query": "label_values(jvm_memory_used_bytes{job=~\"$job\"}, instance)",
+        "refresh": 2,
         "regex": "",
         "sort": 1,
         "tagValuesQuery": "",
@@ -1181,7 +1181,7 @@
         "name": "KubernetesAccount",
         "options": [],
         "query": "label_values(kubernetes_api_seconds_count, account)",
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "sort": 1,
         "tagValuesQuery": "",
@@ -1203,8 +1203,8 @@
         "multi": false,
         "name": "KubernetesNamespace",
         "options": [],
-        "query": "label_values(kubernetes_api_seconds_count, exported_namespace)",
-        "refresh": 1,
+        "query": "label_values(kubernetes_api_seconds_count, namespace)",
+        "refresh": 2,
         "regex": "",
         "sort": 1,
         "tagValuesQuery": "",

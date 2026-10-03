@@ -42,10 +42,10 @@ resource "grafana_notification_policy" "main" {
     group_by       = ["grafana_folder", "alertname", "host"]
     group_wait     = "30s"
     group_interval = "5m"
-    # Notify once per incident: a firing alert is only re-sent after this long (about a year), so it
+    # Notify once per incident: a firing alert is only re-sent after this long (a year), so it
     # posts when it starts and again when it resolves. A different alert joining the group (e.g. a
     # second failed drive on the same host) or one that resolves and fires again still notifies.
-    repeat_interval = "8760h"
+    repeat_interval = "1y"
   }
 }
 
@@ -76,6 +76,7 @@ resource "grafana_rule_group" "ilo" {
       data {
         ref_id         = "A"
         datasource_uid = grafana_data_source.clickhouse.uid
+        query_type     = "timeseries"
         relative_time_range {
           from = 3600
           to   = 0
