@@ -36,8 +36,10 @@ spec:
           claimName: minio-pv-claim
       containers:
       - name: minio
-        # Pulls the default Minio image from Docker Hub
-        image: minio/minio:RELEASE.2024-12-13T22-19-12Z-cpuv1
+        # Mirror of minio/minio:RELEASE.2024-12-13T22-19-12Z-cpuv1 (same digest, sha256:b35ae9d4c303...).
+        # Docker Hub no longer serves that tag (it returns an HTML error page) and Quay needs authentication,
+        # so the upstream image cannot be pulled by a node that does not already have it cached.
+        image: mcintoshj/minio:RELEASE.2024-12-13T22-19-12Z-cpuv1
         args:
         - server
         - /storage
