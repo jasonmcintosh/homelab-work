@@ -20,10 +20,11 @@ truenas:
 # microk8s keeps the kubelet under /var/snap (same path ../nfs-provisioner uses).
 kubeletDir: /var/snap/microk8s/common/var/lib/kubelet
 
-# Both classes are non-default: rook-ceph-block stays the cluster default. Workloads opt in per PVC.
+# truenas-iscsi is the cluster default (Rook-Ceph is being retired, see MIGRATION.md); truenas-nfs is opt-in.
 storageClasses:
-  # RWO block volumes (a zvol + iSCSI target per PVC) for databases.
+  # RWO block volumes (a zvol + iSCSI target per PVC); the default class.
   - name: truenas-iscsi
+    isDefault: true
     allowVolumeExpansion: true
     parameters:
       protocol: iscsi

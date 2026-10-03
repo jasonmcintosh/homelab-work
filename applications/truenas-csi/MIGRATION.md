@@ -5,7 +5,7 @@ Companion to `PLAN.md`. Nothing here has been run against a real workload yet; `
 
 ## Size of the job
 
-30 PVCs: 21 on Rook, 9 on NFS. Provisioned ~1.2 TiB but **only ~58 GiB is real data** (Prometheus 19, ClickHouse 10,
+30 PVCs at the start (21 on Rook, 9 on NFS); 27 after the unused ones were deleted (18 Rook, 9 NFS). Provisioned ~1.2 TiB but **only ~58 GiB is real data** (Prometheus 19, ClickHouse 10,
 Gitea runner Docker cache 8, the rest 4 GiB or less), and TrueNAS thin-provisions, so capacity is a non-issue (31 TiB pool)
 and copies take minutes, not hours.
 
@@ -46,10 +46,10 @@ existing PVCs by name. Locate each chart's values in git first (not yet done).
 
 ## Waves (each needs the owner's go-ahead; each app is down for the length of its copy)
 
-0. **Prep (no downtime):** TrueNAS periodic ZFS snapshot task on `Main/k8s` (recursive, daily, keep 14); make
-   `truenas-iscsi` the default and unset it on `rook-ceph-block` (`isDefault: true` in values, then re-render); decide
-   what to do with the three unused PVCs.
-1. **Unused volumes.**
+0. **Prep: done 2026-10-03.** `truenas-iscsi` is the default class (live and in git); `rook-ceph-block` no longer is.
+   Owner decision: this is a lab, very little data matters long term, so no ZFS snapshot task, backups or copies.
+1. **Unused volumes: done 2026-10-03.** `dev/repo-workspace`, `spinnaker/repo-workspace` and `harness/tiemscaledb` were
+   checked (no pod, no workload spec references them, not defined in git) and deleted.
 2. **Small standalone services:** grafana, clickstack-mongo, spinnaker minio, mysql (NFS), valkey (NFS), gitness x2,
    harness timescaledb, gitea runner x2.
 3. **Observability:** prometheus (19 GiB) and clickhouse (10 GiB); brief telemetry gap while each is down. Prometheus
@@ -59,8 +59,8 @@ existing PVCs by name. Locate each chart's values in git first (not yet done).
 
 ## Removing Rook-Ceph (point of no return)
 
-Preconditions: no PV left on `rook-ceph-block`; retained old PVs deleted only after each app is verified; ZFS snapshots
-running; the **RAID controller battery checked** (everything then depends on that cache; see `PLAN.md`); a few days of
+Preconditions: no PV left on `rook-ceph-block`; retained old PVs deleted only after each app is verified; the
+**RAID controller battery checked** (everything then depends on that cache; see `PLAN.md`); a few days of
 soak. Known snag: the Rook operator has been crash-looping for ~23 days (the `CephObjectStoreAccount` CRD it expects is
 not installed), so it will not process a normal teardown. Expect to remove the CephCluster/CephBlockPool finalizers by
 hand, then delete the operator, CRDs and namespace, `rm -rf /var/lib/rook` on each node, and reclaim the OSD disks in
@@ -69,7 +69,7 @@ Proxmox. Also retire `csi-driver-nfs` and the two `nfs-csi-*` classes once the l
 ## Risks
 
 - TrueNAS becomes the single point of failure for everything (Git hosting, monitoring, Spinnaker DB). A TrueNAS reboot
-  stalls all of it; schedule maintenance and keep ZFS snapshots/replication off-box if anything matters.
+  stalls all of it; schedule maintenance accordingly. No backups are planned (owner's call for this lab).
 - Battery health of the RAID cache is unknown (acknowledged sync writes rely on it).
 - Bandwidth: 1 GbE links are the stated limit (a 600 MB/s result in testing suggests more headroom than that); the whole
   data set is ~58 GiB either way.

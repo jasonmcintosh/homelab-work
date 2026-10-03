@@ -14,7 +14,7 @@ kind: StorageClass
 metadata:
    name: rook-ceph-block
    annotations:
-     storageclass.kubernetes.io/is-default-class: "true"
+     storageclass.kubernetes.io/is-default-class: "false"   # truenas-iscsi is the default; Rook is being retired
 # Change "rook-ceph" provisioner prefix to match the operator namespace if needed
 provisioner: rook-ceph.rbd.csi.ceph.com
 parameters:

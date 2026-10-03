@@ -69,7 +69,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: truenas-csi
   annotations:
-    storageclass.kubernetes.io/is-default-class: "false"
+    storageclass.kubernetes.io/is-default-class: "true"
 provisioner: csi.truenas.io
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
