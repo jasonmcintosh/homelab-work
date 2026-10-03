@@ -1,6 +1,9 @@
 # Plan: TrueNAS CSI driver (iSCSI + NFS) on the cluster
 
-Status: **planned, nothing deployed.** Blocked on the TrueNAS upgrade to 25.10 (the official driver needs 25.10.0+).
+Status: **ready to install, nothing deployed yet.** TrueNAS is on 25.10.7, the iSCSI and NFS services run and start at
+boot, the API key authenticates over the WebSocket API (checked), and `values.yaml` + the rendered `truenas-csi.yaml`
+pass a server-side dry-run. Phases 0-1 are done except creating the parent datasets if the driver needs them (see
+README); next is phase 3 (apply) and phase 5 (smoke test + benchmark).
 
 Driver: [truenas/truenas-csi](https://github.com/truenas/truenas-csi) (official, GPL-3.0). Talks to TrueNAS over the
 WebSocket API (`wss://<host>/api/current`), so it is not affected by the REST API deprecation that breaks

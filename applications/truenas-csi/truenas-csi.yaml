@@ -1,0 +1,677 @@
+---
+# Source: truenas-csi/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: truenas-csi-controller-sa
+  namespace: kube-system
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+
+---
+# Source: truenas-csi/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: truenas-csi-node-sa
+  namespace: kube-system
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+
+---
+# Source: truenas-csi/templates/config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: truenas-csi-config
+  namespace: kube-system
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+data:
+  # The key set matches deploy/truenas-csi-driver.yaml. Every key is written
+  # even when empty: the driver treats an empty value as unset and derives it
+  # from truenasURL, while a missing key would keep the pods from starting for
+  # the ones referenced without optional: true.
+  truenasURL: "wss://truenas.mcintosh.farm"
+  defaultPool: "Main"
+  nfsServer: ""
+  iscsiPortal: ""
+  nvmeofPortal: ""
+  iscsiIQNBase: "iqn.2005-10.org.freenas.ctl"
+  truenasInsecure: "true"
+
+---
+# Source: truenas-csi/templates/storage.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: truenas-iscsi
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: csi.truenas.io
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+parameters:
+  compression: "LZ4"
+  datasetPath: "k8s/iscsi"
+  fsType: "ext4"
+  pool: "Main"
+  protocol: "iscsi"
+  sparse: "true"
+  sync: "STANDARD"
+  volblocksize: "16K"
+
+---
+# Source: truenas-csi/templates/storage.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: truenas-nfs
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: csi.truenas.io
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+parameters:
+  compression: "LZ4"
+  datasetPath: "k8s/nfs"
+  nfs.hosts: "192.168.16.0/24,192.168.18.0/24,192.168.19.0/24"
+  nfs.mountOptions: "hard,nfsvers=4.1"
+  nfs.rootSquash: "false"
+  pool: "Main"
+  protocol: "nfs"
+
+---
+# Source: truenas-csi/templates/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: truenas-csi-controller-role
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims/status"]
+    verbs: ["update", "patch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["csinodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshots/status"]
+    verbs: ["update", "patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotcontents/status"]
+    verbs: ["update", "patch"]
+  - apiGroups: ["snapshot.storage.k8s.io"]
+    resources: ["volumesnapshotclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments/status"]
+    verbs: ["patch"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "watch", "list", "delete", "update", "create"]
+
+---
+# Source: truenas-csi/templates/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: truenas-csi-node-role
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattachments"]
+    verbs: ["get", "list", "watch"]
+
+---
+# Source: truenas-csi/templates/rbac.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: truenas-csi-controller-binding
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+subjects:
+  - kind: ServiceAccount
+    name: truenas-csi-controller-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: truenas-csi-controller-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Source: truenas-csi/templates/rbac.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: truenas-csi-node-binding
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+subjects:
+  - kind: ServiceAccount
+    name: truenas-csi-node-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: truenas-csi-node-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Source: truenas-csi/templates/node.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: truenas-csi-node
+  namespace: kube-system
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+spec:
+  selector:
+    matchLabels:
+      app: truenas-csi-node
+  template:
+    metadata:
+      labels:
+        app: truenas-csi-node
+        helm.sh/chart: truenas-csi-1.3.0
+        app.kubernetes.io/name: truenas-csi
+        app.kubernetes.io/instance: truenas-csi
+        app.kubernetes.io/version: "1.3.0"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: truenas-csi
+    spec:
+      serviceAccountName: truenas-csi-node-sa
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      priorityClassName: system-node-critical
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: csi-node
+          image: ghcr.io/truenas/truenas-csi:v1.3.0
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            postStart:
+              exec:
+                # The shim replaces the container's bundled iscsiadm and re-execs the
+                # host's copy in the host mount namespace. The host binary is looked
+                # up on PATH, not at an absolute path: distributions disagree on where
+                # iscsiadm lives (/usr/sbin on Debian and RHEL, /usr/local/sbin on
+                # Talos), and naming a path makes execvp skip the search and fail with
+                # a bare exit 127. The modprobes are non-fatal because NVMe-oF is
+                # optional, so the hook's verdict is gated on the shim instead.
+                command: ["/bin/sh", "-c", "mkdir -p /run/lock/iscsi && mv /usr/sbin/iscsiadm /usr/sbin/iscsiadm.orig 2>/dev/null; printf '#!/bin/sh\\nexport PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\\nexec nsenter --mount=/host/proc/1/ns/mnt -- iscsiadm \"$@\"\\n' > /usr/sbin/iscsiadm && chmod +x /usr/sbin/iscsiadm; nsenter --mount=/host/proc/1/ns/mnt -- modprobe nvme_tcp 2>/dev/null || true; nsenter --mount=/host/proc/1/ns/mnt -- modprobe nvme_fabrics 2>/dev/null || true; test -x /usr/sbin/iscsiadm"]
+          securityContext:
+            privileged: true
+          args:
+            - "--endpoint=$(CSI_ENDPOINT)"
+            - "--node-id=$(NODE_ID)"
+            - "--mode=node"
+            - "--v=4"
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: TRUENAS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: truenasURL
+            - name: TRUENAS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: truneas-api-key
+                  key: api-key
+            - name: TRUENAS_DEFAULT_POOL
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: defaultPool
+            - name: TRUENAS_NFS_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: nfsServer
+            - name: TRUENAS_ISCSI_PORTAL
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: iscsiPortal
+            - name: TRUENAS_NVMEOF_PORTAL
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: nvmeofPortal
+                  optional: true
+            - name: TRUENAS_ISCSI_IQN_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: iscsiIQNBase
+                  optional: true
+            - name: TRUENAS_INSECURE_SKIP_VERIFY
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: truenasInsecure
+                  optional: true
+            - name: TRUENAS_METRICS_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: nodeMetricsAddr
+                  optional: true
+            - name: NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: kubelet-dir
+              mountPath: /var/snap/microk8s/common/var/lib/kubelet
+              mountPropagation: Bidirectional
+            - name: device-dir
+              mountPath: /dev
+            - name: modules-dir
+              mountPath: /lib/modules
+              readOnly: true
+            - name: iscsi-dir
+              mountPath: /etc/iscsi
+              mountPropagation: Bidirectional
+            - name: iscsi-lib
+              mountPath: /var/lib/iscsi
+              mountPropagation: Bidirectional
+            - name: connector-dir
+              mountPath: /var/lib/truenas-csi
+            - name: host-root
+              mountPath: /host
+              mountPropagation: Bidirectional
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9808
+            initialDelaySeconds: 10
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 5
+
+        - name: csi-node-driver-registrar
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.16.0
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)"
+            - "--v=5"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+            - name: DRIVER_REG_SOCK_PATH
+              value: /var/snap/microk8s/common/var/lib/kubelet/plugins/csi.truenas.io/csi.sock
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: registration-dir
+              mountPath: /registration
+
+        - name: liveness-probe
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.18.0
+          args:
+            - "--csi-address=/csi/csi.sock"
+            - "--health-port=9808"
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+
+      volumes:
+        - name: registration-dir
+          hostPath:
+            path: /var/snap/microk8s/common/var/lib/kubelet/plugins_registry/
+            type: DirectoryOrCreate
+        - name: plugin-dir
+          hostPath:
+            path: /var/snap/microk8s/common/var/lib/kubelet/plugins/csi.truenas.io/
+            type: DirectoryOrCreate
+        - name: kubelet-dir
+          hostPath:
+            path: /var/snap/microk8s/common/var/lib/kubelet
+            type: Directory
+        - name: device-dir
+          hostPath:
+            path: /dev
+        - name: modules-dir
+          hostPath:
+            path: /lib/modules
+            type: Directory
+        - name: iscsi-dir
+          hostPath:
+            path: /etc/iscsi
+            type: Directory
+        - name: iscsi-lib
+          hostPath:
+            path: /var/lib/iscsi
+            type: DirectoryOrCreate
+        # Per-volume connector files record the protocol and target of each staged
+        # volume. NodeUnstageVolume gets no publish context, so this state has to
+        # outlive the container.
+        - name: connector-dir
+          hostPath:
+            path: /var/lib/truenas-csi
+            type: DirectoryOrCreate
+        - name: host-root
+          hostPath:
+            path: /
+            type: Directory
+
+---
+# Source: truenas-csi/templates/controller.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: truenas-csi-controller
+  namespace: kube-system
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: truenas-csi-controller
+  template:
+    metadata:
+      labels:
+        app: truenas-csi-controller
+        helm.sh/chart: truenas-csi-1.3.0
+        app.kubernetes.io/name: truenas-csi
+        app.kubernetes.io/instance: truenas-csi
+        app.kubernetes.io/version: "1.3.0"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: truenas-csi
+    spec:
+      serviceAccountName: truenas-csi-controller-sa
+      containers:
+        - name: csi-controller
+          image: ghcr.io/truenas/truenas-csi:v1.3.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--endpoint=$(CSI_ENDPOINT)"
+            - "--node-id=$(NODE_ID)"
+            - "--mode=controller"
+            - "--v=4"
+          env:
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+            - name: TRUENAS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: truenasURL
+            - name: TRUENAS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: truneas-api-key
+                  key: api-key
+            - name: TRUENAS_DEFAULT_POOL
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: defaultPool
+            - name: TRUENAS_NFS_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: nfsServer
+            - name: TRUENAS_ISCSI_PORTAL
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: iscsiPortal
+            - name: TRUENAS_NVMEOF_PORTAL
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: nvmeofPortal
+                  optional: true
+            - name: TRUENAS_ISCSI_IQN_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: iscsiIQNBase
+                  optional: true
+            - name: TRUENAS_INSECURE_SKIP_VERIFY
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: truenasInsecure
+                  optional: true
+            - name: TRUENAS_METRICS_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: truenas-csi-config
+                  key: metricsAddr
+                  optional: true
+            - name: NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9808
+            initialDelaySeconds: 10
+            timeoutSeconds: 3
+            periodSeconds: 10
+            failureThreshold: 5
+
+        - name: csi-provisioner
+          image: registry.k8s.io/sig-storage/csi-provisioner:v6.1.1
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+            # No Topology feature gate: the driver reports no accessible topology,
+            # so there is nothing for the provisioner to constrain PVs by.
+            - "--extra-create-metadata"
+            - "--leader-election=true"
+            - "--default-fstype=ext4"
+            - "--timeout=60s"
+            # Sidecar metrics (csi_sidecar_operations_seconds). Each sidecar in
+            # this pod needs its own port; see docs/metrics.md for the map.
+            - "--http-endpoint=:8081"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+
+        - name: csi-attacher
+          image: registry.k8s.io/sig-storage/csi-attacher:v4.11.0
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+            - "--leader-election=true"
+            - "--timeout=60s"
+            - "--http-endpoint=:8082"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+
+        - name: csi-snapshotter
+          image: registry.k8s.io/sig-storage/csi-snapshotter:v8.5.0
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+            - "--leader-election=true"
+            - "--timeout=60s"
+            - "--http-endpoint=:8083"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+
+        - name: csi-resizer
+          image: registry.k8s.io/sig-storage/csi-resizer:v2.1.0
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"
+            - "--leader-election=true"
+            - "--timeout=60s"
+            - "--http-endpoint=:8084"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+
+        - name: liveness-probe
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.18.0
+          args:
+            - "--csi-address=/csi/csi.sock"
+            - "--health-port=9808"
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+
+      volumes:
+        - name: socket-dir
+          emptyDir: {}
+
+---
+# Source: truenas-csi/templates/config.yaml
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: csi.truenas.io
+  labels:
+    helm.sh/chart: truenas-csi-1.3.0
+    app.kubernetes.io/name: truenas-csi
+    app.kubernetes.io/instance: truenas-csi
+    app.kubernetes.io/version: "1.3.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: truenas-csi
+spec:
+  attachRequired: true
+  podInfoOnMount: true
+  fsGroupPolicy: File
+  volumeLifecycleModes:
+    - Persistent
+    - Ephemeral

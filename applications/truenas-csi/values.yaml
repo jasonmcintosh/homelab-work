@@ -1,0 +1,48 @@
+# Official TrueNAS CSI driver (https://github.com/truenas/truenas-csi), chart truenas-csi 1.3.0.
+# Layout follows ../nfs-provisioner: values here, rendered manifest in truenas-csi.yaml (see README).
+# Plan and rationale: PLAN.md. Needs TrueNAS 25.10.0+ (the cluster's TrueNAS is 25.10.7).
+
+truenas:
+  url: wss://truenas.mcintosh.farm
+  defaultPool: Main
+  # The appliance's own basename wins if this differs; set to match it anyway.
+  iscsiIQNBase: iqn.2005-10.org.freenas.ctl
+  # TrueNAS ships a self-signed certificate; with this false the pods stay un-Ready.
+  insecureSkipTLS: true
+  # The API key Secret is created by hand (not in git), in the same namespace the driver is installed into.
+  existingSecret: truneas-api-key
+  existingSecretKey: api-key
+
+# microk8s keeps the kubelet under /var/snap (same path ../nfs-provisioner uses).
+kubeletDir: /var/snap/microk8s/common/var/lib/kubelet
+
+# Both classes are non-default: rook-ceph-block stays the cluster default. Workloads opt in per PVC.
+storageClasses:
+  # RWO block volumes (a zvol + iSCSI target per PVC) for databases.
+  - name: truenas-iscsi
+    allowVolumeExpansion: true
+    parameters:
+      protocol: iscsi
+      pool: Main
+      datasetPath: k8s/iscsi
+      fsType: ext4
+      compression: LZ4
+      sync: STANDARD        # fsync is acknowledged from the RAID controller cache; keep ZFS default
+      sparse: "true"        # thin provisioned
+      volblocksize: 16K     # matches InnoDB's page size; fine for most databases
+  # RWX shared volumes (a dataset + NFS share per PVC). Candidate to replace csi-driver-nfs once the
+  # permissions test in PLAN.md passes.
+  - name: truenas-nfs
+    allowVolumeExpansion: true
+    parameters:
+      protocol: nfs
+      pool: Main
+      datasetPath: k8s/nfs
+      compression: LZ4
+      nfs.hosts: "192.168.16.0/24,192.168.18.0/24,192.168.19.0/24"   # the nodes' networks
+      nfs.mountOptions: "hard,nfsvers=4.1"
+      nfs.rootSquash: "false"
+
+# Enable once the external-snapshotter CRDs and snapshot-controller are installed (PLAN.md phase 2).
+volumeSnapshotClass:
+  enabled: false
