@@ -59,8 +59,8 @@ Grafana at `https://grafana.mcintosh.farm`, for a side-by-side evaluation.
 
 `terraform/` manages Grafana and ClickStack/HyperDX dashboards:
 
-- **`dashboards/prometheus-spinnaker/`** - the [uneeq-oss/spinnaker-mixin](https://github.com/uneeq-oss/spinnaker-mixin)
-  Spinnaker dashboards (PromQL), adapted to this lab's metric names. See its README.
+- **`dashboards/prometheus-spinnaker/`** - the Spinnaker service dashboards (PromQL), written for the metrics
+  Spinnaker exports over OTLP. See its README.
 - **`dashboards/clickhouse-spinnaker/`** - ClickHouse (SQL) equivalents of those, generated from them by
   `translate.py` so Spinnaker observability can move off Prometheus. See its README.
 - **`dashboards/clickhouse-infra/`** - ClickHouse's own health (the Grafana ClickHouse plugin's bundled
