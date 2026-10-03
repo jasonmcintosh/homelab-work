@@ -9,8 +9,9 @@ generated from these by `translate.py`, so regenerate those after changing a das
 ## Provenance
 
 Started from the dashboards in [uneeq-oss/spinnaker-mixin](https://github.com/uneeq-oss/spinnaker-mixin)
-(Apache License 2.0), then modified for the metrics Spinnaker actually exports over OTLP (below). This repo is
-Apache 2.0 as well; keep this attribution if the dashboards are redistributed.
+(Apache License 2.0), then modified for the metrics Spinnaker actually exports over OTLP (below). Many thanks to
+the uneeq-oss authors and contributors: their dashboards are the foundation of this set. This repo is Apache 2.0
+as well; keep this attribution if the dashboards are redistributed.
 
 ## What matters for these metrics (OTLP -> otel-gateway -> Prometheus remote-write)
 
