@@ -1344,7 +1344,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_sqlCache_get_relationshipsRequested_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_sqlCache_get_relationshipsRequested_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -1513,7 +1513,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_sqlCache_get_itemCount_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_sqlCache_get_itemCount_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -1682,7 +1682,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_sqlCache_merge_relationshipCount_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_sqlCache_merge_relationshipCount_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -1851,7 +1851,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_sqlCache_merge_itemCount_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_sqlCache_merge_itemCount_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -2020,7 +2020,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_sqlCache_evict_itemCount_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_sqlCache_evict_itemCount_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -2202,7 +2202,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_redisCache_get_keysRequested_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_redisCache_get_keysRequested_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -2371,7 +2371,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_redisCache_get_itemCount_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_redisCache_get_itemCount_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -2540,7 +2540,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_redisCache_merge_keysWritten_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_redisCache_merge_keysWritten_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -2709,7 +2709,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_redisCache_merge_itemCount_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_redisCache_merge_itemCount_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -2878,7 +2878,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_redisCache_evict_keysDeleted_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_redisCache_evict_keysDeleted_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -3047,7 +3047,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cats_redisCache_evict_itemCount_total{prefix=~\".*.$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
+              "expr": "sum(rate(cats_redisCache_evict_itemCount_total{prefix=~\".*$Platform.*\", instance=~\"$Instance\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -4002,7 +4002,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (requestHost) (rate(okhttp_requests_seconds_sum{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))\n / \n sum by (requestHost) (rate(okhttp_requests_seconds_count{job=\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
+              "expr": "sum by (requestHost) (rate(okhttp_requests_seconds_sum{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))\n / \n sum by (requestHost) (rate(okhttp_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 2,

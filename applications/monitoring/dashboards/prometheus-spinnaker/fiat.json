@@ -426,7 +426,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (requestHost) (rate(okhttp_requests_seconds_sum{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))\n / \n sum by (requestHost) (rate(okhttp_requests_seconds_count{job=\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
+              "expr": "sum by (requestHost) (rate(okhttp_requests_seconds_sum{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))\n / \n sum by (requestHost) (rate(okhttp_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 2,
