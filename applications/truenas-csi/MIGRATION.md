@@ -64,9 +64,8 @@ existing PVCs by name. Locate each chart's values in git first (not yet done).
    mongodb x3, redis-sentinel x3, minio). Each StatefulSet was recreated (`--cascade=orphan`) with `truenas-iscsi` in its
    volume template; `gitea/values.yaml` and `gitea/gitea.yaml` now name `truenas-iscsi`. Harness is not defined in this
    repo, so its templates were fixed in the cluster only. All 27 PVCs are on `truenas-iscsi`; nothing Bound is on Rook or NFS.
-5. **Remove Rook-Ceph** (below).
-
-## Removing Rook-Ceph (point of no return)
+5. **Remove Rook-Ceph: done 2026-10-03.** See "Removal record" below.
+## Removing Rook-Ceph (plan, as written beforehand)
 
 Preconditions: no PV left on `rook-ceph-block`; retained old PVs deleted only after each app is verified; the
 **RAID controller battery checked** (everything then depends on that cache; see `PLAN.md`); a few days of
@@ -74,6 +73,25 @@ soak. Known snag: the Rook operator has been crash-looping for ~23 days (the `Ce
 not installed), so it will not process a normal teardown. Expect to remove the CephCluster/CephBlockPool finalizers by
 hand, then delete the operator, CRDs and namespace, `rm -rf /var/lib/rook` on each node, and reclaim the OSD disks in
 Proxmox. Also retire `csi-driver-nfs` and the two `nfs-csi-*` classes once the last NFS volume has moved.
+
+## Removal record (2026-10-03)
+
+Done in this order, with the operator (already crash-looping) deleted first so it could not interfere:
+the CephCluster/CephBlockPool/ceph-csi custom resources (finalizers cleared by hand), the `rook-ceph` namespace (its
+`ceph.rook.io/disaster-protection` finalizer on one ConfigMap and one Secret had to be cleared by hand), the StorageClass,
+two CSIDrivers, 15 ClusterRoleBindings, 28 ClusterRoles, 23 CRDs, and the 18 retained rollback PVs (their
+provisioner finalizer cleared). On `kubenode1`-`3`: the BlueStore signature and first 32 MiB of `/dev/xvda4` were wiped
+(guarded: only if the partition was still type `ceph_bluestore`, unmounted and not an LVM PV), and `/var/lib/rook` plus the
+two stale kubelet plugin directories were removed. `applications/rook-ceph/` was deleted from git and stale comments fixed.
+A final sweep found no rook/ceph object in the API.
+
+Loose ends, none urgent:
+- `xvda4` on kubenode1-3 (1.2-1.3 TB each) is now blank unallocated space inside the same virtual disk as the OS. The root
+  LV is only ~250 GB and kubenode2's root is 82% full, so the cheapest use is to delete the partition and extend the
+  `ubuntu` volume group/root LV into it. That edits a live root disk's partition table, so it was left alone.
+- `kubenode1` still has `/etc/modules-load.d/rbd.conf` (loads the `rbd` module at boot); harmless, can be deleted.
+- 9 retained NFS PVs (rollback copies of the migrated NFS volumes) and their data directories under `Main/K8sData` on TrueNAS
+  remain; `csi-driver-nfs` and the `nfs-csi-*` classes are still installed (retirement is a separate decision).
 
 ## Things found during the migration
 

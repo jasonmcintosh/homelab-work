@@ -1,8 +1,8 @@
 # Plan: TrueNAS CSI driver (iSCSI + NFS) on the cluster
 
-Status: **installed and smoke-tested (2026-10-03); no workloads migrated yet.** TrueNAS is on 25.10.7. The driver is
+Status: **installed, benchmarked, and every volume migrated (2026-10-03); Rook-Ceph removed.** TrueNAS is on 25.10.7. The driver is
 running in `kube-system`; `truenas-iscsi` and `truenas-nfs` both provision, mount across nodes, and accept non-root
-writes. The benchmark gate (phase 5) passed (below). Remaining: snapshot controller (phase 2), then migrate (phase 6).
+writes. The benchmark gate (phase 5) passed (below). All 27 PVCs are on `truenas-iscsi`, now the default class; see MIGRATION.md. Snapshots/backups were deliberately skipped for this lab.
 
 Driver: [truenas/truenas-csi](https://github.com/truenas/truenas-csi) (official, GPL-3.0). Talks to TrueNAS over the
 WebSocket API (`wss://<host>/api/current`), so it is not affected by the REST API deprecation that breaks

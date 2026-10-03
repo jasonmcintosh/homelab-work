@@ -40,8 +40,8 @@ Guaranteed QoS resource sizing. Retention is two-layered: every table gets a `tt
 automatically and cheaply, plus an hourly `clickhouse-retention-guard` CronJob as a
 space-based backstop (ClickHouse has no `--storage.tsdb.retention.size` equivalent).
 
-Storage stays on `rook-ceph-block` for now (explicitly pinned - the cluster's actual default
-StorageClass is `nfs-csi-default`, a poor fit for ClickHouse's MergeTree I/O pattern). A
+Storage is `truenas-iscsi` (block volumes on TrueNAS, explicitly pinned; the cluster default is the same class,
+and NFS is a poor fit for ClickHouse's MergeTree I/O pattern). A
 ready-to-flip `emptyDir` alternative is documented inline in `clickhouse.yaml` if the tuning
 above isn't enough and full ephemeral-local-storage becomes worth the "wiped on every pod
 restart" tradeoff - this uses native kubelet ephemeral-storage support already present in

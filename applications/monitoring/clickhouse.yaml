@@ -180,11 +180,10 @@ spec:
       - name: config-volume
         configMap:
           name: clickhouse-config
-      # -- Storage backend: rook-ceph (current/default) vs. ephemeral (evaluation option) --
-      # Kept on rook-ceph-block for now: durable across pod restarts, and this pool is
-      # already unreplicated (replicated.size: 1) so there's no extra network-replication
-      # overhead beyond RBD itself. To evaluate Kubernetes' native ephemeral storage instead
-      # (no rook-ceph dependency at all - data is wiped on every pod restart), comment out
+      # -- Storage backend: truenas-iscsi (current/default) vs. ephemeral (evaluation option) --
+      # On truenas-iscsi: durable across pod restarts and moves with the pod between nodes (a zvol on
+      # TrueNAS over iSCSI). To evaluate Kubernetes' native ephemeral storage instead
+      # (no storage dependency at all - data is wiped on every pod restart), comment out
       # the persistentVolumeClaim block below and swap in:
       #
       #   - name: data
@@ -212,9 +211,8 @@ metadata:
   name: clickhouse-storage
   namespace: monitoring
 spec:
-  # Explicit rook-ceph-block: the cluster's default StorageClass is now nfs-csi-default
-  # (not rook-ceph-block), and NFS is a poor fit for ClickHouse's MergeTree I/O pattern.
-  # Pinning this avoids silently landing on NFS.
+  # Explicit truenas-iscsi (also the cluster default): NFS is a poor fit for ClickHouse's MergeTree
+  # I/O pattern, so pinning this keeps it on block storage even if the default ever changes.
   storageClassName: truenas-iscsi
   accessModes:
     - ReadWriteOnce

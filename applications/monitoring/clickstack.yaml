@@ -14,9 +14,8 @@ metadata:
   name: clickstack-mongo-pvc
   namespace: monitoring
 spec:
-  # Explicit rook-ceph-block, not whatever the cluster default is: MongoDB's WiredTiger
-  # engine needs real file locking, which the NFS CSI storage class (now the cluster
-  # default) doesn't reliably provide.
+  # Explicit truenas-iscsi (block storage): MongoDB's WiredTiger engine needs real file locking, which
+  # the NFS CSI storage classes don't reliably provide, so don't leave this to the cluster default.
   storageClassName: truenas-iscsi
   accessModes:
     - ReadWriteOnce
