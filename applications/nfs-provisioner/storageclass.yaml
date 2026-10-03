@@ -28,7 +28,9 @@ kind: StorageClass
 metadata:
   name: nfs-csi-default
   annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
+    # Not the cluster default: rook-ceph-block is. NFS (TrueNAS) is opt-in per PVC; it is a poor fit for
+    # databases (MySQL here failed with "Unable to lock ./ibdata1 error: 11") and Redis/Valkey.
+    storageclass.kubernetes.io/is-default-class: "false"
 provisioner: nfs.csi.k8s.io
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
