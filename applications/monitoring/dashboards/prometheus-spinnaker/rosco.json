@@ -543,7 +543,7 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Inbound HTTP requests. \n\n`controller_invocations_total` is an enhanced version of Spring `http_server_requests_seconds_count` with additional labels.",
+          "description": "Inbound HTTP requests. \n\n`controller_invocations_total` is an enhanced version of Spring `http_server_requests_seconds_count` with additional labels. Rosco is a plain Spring service: it exposes Spring http_server_requests_* and OpenTelemetry http_client_request_duration_*, not Spinnaker's controller_invocations_* / okhttp_requests_*.",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {},
@@ -576,10 +576,10 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (controller, method) (rate(controller_invocations_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
+              "expr": "sum by (method, uri) (rate(http_server_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{controller}}/{{method}}",
+              "legendFormat": "{{method}} {{uri}}",
               "refId": "A"
             }
           ],
@@ -625,7 +625,7 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Inbound HTTP request latencies. \n\n`controller_invocations_total` is an enhanced version of Spring `http_server_requests_seconds_count` with additional labels.",
+          "description": "Inbound HTTP request latencies. \n\n`controller_invocations_total` is an enhanced version of Spring `http_server_requests_seconds_count` with additional labels. Rosco is a plain Spring service: it exposes Spring http_server_requests_* and OpenTelemetry http_client_request_duration_*, not Spinnaker's controller_invocations_* / okhttp_requests_*.",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {},
@@ -658,10 +658,10 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (controller, method) (rate(controller_invocations_seconds_sum{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))\n / \n sum by (controller, method) (rate(controller_invocations_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
+              "expr": "sum by (method, uri) (rate(http_server_requests_seconds_sum{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval])) / sum by (method, uri) (rate(http_server_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{controller}}/{{method}}",
+              "legendFormat": "{{method}} {{uri}}",
               "refId": "A"
             }
           ],
@@ -707,7 +707,7 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Inbound HTTP request errors. \n\n`controller_invocations_total` is an enhanced version of Spring `http_server_requests_seconds_count` with additional labels.",
+          "description": "Inbound HTTP request errors. \n\n`controller_invocations_total` is an enhanced version of Spring `http_server_requests_seconds_count` with additional labels. Rosco is a plain Spring service: it exposes Spring http_server_requests_* and OpenTelemetry http_client_request_duration_*, not Spinnaker's controller_invocations_* / okhttp_requests_*.",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {},
@@ -740,17 +740,17 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (statusCode, cause, controller, method) (rate(controller_invocations_seconds_count{job=~\"$job\", instance=~\"$Instance\", status=\"5xx\"}[$__rate_interval]))",
+              "expr": "sum by (status, method, uri) (rate(http_server_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\", status=~\"5..\"}[$__rate_interval]))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{statusCode}}/{{cause}}/{{controller}}/{{method}}",
+              "legendFormat": "{{status}}/{{method}}/{{uri}}",
               "refId": "A"
             },
             {
-              "expr": "sum by (statusCode, cause, controller, method) (rate(controller_invocations_seconds_count{job=~\"$job\", instance=~\"$Instance\", statusCode=\"429\"}[$__rate_interval]))",
+              "expr": "sum by (status, method, uri) (rate(http_server_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\", status=\"429\"}[$__rate_interval]))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{statusCode}}/{{cause}}/{{controller}}/{{method}}",
+              "legendFormat": "{{status}}/{{method}}/{{uri}}",
               "refId": "B"
             }
           ],
@@ -796,7 +796,7 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Rate of outbound http requests to other Spinnaker services.",
+          "description": "Rate of outbound http requests to other Spinnaker services. Rosco is a plain Spring service: it exposes Spring http_server_requests_* and OpenTelemetry http_client_request_duration_*, not Spinnaker's controller_invocations_* / okhttp_requests_*.",
           "fill": 0,
           "fillGradient": 0,
           "gridPos": {},
@@ -829,11 +829,11 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (requestHost) (rate(okhttp_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
+              "expr": "sum by (server_address) (rate(http_client_request_duration_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{requestHost}}",
+              "legendFormat": "{{server_address}}",
               "refId": "A"
             }
           ],
@@ -879,7 +879,7 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Latency of outbound http requests to other Spinnaker services.",
+          "description": "Latency of outbound http requests to other Spinnaker services. Rosco is a plain Spring service: it exposes Spring http_server_requests_* and OpenTelemetry http_client_request_duration_*, not Spinnaker's controller_invocations_* / okhttp_requests_*.",
           "fill": 0,
           "fillGradient": 0,
           "gridPos": {},
@@ -912,11 +912,11 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (requestHost) (rate(okhttp_requests_seconds_sum{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))\n / \n sum by (requestHost) (rate(okhttp_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
+              "expr": "sum by (server_address) (rate(http_client_request_duration_seconds_sum{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval])) / sum by (server_address) (rate(http_client_request_duration_seconds_count{job=~\"$job\", instance=~\"$Instance\"}[$__rate_interval]))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{requestHost}}",
+              "legendFormat": "{{server_address}}",
               "refId": "A"
             }
           ],
@@ -962,7 +962,7 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Rate of outbound http request errors when calling other Spinnaker services. \n\nCheck the logs looking for `retrofit error` or `<--- 500`",
+          "description": "Rate of outbound http request errors when calling other Spinnaker services. \n\nCheck the logs looking for `retrofit error` or `<--- 500` Rosco is a plain Spring service: it exposes Spring http_server_requests_* and OpenTelemetry http_client_request_duration_*, not Spinnaker's controller_invocations_* / okhttp_requests_*.",
           "fill": 0,
           "fillGradient": 0,
           "gridPos": {},
@@ -995,19 +995,19 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (requestHost, statusCode) (rate(okhttp_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\", status=~\"(5xx|Unknown)\"}[$__rate_interval]))",
+              "expr": "sum by (server_address, http_response_status_code, error_type) (rate(http_client_request_duration_seconds_count{job=~\"$job\", instance=~\"$Instance\", error_type!=\"\"}[$__rate_interval]))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{statusCode}}/{{status}}/{{requestHost}}",
+              "legendFormat": "{{server_address}}/{{http_response_status_code}}/{{error_type}}",
               "refId": "A"
             },
             {
-              "expr": "sum by (requestHost, statusCode) (rate(okhttp_requests_seconds_count{job=~\"$job\", instance=~\"$Instance\", statusCode=\"429\"}[$__rate_interval]))",
+              "expr": "sum by (server_address, http_response_status_code) (rate(http_client_request_duration_seconds_count{job=~\"$job\", instance=~\"$Instance\", http_response_status_code=~\"5..|429\"}[$__rate_interval]))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{statusCode}}/{{requestHost}}",
+              "legendFormat": "{{server_address}}/{{http_response_status_code}}",
               "refId": "B"
             }
           ],

@@ -25,6 +25,10 @@ def unit_suffix(u):
 
 class Unsupported(Exception): pass
 
+# Names of single-value custom variables (e.g. spinSvc). Grafana interpolates these as raw text, not as a
+# quoted list, so they must be written inside a quoted SQL string literal instead of IN ($var).
+SINGLE_VARS = set()
+
 # ---- metric name mapping: Prometheus name -> (table, ClickHouse MetricName, value column) ----
 def build_map():
     m = {}
@@ -63,7 +67,12 @@ def resolve(name):
     return (t, base.replace("__", ".").replace(":", ".").replace("_", "."), col)
 
 # ---- label -> column expression ----
+# OTel semantic-convention attribute keys are dotted in ClickHouse; Prometheus replaces the dots with underscores.
+OTEL_LABELS = {"server_address": "server.address", "server_port": "server.port", "error_type": "error.type",
+               "http_request_method": "http.request.method", "http_response_status_code": "http.response.status_code",
+               "http_route": "http.route", "url_scheme": "url.scheme", "network_protocol_version": "network.protocol.version"}
 def lab(name):
+    if name in OTEL_LABELS: return f"Attributes['{OTEL_LABELS[name]}']"
     if name == "job": return "ServiceName"
     if name == "instance": return "ResourceAttributes['service.instance.id']"
     return f"Attributes['{name}']"
@@ -77,6 +86,10 @@ class Rel:
 VAR = re.compile(r"^\$\{?(\w+)\}?$")
 def matcher_sql(m):
     col, op, val = lab(m.name), str(m.op), m.value
+    if any("$" + v in val for v in SINGLE_VARS):   # inline inside a quoted literal; Grafana substitutes the raw value
+        if "Equal" in op or op in ("=", "!="):
+            return f"{col} {'!=' if 'Not' in op or op == '!=' else '='} {q(val)}"
+        return f"{'NOT ' if 'Not' in op or op == '!~' else ''}match({col}, {q('^(?:' + val + ')$')})"
     v = VAR.match(val) if val.startswith("$") else None
     if v and v.group(1) not in ("__all",):
         pos = op in ("=", "=~", "MatchOp.Equal", "MatchOp.Re")
@@ -230,7 +243,9 @@ def convert_vars(d):
     for v in d["templating"]["list"]:
         if v["type"] == "datasource": continue
         if v["type"] == "custom":
-            out.append({k: v[k] for k in ("name", "label", "type", "query", "current", "options", "multi", "includeAll", "hide") if k in v}); continue
+            cv = {k: v[k] for k in ("name", "label", "type", "query", "current", "options", "multi", "includeAll", "hide") if k in v}
+            if cv.get("includeAll"): cv["multi"] = True    # so Grafana interpolates it as a quoted list in SQL
+            out.append(cv); continue
         sql = var_query(v, svc)
         if sql is None: continue
         out.append({"name": v["name"], "label": v.get("label") or v["name"], "type": "query", "datasource": DS,
@@ -268,6 +283,8 @@ def graph_to_ts(p, gid, x, y, w, h, err_log, dash):
 
 def convert(d, err_log):
     name = d["title"]
+    SINGLE_VARS.clear()
+    SINGLE_VARS.update(v["name"] for v in d["templating"]["list"] if v["type"] == "custom" and not v.get("multi") and not v.get("includeAll"))
     panels, gid, y = [], 1, 0
     for r in d.get("rows", []):
         if r.get("showTitle", True) and r.get("title"):
