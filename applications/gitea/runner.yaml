@@ -26,6 +26,11 @@ spec:
         image: docker:28.2.2-dind
         securityContext:
           privileged: true
+        # Pod eth0 (calico vxlan) is MTU 1450 but docker bridges default to 1500,
+        # which drops packets to some hosts (e.g. corretto.github.io) and hangs jobs.
+        args:
+        - --mtu=1400
+        - --default-network-opt=bridge=com.docker.network.driver.mtu=1400
         volumeMounts:
         - name: docker-socket
           mountPath: /var/run
