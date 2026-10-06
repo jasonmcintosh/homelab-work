@@ -1,3 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: runner-config
+  namespace: gitea
+data:
+  config.yaml: |
+    container:
+      # Named docker volumes live in the dind data root (docker-data PVC), so the
+      # JDK tool cache and Gradle home survive across jobs and runner restarts.
+      options: >-
+        --volume hostedtoolcache:/opt/hostedtoolcache
+        --volume gradle-home:/root/.gradle
+      valid_volumes:
+        - hostedtoolcache
+        - gradle-home
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -21,6 +38,9 @@ spec:
       volumes:
       - name: docker-socket
         emptyDir: {}
+      - name: runner-config
+        configMap:
+          name: runner-config
       initContainers:
       - name: docker
         image: docker:28.2.2-dind
@@ -49,6 +69,8 @@ spec:
       - name: runner
         image: gitea/runner:nightly
         env:
+        - name: CONFIG_FILE
+          value: /config/config.yaml
         - name: GITEA_INSTANCE_URL
           value: https://gitea.mcintosh.farm
         - name: GITEA_RUNNER_REGISTRATION_TOKEN
@@ -61,6 +83,8 @@ spec:
           mountPath: /data
         - name: docker-socket
           mountPath: /var/run
+        - name: runner-config
+          mountPath: /config
   volumeClaimTemplates:
   # The runner's working directory: the .runner registration file and, optionally,
   # the config file.
