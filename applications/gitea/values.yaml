@@ -2,6 +2,10 @@ ingress:
   enabled: true
   annotations:
     cert-manager.io/cluster-issuer: cloudflare-issuer
+    # Registry layer pushes exceed nginx's 1m default and fail with 413.
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
   hosts:
     - host: gitea.mcintosh.farm
   tls:

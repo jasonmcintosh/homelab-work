@@ -4206,6 +4206,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
   annotations:
       cert-manager.io/cluster-issuer: "cloudflare-issuer"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
 spec:
   ingressClassName: 
   tls:
