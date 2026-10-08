@@ -80,11 +80,13 @@ resource "cloudflare_record" "dl360_ilo" {
   allow_overwrite = true
 }
 
-resource "cloudflare_record" "xen" {
+// Prod Proxmox host (the DL380, formerly the Xen host). Prod VMs on it live on VLAN 40.
+resource "cloudflare_record" "pve_prod1" {
   zone_id = data.cloudflare_zone.farm.id
-  name    = "xen"
-  content   = "192.168.19.195"
+  name    = "pve-prod1"
+  content   = "192.168.16.89"
   type    = "A"
+  allow_overwrite = true
 }
 
 resource "cloudflare_record" "nginx" {
