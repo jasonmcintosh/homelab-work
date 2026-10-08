@@ -114,9 +114,6 @@ resource "cloudflare_record" "traefik_services" {
 
 locals {
   kubenodes = { 
-    kubenode1="192.168.16.37"
-    kubenode2="192.168.18.69"
-    kubenode3="192.168.16.50"
     kubenode4="192.168.19.6"
     kubenode5="192.168.16.185"
     kubenode6="192.168.18.4"
@@ -159,7 +156,7 @@ resource "cloudflare_record" "www_site" {
 resource "cloudflare_record" "homebridge" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "homebridge"
-  content   = "192.168.18.76"
+  content   = "192.168.18.98"
   type    = "A"
   allow_overwrite = true
 }
