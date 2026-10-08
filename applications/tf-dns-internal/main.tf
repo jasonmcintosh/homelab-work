@@ -121,8 +121,9 @@ locals {
     kubenode5="192.168.16.185"
     kubenode6="192.168.18.4"
   }
-  nginx_fronted_services = toset([ "spinnaker","harness",  "git", "prometheus", "grafana", "splunK", "opencloud", "gitea", "clickhouse", "clickstack", "tractor-tracker-dev", "tractor-tracker" ])
-  traefik_fronted_services = toset(["demo", "argocd"])
+  # tractor-tracker (prod app) moves to the prod cluster's Cloudflare Tunnel when that exists.
+  nginx_fronted_services = toset([ "spinnaker", "git", "prometheus", "grafana", "splunK", "opencloud", "gitea", "clickhouse", "clickstack", "tractor-tracker-dev", "tractor-tracker" ])
+  traefik_fronted_services = toset(["demo"])
 }
 
 resource "cloudflare_record" "services" {
@@ -132,6 +133,26 @@ resource "cloudflare_record" "services" {
   zone_id = data.cloudflare_zone.farm.id
   content   = "nginx.mcintosh.farm"
   type    = "CNAME"
+  allow_overwrite = true
+}
+
+// Public website (repo: mcintosh-farm-site), served by the Cloudflare Pages project
+// "mcintosh-farm". The custom domain is attached in Pages; this is the DNS record for it.
+resource "cloudflare_record" "apex_site" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "mcintosh.farm"
+  content = "mcintosh-farm.pages.dev"
+  type    = "CNAME"
+  proxied = true
+  allow_overwrite = true
+}
+// www only needs to exist and be proxied: a Cloudflare Redirect Rule sends it to the apex.
+resource "cloudflare_record" "www_site" {
+  zone_id = data.cloudflare_zone.farm.id
+  name    = "www"
+  content = "mcintosh.farm"
+  type    = "CNAME"
+  proxied = true
   allow_overwrite = true
 }
 
