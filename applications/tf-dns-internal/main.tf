@@ -119,6 +119,7 @@ locals {
     kubenode3="192.168.16.50"
     kubenode4="192.168.19.6"
     kubenode5="192.168.16.185"
+    kubenode6="192.168.18.4"
   }
   nginx_fronted_services = toset([ "spinnaker","harness",  "git", "prometheus", "grafana", "splunK", "opencloud", "gitea", "clickhouse", "clickstack", "tractor-tracker-dev", "tractor-tracker" ])
   traefik_fronted_services = toset(["demo", "argocd"])
