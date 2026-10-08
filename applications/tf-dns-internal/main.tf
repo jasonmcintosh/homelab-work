@@ -153,6 +153,33 @@ resource "cloudflare_record" "www_site" {
   allow_overwrite = true
 }
 
+// Zone-level redirect rules. Cloudflare allows one ruleset per phase per zone, so every
+// redirect rule for mcintosh.farm goes in this resource.
+// The API token needs "Zone → Single Redirect → Edit" in addition to DNS edit.
+resource "cloudflare_ruleset" "redirects" {
+  zone_id     = data.cloudflare_zone.farm.id
+  name        = "Redirect rules"
+  description = "Managed in homelab-work/applications/tf-dns-internal"
+  kind        = "zone"
+  phase       = "http_request_dynamic_redirect"
+
+  rules {
+    description = "www.mcintosh.farm to the apex"
+    expression  = "(http.host eq \"www.mcintosh.farm\")"
+    action      = "redirect"
+    enabled     = true
+    action_parameters {
+      from_value {
+        status_code           = 301
+        preserve_query_string = true
+        target_url {
+          expression = "concat(\"https://mcintosh.farm\", http.request.uri.path)"
+        }
+      }
+    }
+  }
+}
+
 resource "cloudflare_record" "homebridge" {
   zone_id = data.cloudflare_zone.farm.id
   name    = "homebridge"
