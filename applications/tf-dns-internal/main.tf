@@ -222,15 +222,6 @@ resource "cloudflare_record" "nas" {
   allow_overwrite = true
 }
 
-resource "cloudflare_record" "tractor_tracker" {
-  zone_id         = data.cloudflare_zone.farm.id
-  name            = "tractor-tracker"
-  content         = "e81648f1-7046-40df-8ac7-326b122fe1f9.cfargotunnel.com"
-  type            = "CNAME"
-  proxied         = true
-  allow_overwrite = true
-}
-
 output "zone_status" {
   value = data.cloudflare_zone.farm.status
 }
