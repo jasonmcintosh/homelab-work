@@ -243,6 +243,22 @@ resource "cloudflare_record" "resend_dkim" {
   content         = "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCtbq/kP+Ud65deNlGCaRRhayNv1w/sd25KaiwUa9cR9ptY+OCwACWg2Il5WBpsx1c48J9nqeF8vHmScNxqeuG6aOYiV997WJ0R+uywFv36Hsbar+SeVDz+29COUq592h8Q3RAaI9ht3CaBLPi/rT9WBR59qf/tPaZyxlwKhic5rQIDAQAB"
 }
 
+# Return paths (bounces, complaints) delegated to Resend by CNAME, so Resend manages their MX and
+# SPF: rsend.forge.rmta.net is Amazon SES us-east-1, send.forge.rmta.net Resend's own MTA.
+# DNS-only: mail records must never be proxied.
+resource "cloudflare_record" "resend_return_path" {
+  for_each = {
+    "resend" = "rsend.forge.rmta.net"
+    "send"   = "send.forge.rmta.net"
+  }
+  zone_id         = data.cloudflare_zone.farm.id
+  name            = each.key
+  type            = "CNAME"
+  content         = each.value
+  proxied         = false
+  allow_overwrite = true
+}
+
 output "zone_status" {
   value = data.cloudflare_zone.farm.status
 }
