@@ -232,6 +232,17 @@ resource "cloudflare_record" "nas_buckets" {
   allow_overwrite = true
 }
 
+# Resend (TractorTrack invite/account email from noreply@mcintosh.farm). DMARC is p=reject with
+# strict alignment, so this DKIM key (d=mcintosh.farm) is what lets the mail through: SPF can't
+# align strictly, because the return path is send.mcintosh.farm. Root MX/SPF stay iCloud's.
+resource "cloudflare_record" "resend_dkim" {
+  zone_id         = data.cloudflare_zone.farm.id
+  name            = "resend._domainkey"
+  type            = "TXT"
+  allow_overwrite = true
+  content         = "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCtbq/kP+Ud65deNlGCaRRhayNv1w/sd25KaiwUa9cR9ptY+OCwACWg2Il5WBpsx1c48J9nqeF8vHmScNxqeuG6aOYiV997WJ0R+uywFv36Hsbar+SeVDz+29COUq592h8Q3RAaI9ht3CaBLPi/rT9WBR59qf/tPaZyxlwKhic5rQIDAQAB"
+}
+
 output "zone_status" {
   value = data.cloudflare_zone.farm.status
 }
