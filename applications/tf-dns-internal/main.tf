@@ -222,6 +222,16 @@ resource "cloudflare_record" "nas" {
   allow_overwrite = true
 }
 
+# S3 buckets on TrueNAS's SeaweedFS as <bucket>.truenas.mcintosh.farm: xbcloud (the MySQL backup
+# uploader) addresses buckets that way.
+resource "cloudflare_record" "nas_buckets" {
+  zone_id         = data.cloudflare_zone.farm.id
+  name            = "*.truenas"
+  content         = "192.168.17.150"
+  type            = "A"
+  allow_overwrite = true
+}
+
 output "zone_status" {
   value = data.cloudflare_zone.farm.status
 }
