@@ -120,9 +120,12 @@ locals {
     kubenode5 = "192.168.16.185"
     kubenode6 = "192.168.18.4"
   }
-  # tractor-tracker (prod app) moves to the prod cluster's Cloudflare Tunnel when that exists.
-  nginx_fronted_services   = toset(["spinnaker", "git", "prometheus", "grafana", "splunK", "opencloud", "gitea", "clickhouse", "clickstack", "tractor-tracker-dev"])
-  traefik_fronted_services = toset(["demo"])
+  # TractorTrack dev (LAN only). tractor-tracker-dev is its old name: the app 308s it to tractortrack-dev.
+  # The prod app (tractortrack) is on the prod cluster's Cloudflare Tunnel; that record is the tunnel dashboard's.
+  nginx_fronted_services = toset(["spinnaker", "git", "prometheus", "grafana", "splunK", "opencloud", "gitea", "clickhouse", "clickstack", "tractortrack-dev", "tractor-tracker-dev"])
+  # Old and look-alike names for the prod app; the redirect rule below sends them to tractortrack.
+  tractortrack_redirect_names = toset(["tractor-tracker", "tractortracker", "tractor-track"])
+  traefik_fronted_services    = toset(["demo"])
 }
 
 resource "cloudflare_record" "services" {
@@ -155,6 +158,18 @@ resource "cloudflare_record" "www_site" {
   allow_overwrite = true
 }
 
+// The prod app's old and look-alike names only need to exist and be proxied: the redirect rule
+// answers at Cloudflare's edge. tractor-tracker replaces the tunnel CNAME the dashboard made for it.
+resource "cloudflare_record" "tractortrack_redirects" {
+  for_each        = local.tractortrack_redirect_names
+  zone_id         = data.cloudflare_zone.farm.id
+  name            = each.key
+  content         = "mcintosh.farm"
+  type            = "CNAME"
+  proxied         = true
+  allow_overwrite = true
+}
+
 // Zone-level redirect rules. Cloudflare allows one ruleset per phase per zone, so every
 // redirect rule for mcintosh.farm goes in this resource.
 // The API token needs "Zone → Single Redirect → Edit" in addition to DNS edit.
@@ -176,6 +191,23 @@ resource "cloudflare_ruleset" "redirects" {
         preserve_query_string = true
         target_url {
           expression = "concat(\"https://mcintosh.farm\", http.request.uri.path)"
+        }
+      }
+    }
+  }
+
+  # 308, not 301: permanent, and the method and body survive (API calls, webhooks, form posts).
+  rules {
+    description = "TractorTrack's old and look-alike hostnames to tractortrack.mcintosh.farm"
+    expression  = "(http.host in {\"tractor-tracker.mcintosh.farm\" \"tractortracker.mcintosh.farm\" \"tractor-track.mcintosh.farm\"})"
+    action      = "redirect"
+    enabled     = true
+    action_parameters {
+      from_value {
+        status_code           = 308
+        preserve_query_string = true
+        target_url {
+          expression = "concat(\"https://tractortrack.mcintosh.farm\", http.request.uri.path)"
         }
       }
     }
