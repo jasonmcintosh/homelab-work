@@ -15,6 +15,19 @@ ingress:
 postgresql-ha:
   persistence:
     storageClass: truenas-iscsi
+  # The chart's "small" preset (384Mi) left no headroom: after enough crash-restarts pgpool's
+  # container couldn't even start ("container init was OOM-killed", 2026-10-15). Same requests
+  # and CPU as the preset, double the memory limit.
+  pgpool:
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+        ephemeral-storage: 50Mi
+      limits:
+        cpu: 375m
+        memory: 768Mi
+        ephemeral-storage: 2Gi
 resources:
   limits:
     cpu: 2000m
