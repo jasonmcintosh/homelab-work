@@ -3922,13 +3922,13 @@ spec:
                 - /readiness-probe.sh
           resources:
             limits:
-              cpu: 375m
+              cpu: 1000m
               ephemeral-storage: 2Gi
-              memory: 384Mi
+              memory: 1Gi
             requests:
               cpu: 250m
               ephemeral-storage: 50Mi
-              memory: 256Mi
+              memory: 512Mi
           volumeMounts:
             - name: empty-dir
               mountPath: /tmp

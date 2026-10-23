@@ -2,7 +2,7 @@
 
 Gitea (chart `gitea` 12.7.0, with `postgresql-ha` 16.3.2 and valkey) on the microk8s tools cluster,
 namespace `gitea`. `values.yaml` is the input; `gitea.yaml` is the rendered manifest, with a few edits
-by hand (`storageClassName: truenas-iscsi` on the PVCs, the pgpool memory limit), so change it in
+by hand (`storageClassName: truenas-iscsi` on the PVCs, the pgpool and PostgreSQL resource limits), so change it in
 place or carry those edits over after a fresh `helm template`.
 
 The cluster is reachable only from the internal network.
@@ -21,3 +21,5 @@ The cluster is reachable only from the internal network.
   CrashLoopBackOff with "container init was OOM-killed" after two days of restarts under the
   chart's 384Mi preset; `kubectl -n gitea rollout restart deployment/gitea-postgresql-ha-pgpool`
   brought it back, and its memory limit is now 768Mi.
+  On 2026-10-23 a PostgreSQL replica was OOM-killed at the same preset's 384Mi and the others
+  failed their probes under load; PostgreSQL now has 512Mi requested, 1Gi and 1 CPU as limits.

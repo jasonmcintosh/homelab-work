@@ -28,6 +28,19 @@ postgresql-ha:
         cpu: 375m
         memory: 768Mi
         ephemeral-storage: 2Gi
+  # PostgreSQL had the same "small" preset (384Mi, 375m CPU): on 2026-10-23 a replica was
+  # OOM-killed and the others failed their 5s probes under load (Renovate's first run), taking
+  # Gitea down until they recovered. The primary sits near 340Mi on its own.
+  postgresql:
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+        ephemeral-storage: 50Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+        ephemeral-storage: 2Gi
 resources:
   limits:
     cpu: 2000m
