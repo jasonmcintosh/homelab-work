@@ -23,3 +23,8 @@ The cluster is reachable only from the internal network.
   brought it back, and its memory limit is now 768Mi.
   On 2026-10-23 a PostgreSQL replica was OOM-killed at the same preset's 384Mi and the others
   failed their probes under load; PostgreSQL now has 512Mi requested, 1Gi and 1 CPU as limits.
+- **A PostgreSQL pod stuck in ContainerCreating** with `failed to connect to iSCSI target ... context
+  deadline exceeded`: the TrueNAS CSI driver gives an iSCSI login only 3s. On 2026-10-23 TrueNAS
+  took 30s per new login (a pending TrueNAS network change; applying it fixed discovery). A login
+  by hand from that node (`iscsiadm -m node -T <iqn> -p 192.168.17.150:3260 --login`, through
+  `kubectl debug node/<node> --profile=sysadmin`) let the driver use the session on its next retry.
