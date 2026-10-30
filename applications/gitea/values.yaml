@@ -19,6 +19,11 @@ postgresql-ha:
   # container couldn't even start ("container init was OOM-killed", 2026-10-15). Same requests
   # and CPU as the preset, double the memory limit.
   pgpool:
+    # Every query to the primary; the replicas are for failover only. With load balancing on, a read
+    # straight after a write in another request (Docker checking a layer it just pushed, the runner
+    # appending to a log it just created) could go to a replica that hadn't caught up: "unknown
+    # blob" on an image push and "file does not exist" for action logs (2026-10-30).
+    useLoadBalancing: false
     resources:
       requests:
         cpu: 250m

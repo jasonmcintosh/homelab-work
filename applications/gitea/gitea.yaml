@@ -3400,7 +3400,7 @@ spec:
             - name: PGPOOL_AUTHENTICATION_METHOD
               value: "scram-sha-256"
             - name: PGPOOL_ENABLE_LOAD_BALANCING
-              value: "yes"
+              value: "no"
             - name: PGPOOL_ENABLE_CONNECTION_CACHE
               value: "yes"
             - name: PGPOOL_DISABLE_LOAD_BALANCE_ON_WRITE
